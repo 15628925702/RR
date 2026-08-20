@@ -1,0 +1,14 @@
+seed: 2026
+device: cpu
+dtype: float64
+paths:
+  root: ..
+  data: data
+  results: results
+  figures: figures
+  experiments: experiments
+p10:
+  campaigns: [batch7, batches8_9, batch10]
+  budgets: [400, 800, 1600, 3200]
+  replications: 50
+
