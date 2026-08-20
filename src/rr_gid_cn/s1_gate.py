@@ -16,14 +16,22 @@ def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilt
     fisher = np.cov(phi, rowvar=False)
     infos = []
     for panel in panels:
-        projected = []
+        projected_a = []
+        projected_b = []
         for row in tilted:
-            completed = sample_conditional(mixture, row[list(panel)], panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
-            logits = feature_map(completed, scale) @ beta
-            weights = np.exp(logits - logits.max()); weights /= weights.sum()
-            chosen = completed[rng.choice(len(completed), size=n_conditional, replace=True, p=weights)]
-            projected.append(feature_map(chosen, scale).mean(0) - mu)
-        infos.append(np.cov(np.asarray(projected), rowvar=False))
+            batches = []
+            for _ in range(2):
+                completed = sample_conditional(mixture, row[list(panel)], panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
+                logits = feature_map(completed, scale) @ beta
+                weights = np.exp(logits - logits.max()); weights /= weights.sum()
+                chosen = completed[rng.choice(len(completed), size=n_conditional, replace=True, p=weights)]
+                batches.append(feature_map(chosen, scale).mean(0) - mu)
+            projected_a.append(batches[0]); projected_b.append(batches[1])
+        a = np.asarray(projected_a); b = np.asarray(projected_b)
+        a = a - a.mean(0); b = b - b.mean(0)
+        info = (a.T @ b + b.T @ a) / max(2 * (len(a) - 1), 1)
+        vals, vecs = np.linalg.eigh((info + info.T) / 2)
+        infos.append((vecs * np.maximum(vals, 1e-10)) @ vecs.T)
     return fisher, np.asarray(infos)
 
 
