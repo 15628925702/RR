@@ -1,0 +1,21 @@
+seed: 2026
+device: cpu
+dtype: float64
+paths:
+  root: ..
+  data: data
+  results: results
+  figures: figures
+  experiments: experiments
+p4:
+  alpha: 1.0
+  budgets: [2000, 4000, 8000, 16000, 32000]
+  pilot_multiplier: 10.0
+  scoring_steps: 2
+  replications: 200
+  target_ess_fraction: 0.5
+  information_tilted_samples: 1000
+  information_conditional_samples: 64
+  final_conditional_samples: 64
+  fw_tolerance: 1.0e-6
+  paired_target_manifest: experiments/p4_target_draw_manifest.json

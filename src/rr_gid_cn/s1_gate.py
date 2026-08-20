@@ -33,7 +33,7 @@ def policy_designs(reference, panels, fisher, oracle_information):
     return {"Uniform SQD": uniform, "A-OSQD": a_p, "oracle RR-GID": rr_p}
 
 
-def final_rr_estimator(mixture, beta_start, observations, panel_information, scale, n_conditional=64, seed=0):
+def final_rr_estimator(mixture, beta_start, observations, panel_information, scale, reference_mu, n_conditional=64, seed=0):
     rng = np.random.default_rng(seed)
     projected = []
     H = np.zeros((12, 12))
@@ -43,7 +43,7 @@ def final_rr_estimator(mixture, beta_start, observations, panel_information, sca
         H += panel_information[panel]
     if not projected:
         return np.asarray(beta_start).copy()
-    U = np.mean(projected, axis=0)
+    U = np.sum(np.asarray(projected) - reference_mu, axis=0)
     return np.asarray(beta_start) + np.linalg.pinv((H + H.T) / 2 + 1e-6 * np.eye(12)) @ U
 
 
@@ -51,6 +51,7 @@ def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, i
     reference = sample_full(mixture, reference_size, seed)
     beta_true = beta_direction_and_scale(reference, 2026, 0.5, scale)
     fisher, oracle_information = exact_panel_information(mixture, beta_true, panels, reference, scale, information_samples, conditional_samples, seed + 1)
+    reference_mu = feature_map(reference, scale).mean(0)
     designs = policy_designs(reference, panels, fisher, oracle_information)
     target_reference = sample_full(mixture, max(4000, budget * 2), seed + 2)
     target_full = tilted_sample_from_reference(beta_true, target_reference, budget, seed + 3, scale)
@@ -64,7 +65,7 @@ def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, i
             for row in target_full[cursor : cursor + count]:
                 observations.append((panel, row[list(panel)]))
             cursor += count
-        beta_hat = final_rr_estimator(mixture, np.zeros_like(beta_true), observations, {panel: info for panel, info in zip(panels, oracle_information)}, scale, conditional_samples, seed + 4)
+        beta_hat = final_rr_estimator(mixture, np.zeros_like(beta_true), observations, {panel: info for panel, info in zip(panels, oracle_information)}, scale, reference_mu, conditional_samples, seed + 4)
         kl = max(0.0, full_target_kl(beta_true, beta_hat, target_reference, scale))
         rows.append({"policy": name, "budget": budget, "seed": seed, "beta_true_norm": float(np.linalg.norm(beta_true)), "beta_hat_norm": float(np.linalg.norm(beta_hat)), "kl": kl, "B_kl": budget * kl, "design_ratio": float(kl / max(phi_star / (2 * budget), 1e-12)), "target_draw_seed": seed + 3})
     return rows
