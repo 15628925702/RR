@@ -36,7 +36,7 @@ def policy_designs(reference, panels, fisher, oracle_information):
     return {"Uniform SQD": uniform, "A-OSQD": a_p, "oracle RR-GID": rr_p}
 
 
-def final_rr_estimator(mixture, beta_start, observations, panel_information, scale, reference_mu, n_conditional=64, seed=0):
+def final_rr_estimator(mixture, beta_start, observations, panel_information, scale, reference_mu, n_conditional=64, seed=0, theta_bound=4.0):
     rng = np.random.default_rng(seed)
     projected = []
     H = np.zeros((12, 12))
@@ -52,7 +52,13 @@ def final_rr_estimator(mixture, beta_start, observations, panel_information, sca
     U = np.sum(np.asarray(projected) - reference_mu, axis=0)
     # Finite conditional Monte Carlo can leave weak directions nearly singular;
     # the ridge is recorded in the run manifest and is not used to define Phi.
-    return np.asarray(beta_start) + np.linalg.solve((H + H.T) / 2 + 1e-2 * np.eye(12), U)
+    H = (H + H.T) / 2
+    step = np.linalg.solve(H + 1e-2 * np.eye(12), U)
+    step_norm = np.linalg.norm(step)
+    if step_norm > 1.0:
+        step = step / step_norm
+    updated = np.asarray(beta_start) + step
+    return np.clip(updated, -theta_bound, theta_bound)
 
 
 def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, information_samples=256, conditional_samples=32):
@@ -74,9 +80,15 @@ def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, i
                 observations.append((panel, row[list(panel)]))
             cursor += count
         beta_hat = np.zeros_like(beta_true)
+        update_diagnostics = []
+        panel_info_map = {panel: info for panel, info in zip(panels, oracle_information)}
+        observed_H = sum((panel_info_map[panel] for panel, _ in observations), start=np.zeros((12, 12)))
+        lambda_min_H = float(np.linalg.eigvalsh((observed_H + observed_H.T) / 2).min())
         for update in range(2):
             mu_beta, _ = tilted_moments(beta_hat, reference, scale)
-            beta_hat = final_rr_estimator(mixture, beta_hat, observations, {panel: info for panel, info in zip(panels, oracle_information)}, scale, mu_beta, conditional_samples, seed + 4 + update)
+            beta_next = final_rr_estimator(mixture, beta_hat, observations, panel_info_map, scale, mu_beta, conditional_samples, seed + 4 + update)
+            update_diagnostics.append({"step": update, "lambda_min_H": lambda_min_H, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0))})
+            beta_hat = beta_next
         kl = max(0.0, full_target_kl(beta_true, beta_hat, target_reference, scale))
-        rows.append({"policy": name, "budget": budget, "seed": seed, "beta_true_norm": float(np.linalg.norm(beta_true)), "beta_hat_norm": float(np.linalg.norm(beta_hat)), "kl": kl, "B_kl": budget * kl, "design_ratio": float(kl / max(phi_star / (2 * budget), 1e-12)), "target_draw_seed": seed + 3})
+        rows.append({"policy": name, "budget": budget, "seed": seed, "beta_true_norm": float(np.linalg.norm(beta_true)), "beta_hat_norm": float(np.linalg.norm(beta_hat)), "kl": kl, "B_kl": budget * kl, "design_ratio": float(kl / max(phi_star / (2 * budget), 1e-12)), "target_draw_seed": seed + 3, "update_diagnostics": update_diagnostics})
     return rows
