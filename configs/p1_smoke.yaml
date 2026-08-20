@@ -1,0 +1,19 @@
+seed: 2026
+device: cpu
+dtype: float64
+paths:
+  root: ..
+  data: data
+  results: results
+  figures: figures
+  experiments: experiments
+synthetic:
+  dimension: 16
+  components: 4
+  warp_alpha: 1.0
+  mixture_seed: 2026
+  feature_dim: 12
+  reference_scale_pool_size: 6000
+  oracle_conditional_samples: 20000
+  conditional_mean_zscore_tolerance: 5.0
+  conditional_covariance_relative_tolerance: 0.15
