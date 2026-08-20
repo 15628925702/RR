@@ -54,13 +54,15 @@ def final_rr_estimator(mixture, beta_start, observations, panel_information, sca
     for panel, observed_rows in grouped.items():
       batch = np.asarray(observed_rows)
       completions = sample_conditional_batch(mixture, batch, panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
-      for row_idx, observed in enumerate(batch):
-        completed = completions[row_idx]
-        logits = feature_map(completed, scale) @ beta_start
-        weights = np.exp(logits - logits.max()); weights /= weights.sum()
-        chosen = completed[rng.choice(len(completed), size=n_conditional, replace=True, p=weights)]
-        projected.append(feature_map(chosen, scale).mean(0))
-        H += panel_information[panel]
+      features = feature_map(completions, scale)
+      logits = features @ beta_start
+      weights = np.exp(logits - logits.max(axis=1, keepdims=True))
+      weights /= weights.sum(axis=1, keepdims=True)
+      uniforms = rng.random((len(batch), n_conditional))
+      choices = (uniforms[:, :, None] > np.cumsum(weights, axis=1)[:, None, :]).sum(axis=2)
+      selected = np.take_along_axis(features, choices[:, :, None], axis=1)
+      projected.extend(selected.mean(axis=1))
+      H += len(batch) * panel_information[panel]
     if not projected:
         return np.asarray(beta_start).copy()
     U = np.sum(np.asarray(projected) - reference_mu, axis=0)
