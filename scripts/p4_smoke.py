@@ -1,0 +1,31 @@
+"""Run paired Synthetic S1 oracle-gate smoke evaluations."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+
+from rr_gid_cn.s1_gate import run_replication
+from rr_gid_cn.synthetic_oracle import all_pairs, make_frozen_mixture, reference_scale
+
+
+def main() -> None:
+    mixture = make_frozen_mixture(seed=2026, alpha=1.0)
+    scale = reference_scale(mixture, 1000, 2026)
+    rows = []
+    for budget in (200, 400, 800):
+        for rep in range(3):
+            rows.extend(run_replication(mixture, scale, all_pairs(), budget, 202600 + budget + rep))
+    summary = {"stage": "P4", "alpha": 1.0, "budgets": [200, 400, 800], "replications_per_budget": 3, "rows": rows, "formal_replications_required": 200}
+    payload = json.dumps(summary, sort_keys=True, indent=2) + "\n"
+    Path("results").mkdir(exist_ok=True)
+    Path("results/p4_s1_gate_summary.json").write_text(payload, encoding="utf-8")
+    summary["summary_sha256"] = hashlib.sha256(payload.encode()).hexdigest()
+    Path("results/p4_s1_gate_summary.json").write_text(json.dumps(summary, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"stage": "P4", "rows": len(rows), "summary_sha256": summary["summary_sha256"]}, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()
+
