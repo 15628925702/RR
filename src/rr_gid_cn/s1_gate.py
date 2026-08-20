@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from .policies import covariance_information, frank_wolfe, uniform_probabilities
-from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, sample_conditional, sample_full, tilted_moments, tilted_sample_from_reference
+from .synthetic_oracle import beta_direction_and_scale, conditional_moments, feature_map, full_target_kl, inverse_warp, sample_conditional, sample_full, tilted_moments, tilted_sample_from_reference, warp
 
 
 def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilted=256, n_conditional=64, seed=0):
@@ -49,7 +49,18 @@ def final_rr_estimator(mixture, beta_start, observations, panel_information, sca
     projected = []
     H = np.zeros((12, 12))
     for panel, observed in observations:
-        completed = sample_conditional(mixture, observed, panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
+        if n_conditional <= 1:
+            # Deterministic one-draw fast path for large formal budgets.  The
+            # completion is the exact mixture conditional mean in latent space;
+            # no target-only information is introduced.
+            mean_z, _ = conditional_moments(mixture, observed, panel)
+            z_full = np.empty(mixture.dimension)
+            z_full[list(panel)] = inverse_warp(np.asarray(observed), mixture.alpha)
+            complement = [i for i in range(mixture.dimension) if i not in panel]
+            z_full[complement] = mean_z
+            completed = np.asarray([warp(z_full, mixture.alpha)])
+        else:
+            completed = sample_conditional(mixture, observed, panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
         logits = feature_map(completed, scale) @ beta_start
         weights = np.exp(logits - logits.max()); weights /= weights.sum()
         chosen = completed[rng.choice(len(completed), size=n_conditional, replace=True, p=weights)]
