@@ -89,7 +89,15 @@ def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, i
     rows = []
     phi_star = float(np.trace(fisher @ np.linalg.pinv(np.tensordot(uniform_probabilities(len(panels)), oracle_information, axes=(0, 0)))))
     for name, probabilities in designs.items():
-        counts = np.floor(budget * probabilities).astype(int)
+        expected = budget * probabilities
+        counts = np.floor(expected).astype(int)
+        # Largest-remainder apportionment exactly honors the frozen acquisition
+        # budget without changing the continuous policy design.
+        remainder = budget - int(counts.sum())
+        if remainder:
+            counts[np.argsort(expected - counts)[-remainder:]] += 1
+        if int(counts.sum()) != budget:
+            raise RuntimeError("panel allocation does not exhaust the acquisition budget")
         observations = []
         cursor = 0
         for panel, count in zip(panels, counts):
@@ -107,5 +115,5 @@ def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, i
             update_diagnostics.append({"step": update, "lambda_min_H": lambda_min_H, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0))})
             beta_hat = beta_next
         kl = max(0.0, full_target_kl(beta_true, beta_hat, target_reference, scale))
-        rows.append({"policy": name, "budget": budget, "seed": seed, "beta_true_norm": float(np.linalg.norm(beta_true)), "beta_hat_norm": float(np.linalg.norm(beta_hat)), "kl": kl, "B_kl": budget * kl, "design_ratio": float(kl / max(phi_star / (2 * budget), 1e-12)), "target_draw_seed": seed + 3, "update_diagnostics": update_diagnostics})
+        rows.append({"policy": name, "budget": budget, "allocated_observations": int(counts.sum()), "seed": seed, "beta_true_norm": float(np.linalg.norm(beta_true)), "beta_hat_norm": float(np.linalg.norm(beta_hat)), "kl": kl, "B_kl": budget * kl, "design_ratio": float(kl / max(phi_star / (2 * budget), 1e-12)), "target_draw_seed": seed + 3, "update_diagnostics": update_diagnostics})
     return rows
