@@ -36,6 +36,14 @@ def policy_designs(reference, panels, fisher, oracle_information):
     return {"Uniform SQD": uniform, "A-OSQD": a_p, "oracle RR-GID": rr_p}
 
 
+def prepare_s1_oracle(mixture, scale, panels, seed=2026, reference_size=50000, information_samples=256, conditional_samples=32):
+    reference = sample_full(mixture, reference_size, seed)
+    beta_true = beta_direction_and_scale(reference, 2026, 0.5, scale)
+    fisher, oracle_information = exact_panel_information(mixture, beta_true, panels, reference, scale, information_samples, conditional_samples, seed + 1)
+    designs = policy_designs(reference, panels, fisher, oracle_information)
+    return {"reference": reference, "beta_true": beta_true, "fisher": fisher, "information": oracle_information, "designs": designs}
+
+
 def final_rr_estimator(mixture, beta_start, observations, panel_information, scale, reference_mu, n_conditional=64, seed=0, theta_bound=4.0):
     rng = np.random.default_rng(seed)
     projected = []
@@ -61,12 +69,13 @@ def final_rr_estimator(mixture, beta_start, observations, panel_information, sca
     return np.clip(updated, -theta_bound, theta_bound)
 
 
-def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, information_samples=256, conditional_samples=32):
-    reference = sample_full(mixture, reference_size, seed)
-    beta_true = beta_direction_and_scale(reference, 2026, 0.5, scale)
-    fisher, oracle_information = exact_panel_information(mixture, beta_true, panels, reference, scale, information_samples, conditional_samples, seed + 1)
-    reference_mu = feature_map(reference, scale).mean(0)
-    designs = policy_designs(reference, panels, fisher, oracle_information)
+def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, information_samples=256, conditional_samples=32, prepared=None):
+    prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed, reference_size, information_samples, conditional_samples)
+    reference = prepared["reference"]
+    beta_true = prepared["beta_true"]
+    fisher = prepared["fisher"]
+    oracle_information = prepared["information"]
+    designs = prepared["designs"]
     target_reference = sample_full(mixture, max(4000, budget * 2), seed + 2)
     target_full = tilted_sample_from_reference(beta_true, target_reference, budget, seed + 3, scale)
     rows = []

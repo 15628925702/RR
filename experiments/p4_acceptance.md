@@ -14,3 +14,5 @@ Formal configuration is recorded in `configs/p4_formal.yaml`; paired target draw
 Latest numerical audit: nonzero beta and nonzero KL are now observed, but low-budget toy runs show unstable beta estimates under weak information conditioning. P4 remains **NOT PASSED** pending conditioning diagnostics, stable safe allocation, and formal budget-scale replication.
 
 The formal runner is resumable at `scripts/p4_formal_run.py` and writes paired rows to `results/p4_formal_rows.jsonl`; no row is counted until its policy, budget, replication, and diagnostics are present.
+
+The frozen 120-panel oracle preparation is cached in `experiments/p4_prepared_oracle.pkl` and must be hash-checked before formal jobs consume it.

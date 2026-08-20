@@ -14,8 +14,8 @@ p4:
   scoring_steps: 2
   replications: 200
   target_ess_fraction: 0.5
-  information_tilted_samples: 1000
-  information_conditional_samples: 64
+  information_tilted_samples: 256
+  information_conditional_samples: 32
   final_conditional_samples: 64
   fw_tolerance: 1.0e-6
   paired_target_manifest: experiments/p4_target_draw_manifest.json
