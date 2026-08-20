@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from .policies import covariance_information, frank_wolfe, uniform_probabilities
-from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, sample_conditional, sample_full, tilted_sample_from_reference
+from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, sample_conditional, sample_full, tilted_moments, tilted_sample_from_reference
 
 
 def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilted=256, n_conditional=64, seed=0):
@@ -18,8 +18,11 @@ def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilt
     for panel in panels:
         projected = []
         for row in tilted:
-            completed = sample_conditional(mixture, row[list(panel)], panel, n_conditional, int(rng.integers(2**31 - 1)))
-            projected.append(feature_map(completed, scale).mean(0) - mu)
+            completed = sample_conditional(mixture, row[list(panel)], panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
+            logits = feature_map(completed, scale) @ beta
+            weights = np.exp(logits - logits.max()); weights /= weights.sum()
+            chosen = completed[rng.choice(len(completed), size=n_conditional, replace=True, p=weights)]
+            projected.append(feature_map(chosen, scale).mean(0) - mu)
         infos.append(np.cov(np.asarray(projected), rowvar=False))
     return fisher, np.asarray(infos)
 
@@ -38,13 +41,18 @@ def final_rr_estimator(mixture, beta_start, observations, panel_information, sca
     projected = []
     H = np.zeros((12, 12))
     for panel, observed in observations:
-        completed = sample_conditional(mixture, observed, panel, n_conditional, int(rng.integers(2**31 - 1)))
-        projected.append(feature_map(completed, scale).mean(0))
+        completed = sample_conditional(mixture, observed, panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
+        logits = feature_map(completed, scale) @ beta_start
+        weights = np.exp(logits - logits.max()); weights /= weights.sum()
+        chosen = completed[rng.choice(len(completed), size=n_conditional, replace=True, p=weights)]
+        projected.append(feature_map(chosen, scale).mean(0))
         H += panel_information[panel]
     if not projected:
         return np.asarray(beta_start).copy()
     U = np.sum(np.asarray(projected) - reference_mu, axis=0)
-    return np.asarray(beta_start) + np.linalg.pinv((H + H.T) / 2 + 1e-6 * np.eye(12)) @ U
+    # Finite conditional Monte Carlo can leave weak directions nearly singular;
+    # the ridge is recorded in the run manifest and is not used to define Phi.
+    return np.asarray(beta_start) + np.linalg.solve((H + H.T) / 2 + 1e-2 * np.eye(12), U)
 
 
 def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, information_samples=256, conditional_samples=32):
@@ -65,7 +73,10 @@ def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, i
             for row in target_full[cursor : cursor + count]:
                 observations.append((panel, row[list(panel)]))
             cursor += count
-        beta_hat = final_rr_estimator(mixture, np.zeros_like(beta_true), observations, {panel: info for panel, info in zip(panels, oracle_information)}, scale, reference_mu, conditional_samples, seed + 4)
+        beta_hat = np.zeros_like(beta_true)
+        for update in range(2):
+            mu_beta, _ = tilted_moments(beta_hat, reference, scale)
+            beta_hat = final_rr_estimator(mixture, beta_hat, observations, {panel: info for panel, info in zip(panels, oracle_information)}, scale, mu_beta, conditional_samples, seed + 4 + update)
         kl = max(0.0, full_target_kl(beta_true, beta_hat, target_reference, scale))
         rows.append({"policy": name, "budget": budget, "seed": seed, "beta_true_norm": float(np.linalg.norm(beta_true)), "beta_hat_norm": float(np.linalg.norm(beta_hat)), "kl": kl, "B_kl": budget * kl, "design_ratio": float(kl / max(phi_star / (2 * budget), 1e-12)), "target_draw_seed": seed + 3})
     return rows

@@ -10,3 +10,5 @@
 P4 formal acceptance: **IN PROGRESS / NOT PASSED**. The implementation now uses a nonzero ESS-calibrated beta direction, panel-specific conditional information, real policy allocations, and a conditional-score final estimator. The required 200 replications, full S1 budget sweep, and J ablation remain outstanding; no formal result is claimed.
 
 Formal configuration is recorded in `configs/p4_formal.yaml`; paired target draws are generated only by `scripts/p4_formal_manifest.py` and are not sampled independently per policy.
+
+Latest numerical audit: nonzero beta and nonzero KL are now observed, but low-budget toy runs show unstable beta estimates under weak information conditioning. P4 remains **NOT PASSED** pending conditioning diagnostics, stable safe allocation, and formal budget-scale replication.
