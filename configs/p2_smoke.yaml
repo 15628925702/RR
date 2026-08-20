@@ -1,0 +1,14 @@
+seed: 2026
+device: cpu
+dtype: float64
+paths:
+  root: ..
+  data: data
+  results: results
+  figures: figures
+  experiments: experiments
+p2:
+  budget: 100
+  fw_tolerance: 0.2
+  conditional_tilted_samples: 80
+  conditional_completions: 16
