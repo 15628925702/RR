@@ -18,6 +18,6 @@ p4:
   information_conditional_samples: 32
   # Internal conditional Monte Carlo size; PDF fixes the estimator and budget,
   # but does not prescribe this numerical integration count.
-  final_conditional_samples: 1
+  final_conditional_samples: 8
   fw_tolerance: 1.0e-6
   paired_target_manifest: experiments/p4_target_draw_manifest.json

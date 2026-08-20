@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from .policies import covariance_information, frank_wolfe, uniform_probabilities
-from .synthetic_oracle import beta_direction_and_scale, conditional_moments, feature_map, full_target_kl, inverse_warp, sample_conditional, sample_full, tilted_moments, tilted_sample_from_reference, warp
+from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, sample_conditional, sample_conditional_batch, sample_full, tilted_moments, tilted_sample_from_reference
 
 
 def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilted=256, n_conditional=64, seed=0):
@@ -48,22 +48,14 @@ def final_rr_estimator(mixture, beta_start, observations, panel_information, sca
     rng = np.random.default_rng(seed)
     projected = []
     H = np.zeros((12, 12))
-    marginal_latent_mean = np.average(mixture.means, axis=0, weights=mixture.weights)
+    grouped = {}
     for panel, observed in observations:
-        if n_conditional <= 1:
-            # Deterministic one-draw fast path for large formal budgets.  The
-            # completion is the exact mixture conditional mean in latent space;
-            # no target-only information is introduced.
-            z_full = np.empty(mixture.dimension)
-            z_full[list(panel)] = inverse_warp(np.asarray(observed), mixture.alpha)
-            complement = [i for i in range(mixture.dimension) if i not in panel]
-            # Use the frozen mixture marginal latent mean for the missing
-            # coordinates; this avoids repeated per-observation component
-            # solves at the largest formal budgets.
-            z_full[complement] = marginal_latent_mean[complement]
-            completed = np.asarray([warp(z_full, mixture.alpha)])
-        else:
-            completed = sample_conditional(mixture, observed, panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
+        grouped.setdefault(panel, []).append(observed)
+    for panel, observed_rows in grouped.items():
+      batch = np.asarray(observed_rows)
+      completions = sample_conditional_batch(mixture, batch, panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
+      for row_idx, observed in enumerate(batch):
+        completed = completions[row_idx]
         logits = feature_map(completed, scale) @ beta_start
         weights = np.exp(logits - logits.max()); weights /= weights.sum()
         chosen = completed[rng.choice(len(completed), size=n_conditional, replace=True, p=weights)]

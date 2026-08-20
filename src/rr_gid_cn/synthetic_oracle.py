@@ -100,6 +100,54 @@ def sample_conditional(mixture: FrozenMixture, x_s: np.ndarray, panel: tuple[int
     return warp(z, mixture.alpha)
 
 
+def sample_conditional_batch(
+    mixture: FrozenMixture, x_s: np.ndarray, panel: tuple[int, ...], n: int, seed: int | None = None
+) -> np.ndarray:
+    """Independent exact GMM conditional completions for a batch of panels.
+
+    The returned array has shape ``(n_rows, n, dimension)``.  This is a
+    vectorized implementation of :func:`sample_conditional`, used only to make
+    the formal-budget S1 estimator computationally feasible.
+    """
+    panel = tuple(panel)
+    observed = np.atleast_2d(np.asarray(x_s, dtype=float))
+    if observed.shape[1] != len(panel):
+        raise ValueError("observed batch has incompatible panel width")
+    rng = np.random.default_rng(seed)
+    rows = observed.shape[0]
+    complement = tuple(i for i in range(mixture.dimension) if i not in panel)
+    z_s = inverse_warp(observed, mixture.alpha)
+    log_probs = np.empty((rows, len(mixture.weights)))
+    parameters = []
+    for k, (weight, mean, cov) in enumerate(zip(mixture.weights, mixture.means, mixture.covariances)):
+        sigma_ss = cov[np.ix_(panel, panel)]
+        inv_ss = np.linalg.inv(sigma_ss)
+        delta = z_s - mean[list(panel)]
+        sign, logdet = np.linalg.slogdet(sigma_ss)
+        if sign <= 0:
+            raise ValueError("mixture covariance is not positive definite")
+        log_probs[:, k] = np.log(weight) - 0.5 * (
+            len(panel) * np.log(2 * np.pi) + logdet + np.einsum("ni,ij,nj->n", delta, inv_ss, delta)
+        )
+        gain = cov[np.ix_(complement, panel)] @ inv_ss
+        cond_cov = cov[np.ix_(complement, complement)] - gain @ cov[np.ix_(panel, complement)]
+        parameters.append((mean[list(complement)], mean[list(panel)], gain, cond_cov))
+    probs = np.exp(log_probs - log_probs.max(axis=1, keepdims=True))
+    probs /= probs.sum(axis=1, keepdims=True)
+    uniforms = rng.random((rows, n))
+    components = (uniforms[:, :, None] > np.cumsum(probs, axis=1)[:, None, :]).sum(axis=2)
+    z = np.empty((rows, n, mixture.dimension))
+    z[:, :, list(panel)] = z_s[:, None, :]
+    for k, (mean_c, mean_s, gain, cond_cov) in enumerate(parameters):
+        row_idx, sample_idx = np.nonzero(components == k)
+        if row_idx.size:
+            conditional_mean = mean_c + (z_s[row_idx] - mean_s) @ gain.T
+            draws = rng.multivariate_normal(np.zeros(len(complement)), cond_cov, size=row_idx.size) + conditional_mean
+            for j, coordinate in enumerate(complement):
+                z[row_idx, sample_idx, coordinate] = draws[:, j]
+    return warp(z, mixture.alpha)
+
+
 def conditional_moments(mixture: FrozenMixture, x_s: np.ndarray, panel: tuple[int, ...]) -> tuple[np.ndarray, np.ndarray]:
     """Analytic conditional mean/covariance in warped coordinates' latent space.
 
