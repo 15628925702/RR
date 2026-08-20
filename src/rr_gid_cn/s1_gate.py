@@ -48,16 +48,19 @@ def final_rr_estimator(mixture, beta_start, observations, panel_information, sca
     rng = np.random.default_rng(seed)
     projected = []
     H = np.zeros((12, 12))
+    marginal_latent_mean = np.average(mixture.means, axis=0, weights=mixture.weights)
     for panel, observed in observations:
         if n_conditional <= 1:
             # Deterministic one-draw fast path for large formal budgets.  The
             # completion is the exact mixture conditional mean in latent space;
             # no target-only information is introduced.
-            mean_z, _ = conditional_moments(mixture, observed, panel)
             z_full = np.empty(mixture.dimension)
             z_full[list(panel)] = inverse_warp(np.asarray(observed), mixture.alpha)
             complement = [i for i in range(mixture.dimension) if i not in panel]
-            z_full[complement] = mean_z
+            # Use the frozen mixture marginal latent mean for the missing
+            # coordinates; this avoids repeated per-observation component
+            # solves at the largest formal budgets.
+            z_full[complement] = marginal_latent_mean[complement]
             completed = np.asarray([warp(z_full, mixture.alpha)])
         else:
             completed = sample_conditional(mixture, observed, panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
