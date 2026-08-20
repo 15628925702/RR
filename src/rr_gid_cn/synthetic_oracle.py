@@ -148,6 +148,57 @@ def sample_conditional_batch(
     return warp(z, mixture.alpha)
 
 
+def tilted_conditional_sample(
+    mixture: FrozenMixture,
+    beta: np.ndarray,
+    x_s: np.ndarray,
+    panel: tuple[int, ...],
+    n: int,
+    seed: int | None = None,
+    scale: np.ndarray | None = None,
+) -> np.ndarray:
+    """Exact rejection samples from the relative tilt conditional law.
+
+    Since every feature coordinate is bounded by one, ``sum(abs(beta))`` is a
+    valid log-tilt envelope. Rejection from the exact GMM conditional therefore
+    has no self-normalized importance bias.
+    """
+    rng = np.random.default_rng(seed)
+    beta = np.asarray(beta, dtype=float)
+    panel_set = set(panel)
+    fixed = np.zeros(beta.shape[0], dtype=bool)
+    fixed[:6] = [i in panel_set for i in range(6)]
+    fixed[6:] = [i in panel_set and i + 6 in panel_set for i in range(6)]
+    observed_full = np.zeros(mixture.dimension)
+    observed_full[list(panel)] = np.asarray(x_s)
+    observed_features = feature_map(observed_full[None, :], scale)[0]
+    envelope = float(np.dot(beta[fixed], observed_features[fixed]) + np.sum(np.abs(beta[~fixed])))
+    accepted = []
+    while len(accepted) < n:
+        proposal = sample_conditional(mixture, x_s, panel, max(32, 2 * (n - len(accepted))), int(rng.integers(2**31 - 1)))
+        logits = feature_map(proposal, scale) @ beta
+        keep = rng.random(len(proposal)) < np.exp(logits - envelope)
+        accepted.extend(proposal[keep])
+    return np.asarray(accepted[:n])
+
+
+def tilted_conditional_batch(
+    mixture: FrozenMixture,
+    beta: np.ndarray,
+    x_s: np.ndarray,
+    panel: tuple[int, ...],
+    n: int,
+    seed: int | None = None,
+    scale: np.ndarray | None = None,
+) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    rows = np.atleast_2d(np.asarray(x_s))
+    return np.asarray([
+        tilted_conditional_sample(mixture, beta, row, panel, n, int(rng.integers(2**31 - 1)), scale)
+        for row in rows
+    ])
+
+
 def conditional_moments(mixture: FrozenMixture, x_s: np.ndarray, panel: tuple[int, ...]) -> tuple[np.ndarray, np.ndarray]:
     """Analytic conditional mean/covariance in warped coordinates' latent space.
 

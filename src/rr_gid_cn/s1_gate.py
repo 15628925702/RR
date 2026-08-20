@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from .policies import covariance_information, frank_wolfe, uniform_probabilities
-from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, sample_conditional, sample_conditional_batch, sample_full, tilted_moments, tilted_sample_from_reference
+from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, sample_conditional, sample_conditional_batch, sample_full, tilted_conditional_sample, tilted_conditional_batch, tilted_moments, tilted_sample_from_reference
 
 
 def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilted=256, n_conditional=64, seed=0):
@@ -21,10 +21,7 @@ def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilt
         for row in tilted:
             batches = []
             for _ in range(2):
-                completed = sample_conditional(mixture, row[list(panel)], panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
-                logits = feature_map(completed, scale) @ beta
-                weights = np.exp(logits - logits.max()); weights /= weights.sum()
-                chosen = completed[rng.choice(len(completed), size=n_conditional, replace=True, p=weights)]
+                chosen = tilted_conditional_sample(mixture, beta, row[list(panel)], panel, n_conditional, int(rng.integers(2**31 - 1)), scale)
                 batches.append(feature_map(chosen, scale).mean(0) - mu)
             projected_a.append(batches[0]); projected_b.append(batches[1])
         a = np.asarray(projected_a); b = np.asarray(projected_b)
@@ -44,6 +41,51 @@ def policy_designs(reference, panels, fisher, oracle_information):
     return {"Uniform SQD": uniform, "A-OSQD": a_p, "oracle RR-GID": rr_p}
 
 
+def balanced_pilot_counts(panels: tuple[tuple[int, int], ...], budget: int) -> np.ndarray:
+    """PDF balanced pilot: equal mass on the six direct feature-support pairs."""
+    counts = np.zeros(len(panels), dtype=int)
+    supports = [(i, i + 6) for i in range(6)]
+    indices = [panels.index(s) for s in supports if s in panels]
+    if not indices:
+        return np.floor(budget * uniform_probabilities(len(panels))).astype(int)
+    base, rem = divmod(budget, len(indices))
+    counts[indices] = base
+    for idx in indices[:rem]:
+        counts[idx] += 1
+    return counts
+
+
+def pilot_ht_moment(observations, pilot_counts, panels, scale, reference):
+    n0 = int(pilot_counts.sum())
+    if n0 <= 0:
+        return np.zeros(12), np.zeros(12)
+    supports = [(i,) for i in range(6)] + [(i, i + 6) for i in range(6)]
+    values = np.zeros(12)
+    for a, support in enumerate(supports):
+        rho = sum(c for c, panel in zip(pilot_counts, panels) if set(support).issubset(panel)) / n0
+        if rho <= 0:
+            continue
+        vals = []
+        for panel, observed in observations:
+            if set(support).issubset(panel):
+                full = np.zeros(16); full[list(panel)] = observed
+                vals.append(feature_map(full[None, :], scale)[0, a])
+        values[a] = np.mean(vals) / rho if vals else 0.0
+    return values, np.asarray([sum(c for c, panel in zip(pilot_counts, panels) if set(s).issubset(panel)) / n0 for s in supports])
+
+
+def solve_pilot_beta(mu_pil, reference, scale, theta_bound=4.0, steps=20):
+    beta = np.zeros(12)
+    for _ in range(steps):
+        mu, fisher = tilted_moments(beta, reference, scale)
+        delta = np.linalg.solve(fisher + 1e-6 * np.eye(12), np.asarray(mu_pil) - mu)
+        candidate = np.clip(beta + delta, -theta_bound, theta_bound)
+        if np.linalg.norm(candidate - beta) < 1e-7:
+            break
+        beta = candidate
+    return beta
+
+
 def prepare_s1_oracle(mixture, scale, panels, seed=2026, reference_size=50000, information_samples=256, conditional_samples=32):
     reference = sample_full(mixture, reference_size, seed)
     beta_true = beta_direction_and_scale(reference, 2026, 0.5, scale)
@@ -61,15 +103,18 @@ def final_rr_estimator(mixture, beta_start, observations, panel_information, sca
         grouped.setdefault(panel, []).append(observed)
     for panel, observed_rows in grouped.items():
       batch = np.asarray(observed_rows)
-      completions = sample_conditional_batch(mixture, batch, panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
-      features = feature_map(completions, scale)
-      logits = features @ beta_start
-      weights = np.exp(logits - logits.max(axis=1, keepdims=True))
-      weights /= weights.sum(axis=1, keepdims=True)
-      uniforms = rng.random((len(batch), n_conditional))
-      choices = (uniforms[:, :, None] > np.cumsum(weights, axis=1)[:, None, :]).sum(axis=2)
-      selected = np.take_along_axis(features, choices[:, :, None], axis=1)
-      projected.extend(selected.mean(axis=1))
+      if n_conditional <= 4:
+          completions = sample_conditional_batch(mixture, batch, panel, n_conditional * 4, int(rng.integers(2**31 - 1)))
+          features = feature_map(completions, scale)
+          logits = features @ beta_start
+          weights = np.exp(logits - logits.max(axis=1, keepdims=True)); weights /= weights.sum(axis=1, keepdims=True)
+          uniforms = rng.random((len(batch), n_conditional))
+          choices = (uniforms[:, :, None] > np.cumsum(weights, axis=1)[:, None, :]).sum(axis=2)
+          selected = np.take_along_axis(features, choices[:, :, None], axis=1)
+          projected.extend(selected.mean(axis=1))
+      else:
+          completions = tilted_conditional_batch(mixture, beta_start, batch, panel, n_conditional, int(rng.integers(2**31 - 1)), scale)
+          projected.extend(feature_map(completions, scale).mean(axis=1))
       H += len(batch) * panel_information[panel]
     if not projected:
         return np.asarray(beta_start).copy()
@@ -107,12 +152,7 @@ def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, i
         if int(counts.sum()) != remaining_budget:
             raise RuntimeError("main panel allocation does not exhaust the remaining acquisition budget")
         observations = []
-        pilot_counts = np.zeros(len(panels), dtype=int)
-        pilot_expected = pilot_budget * uniform_probabilities(len(panels))
-        pilot_counts[:] = np.floor(pilot_expected).astype(int)
-        pilot_remainder = pilot_budget - int(pilot_counts.sum())
-        if pilot_remainder:
-            pilot_counts[np.argsort(pilot_expected - pilot_counts)[-pilot_remainder:]] += 1
+        pilot_counts = balanced_pilot_counts(panels, pilot_budget)
         panel_info_map = {panel: info for panel, info in zip(panels, oracle_information)}
         pilot_cursor = 0
         pilot_observations = []
@@ -126,16 +166,10 @@ def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, i
             for row in target_full[main_cursor : main_cursor + count]:
                 observations.append((panel, row[list(panel)]))
             main_cursor += count
-        # Pilot moment initialization uses the global reference Fisher rather
-        # than sparse panel-specific curvature, matching the HT moment step.
-        pilot_info_map = {panel: fisher for panel in panels}
-        beta_hat = np.zeros_like(beta_true)
-        pilot_mu, _ = tilted_moments(beta_hat, reference, scale)
-        for pilot_step in range(2):
-            pilot_mu, _ = tilted_moments(beta_hat, reference, scale)
-            beta_hat = final_rr_estimator(mixture, beta_hat, pilot_observations, pilot_info_map, scale, pilot_mu, conditional_samples, seed + 3 + pilot_step, step_size=1.0)
+        pilot_mu, pilot_rho = pilot_ht_moment(pilot_observations, pilot_counts, panels, scale, reference)
+        beta_hat = solve_pilot_beta(pilot_mu, reference, scale)
         observations = pilot_observations + observations
-        update_diagnostics = [{"step": "pilot", "pilot_budget": pilot_budget, "beta_norm": float(np.linalg.norm(beta_hat))}]
+        update_diagnostics = [{"step": "pilot", "pilot_budget": pilot_budget, "beta_norm": float(np.linalg.norm(beta_hat)), "rho_min": float(np.min(pilot_rho[pilot_rho > 0])) if np.any(pilot_rho > 0) else 0.0}]
         observed_H = sum((panel_info_map[panel] for panel, _ in observations), start=np.zeros((12, 12)))
         lambda_min_H = float(np.linalg.eigvalsh((observed_H + observed_H.T) / 2).min())
         for update in range(2):
