@@ -1,0 +1,14 @@
+seed: 2026
+device: cpu
+dtype: float64
+paths:
+  root: ..
+  data: data
+  results: results
+  figures: figures
+  experiments: experiments
+p7:
+  budget: 8000
+  alpha_values: [0.0, 0.5, 1.0, 1.5]
+  reuse_campaigns: [1, 5, 20, 50]
+
