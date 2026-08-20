@@ -5,13 +5,18 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import pickle
+import argparse
 
 from rr_gid_cn.s1_gate import prepare_s1_oracle, run_replication
 from rr_gid_cn.synthetic_oracle import all_pairs, make_frozen_mixture, reference_scale
 
 
 def main() -> None:
-    out = Path("results/p4_formal_rows.jsonl")
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--budget", type=int, default=None)
+    ap.add_argument("--output", type=Path, default=Path("results/p4_formal_rows.jsonl"))
+    args = ap.parse_args()
+    out = args.output
     done = set()
     if out.exists():
         for line in out.read_text(encoding="utf-8").splitlines():
@@ -31,7 +36,8 @@ def main() -> None:
             pickle.dump(prepared, stream, protocol=5)
     out.parent.mkdir(exist_ok=True)
     with out.open("a", encoding="utf-8") as stream:
-        for budget in (2000, 4000, 8000, 16000, 32000):
+        budgets = (args.budget,) if args.budget is not None else (2000, 4000, 8000, 16000, 32000)
+        for budget in budgets:
             for replication in range(200):
                 seed = 202600000 + budget * 1000 + replication
                 rows = run_replication(mixture, scale, panels, budget, seed, conditional_samples=64, prepared=prepared)
