@@ -44,7 +44,7 @@ def prepare_s1_oracle(mixture, scale, panels, seed=2026, reference_size=50000, i
     return {"reference": reference, "beta_true": beta_true, "fisher": fisher, "information": oracle_information, "designs": designs}
 
 
-def final_rr_estimator(mixture, beta_start, observations, panel_information, scale, reference_mu, n_conditional=64, seed=0, theta_bound=4.0, gamma=1.0/3.0):
+def final_rr_estimator(mixture, beta_start, observations, panel_information, scale, reference_mu, n_conditional=64, seed=0, theta_bound=4.0, step_size=1.0):
     rng = np.random.default_rng(seed)
     projected = []
     H = np.zeros((12, 12))
@@ -70,7 +70,7 @@ def final_rr_estimator(mixture, beta_start, observations, panel_information, sca
     # the ridge is recorded in the run manifest and is not used to define Phi.
     H = (H + H.T) / 2
     step = np.linalg.solve(H + 1e-2 * np.eye(12), U)
-    updated = np.asarray(beta_start) + gamma * step
+    updated = np.asarray(beta_start) + step_size * step
     return np.clip(updated, -theta_bound, theta_bound)
 
 
@@ -118,16 +118,21 @@ def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, i
             for row in target_full[main_cursor : main_cursor + count]:
                 observations.append((panel, row[list(panel)]))
             main_cursor += count
-        # The sparse balanced pilot initializes information/design only; it is
-        # not treated as a standalone 12-dimensional parameter fit.
-        observations = pilot_observations + observations
+        # Pilot moment initialization uses the global reference Fisher rather
+        # than sparse panel-specific curvature, matching the HT moment step.
+        pilot_info_map = {panel: fisher for panel in panels}
         beta_hat = np.zeros_like(beta_true)
-        update_diagnostics = []
+        pilot_mu, _ = tilted_moments(beta_hat, reference, scale)
+        for pilot_step in range(2):
+            pilot_mu, _ = tilted_moments(beta_hat, reference, scale)
+            beta_hat = final_rr_estimator(mixture, beta_hat, pilot_observations, pilot_info_map, scale, pilot_mu, conditional_samples, seed + 3 + pilot_step, step_size=1.0)
+        observations = pilot_observations + observations
+        update_diagnostics = [{"step": "pilot", "pilot_budget": pilot_budget, "beta_norm": float(np.linalg.norm(beta_hat))}]
         observed_H = sum((panel_info_map[panel] for panel, _ in observations), start=np.zeros((12, 12)))
         lambda_min_H = float(np.linalg.eigvalsh((observed_H + observed_H.T) / 2).min())
         for update in range(2):
             mu_beta, _ = tilted_moments(beta_hat, reference, scale)
-            beta_next = final_rr_estimator(mixture, beta_hat, observations, panel_info_map, scale, mu_beta, conditional_samples, seed + 4 + update, gamma=1.0/3.0)
+            beta_next = final_rr_estimator(mixture, beta_hat, observations, panel_info_map, scale, mu_beta, conditional_samples, seed + 4 + update, step_size=1.0)
             update_diagnostics.append({"step": update, "lambda_min_H": lambda_min_H, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": pilot_budget})
             beta_hat = beta_next
         kl = max(0.0, full_target_kl(beta_true, beta_hat, target_reference, scale))
