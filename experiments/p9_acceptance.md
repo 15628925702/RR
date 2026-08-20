@@ -6,5 +6,4 @@
 - Generator hash, target draw seed, ESS fraction, budget, replication, and policy are present in every row.
 - No natural drift or full-test evaluation data is used.
 
-P9 local R1 interface gate: **PASS**.
-
+P9 formal acceptance: **NOT PASSED**. The current artifact uses random synthetic 300x128 records and an empirical sampler, not real Gas data plus a trained/frozen Gas VAEAC; formal R1 replications are outstanding.

@@ -6,5 +6,4 @@
 - Tests: 18 total project tests pass, including arbitrary-mask and shape checks.
 - Smoke artifact: `results/p6_vaeac_summary.json`.
 
-P6 local implementation gate: **PASS**. The smoke backbone is intentionally empirical and does not replace the frozen VAEAC model required for formal experiments.
-
+P6 formal acceptance: **NOT PASSED**. The current checkpoint-free empirical generator is only an interface smoke and is not the required trained/frozen VAEAC backbone.

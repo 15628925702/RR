@@ -6,5 +6,4 @@
 - Smoke uses a deterministic synthetic fixed subset only; no UCI data or target data is committed.
 - Tests: 20 total project tests pass; dimensions, panel count, PC1 sign alignment, and bounded feature map pass.
 
-P8 local schema gate: **PASS**. External UCI archive registration remains a data acquisition step and does not alter preprocessing.
-
+P8 formal acceptance: **NOT PASSED**. Only the preprocessing schema smoke is complete; the UCI Gas Sensor archive has not yet been downloaded, hashed, split, and registered.

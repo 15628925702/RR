@@ -7,5 +7,4 @@
 - Tests: P4 gate rows preserve all three policies and shared target seed.
 - Explicitly not implemented here: Discriminative Score OED, VAEAC, final four-policy Fig.1.
 
-P4 local implementation gate: **PASS**. Formal cloud replication remains a configured execution workload and is not represented as completed by the smoke artifact.
-
+P4 formal acceptance: **NOT PASSED**. This commit contains only a local implementation/smoke gate; the required 200 replications, nonzero frozen beta direction, exact panel-specific information, allocation effect, and J ablation remain outstanding.

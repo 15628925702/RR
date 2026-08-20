@@ -6,5 +6,4 @@
 - Every row includes projection loss, held-out moment RMSE, C2ST AUC, ESS, conditional acceptance, FW gap, and minimum information eigenvalue.
 - Full-test exposure to acquisition is explicitly false in every row.
 
-P10 local robustness-schema gate: **PASS**.
-
+P10 formal acceptance: **NOT PASSED**. The artifact contains 144 schema rows (3 smoke replications per budget/campaign/policy), not the required 2,400 paired records; metrics are placeholders and no natural-drift evaluation has been completed.

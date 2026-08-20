@@ -6,5 +6,4 @@
 - Tests: mask leakage and PSD information shape checks pass.
 - Smoke: fixed seed, train/validation separation, all four policy identities retained.
 
-P5 local implementation gate: **PASS**. Formal S1 replication remains configured separately.
-
+P5 formal acceptance: **NOT PASSED**. The current implementation is a linear smoke baseline, not the PDF-required mask-conditioned MLP, and no formal four-policy S1 replication has been completed.
