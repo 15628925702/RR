@@ -40,7 +40,7 @@ def main() -> None:
         for budget in budgets:
             for replication in range(200):
                 seed = 202600000 + budget * 1000 + replication
-                rows = run_replication(mixture, scale, panels, budget, seed, conditional_samples=8, prepared=prepared)
+                rows = run_replication(mixture, scale, panels, budget, seed, conditional_samples=1, prepared=prepared)
                 for row in rows:
                     row["replication"] = replication
                     if (budget, replication, row["policy"]) not in done:
