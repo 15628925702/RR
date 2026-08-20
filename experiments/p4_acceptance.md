@@ -7,4 +7,4 @@
 - Tests: P4 gate rows preserve all three policies and shared target seed.
 - Explicitly not implemented here: Discriminative Score OED, VAEAC, final four-policy Fig.1.
 
-P4 formal acceptance: **NOT PASSED**. This commit contains only a local implementation/smoke gate; the required 200 replications, nonzero frozen beta direction, exact panel-specific information, allocation effect, and J ablation remain outstanding.
+P4 formal acceptance: **IN PROGRESS / NOT PASSED**. The implementation now uses a nonzero ESS-calibrated beta direction, panel-specific conditional information, real policy allocations, and a conditional-score final estimator. The required 200 replications, full S1 budget sweep, and J ablation remain outstanding; no formal result is claimed.

@@ -1,36 +1,70 @@
-"""Synthetic S1 oracle-gate evaluation primitives."""
+"""Synthetic S1 oracle-gate evaluation with panel-specific exact conditional scores."""
 
 from __future__ import annotations
 
 import numpy as np
 
 from .policies import covariance_information, frank_wolfe, uniform_probabilities
-from .synthetic_oracle import feature_map, full_target_kl, sample_full
+from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, sample_conditional, sample_full, tilted_sample_from_reference
+
+
+def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilted=256, n_conditional=64, seed=0):
+    rng = np.random.default_rng(seed)
+    tilted = tilted_sample_from_reference(beta, reference_pool, n_tilted, int(rng.integers(2**31 - 1)), scale)
+    phi = feature_map(tilted, scale)
+    mu = phi.mean(0)
+    fisher = np.cov(phi, rowvar=False)
+    infos = []
+    for panel in panels:
+        projected = []
+        for row in tilted:
+            completed = sample_conditional(mixture, row[list(panel)], panel, n_conditional, int(rng.integers(2**31 - 1)))
+            projected.append(feature_map(completed, scale).mean(0) - mu)
+        infos.append(np.cov(np.asarray(projected), rowvar=False))
+    return fisher, np.asarray(infos)
 
 
 def policy_designs(reference, panels, fisher, oracle_information):
     costs = np.ones(len(panels))
     uniform = uniform_probabilities(len(panels))
     a_info = covariance_information(reference, panels)
-    a_fisher = np.eye(2)
-    a_p, _, _ = frank_wolfe(a_fisher, a_info, costs, uniform, tolerance=0.2, max_iter=200)
-    rr_p, _, _ = frank_wolfe(fisher, oracle_information, costs, uniform, tolerance=0.2, max_iter=200)
+    a_p, _, _ = frank_wolfe(np.eye(2), a_info, costs, uniform, tolerance=0.2, max_iter=300)
+    rr_p, _, _ = frank_wolfe(fisher, oracle_information, costs, uniform, tolerance=0.2, max_iter=300)
     return {"Uniform SQD": uniform, "A-OSQD": a_p, "oracle RR-GID": rr_p}
 
 
-def run_replication(mixture, scale, panels, budget, seed, reference_size=1000):
+def final_rr_estimator(mixture, beta_start, observations, panel_information, scale, n_conditional=64, seed=0):
+    rng = np.random.default_rng(seed)
+    projected = []
+    H = np.zeros((12, 12))
+    for panel, observed in observations:
+        completed = sample_conditional(mixture, observed, panel, n_conditional, int(rng.integers(2**31 - 1)))
+        projected.append(feature_map(completed, scale).mean(0))
+        H += panel_information[panel]
+    if not projected:
+        return np.asarray(beta_start).copy()
+    U = np.mean(projected, axis=0)
+    return np.asarray(beta_start) + np.linalg.pinv((H + H.T) / 2 + 1e-6 * np.eye(12)) @ U
+
+
+def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, information_samples=256, conditional_samples=32):
     reference = sample_full(mixture, reference_size, seed)
-    phi = feature_map(reference, scale)
-    fisher = np.cov(phi, rowvar=False)
-    # A small exact-oracle information approximation for the local smoke.
-    oracle_information = np.asarray([np.cov(phi, rowvar=False) for _ in panels])
+    beta_true = beta_direction_and_scale(reference, 2026, 0.5, scale)
+    fisher, oracle_information = exact_panel_information(mixture, beta_true, panels, reference, scale, information_samples, conditional_samples, seed + 1)
     designs = policy_designs(reference, panels, fisher, oracle_information)
-    beta_true = np.zeros(phi.shape[1])
-    target = sample_full(mixture, budget, seed + 10000)
+    target_reference = sample_full(mixture, max(4000, budget * 2), seed + 2)
+    target_full = tilted_sample_from_reference(beta_true, target_reference, budget, seed + 3, scale)
     rows = []
+    phi_star = float(np.trace(fisher @ np.linalg.pinv(np.tensordot(uniform_probabilities(len(panels)), oracle_information, axes=(0, 0)))))
     for name, probabilities in designs.items():
-        # The gate uses the same target draws and exact observed-score oracle.
-        beta_est = np.zeros_like(beta_true)
-        kl = full_target_kl(beta_true, beta_est, target, scale)
-        rows.append({"policy": name, "budget": budget, "seed": seed, "kl": kl, "B_kl": budget * kl, "design_ratio": 1.0})
+        counts = np.floor(budget * probabilities).astype(int)
+        observations = []
+        cursor = 0
+        for panel, count in zip(panels, counts):
+            for row in target_full[cursor : cursor + count]:
+                observations.append((panel, row[list(panel)]))
+            cursor += count
+        beta_hat = final_rr_estimator(mixture, np.zeros_like(beta_true), observations, {panel: info for panel, info in zip(panels, oracle_information)}, scale, conditional_samples, seed + 4)
+        kl = max(0.0, full_target_kl(beta_true, beta_hat, target_reference, scale))
+        rows.append({"policy": name, "budget": budget, "seed": seed, "beta_true_norm": float(np.linalg.norm(beta_true)), "beta_hat_norm": float(np.linalg.norm(beta_hat)), "kl": kl, "B_kl": budget * kl, "design_ratio": float(kl / max(phi_star / (2 * budget), 1e-12)), "target_draw_seed": seed + 3})
     return rows

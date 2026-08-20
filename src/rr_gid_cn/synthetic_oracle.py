@@ -169,6 +169,36 @@ def tilted_moments(beta: np.ndarray, reference_samples: np.ndarray, scale: np.nd
     return mean, fisher
 
 
+def tilted_sample_from_reference(beta: np.ndarray, reference_samples: np.ndarray, n: int, seed: int = 0, scale: np.ndarray | None = None) -> np.ndarray:
+    """Sample Q_beta by exact importance resampling from an independent Q0 pool."""
+    rng = np.random.default_rng(seed)
+    features = feature_map(reference_samples, scale)
+    logits = features @ np.asarray(beta)
+    weights = np.exp(logits - logits.max())
+    weights /= weights.sum()
+    return np.asarray(reference_samples)[rng.choice(len(reference_samples), size=n, replace=True, p=weights)]
+
+
+def beta_direction_and_scale(reference_samples: np.ndarray, seed: int = 2026, target_ess_fraction: float = 0.5, scale: np.ndarray | None = None) -> np.ndarray:
+    """Freeze a nonzero direction and choose its magnitude by ESS/N bisection."""
+    rng = np.random.default_rng(seed)
+    direction = rng.normal(size=12)
+    direction /= np.linalg.norm(direction)
+    phi = feature_map(reference_samples, scale)
+    target = target_ess_fraction * len(phi)
+    lo, hi = 0.0, 8.0
+    for _ in range(60):
+        mag = (lo + hi) / 2
+        logits = phi @ (mag * direction)
+        weights = np.exp(logits - logits.max())
+        ess = weights.sum() ** 2 / np.sum(weights ** 2)
+        if ess > target:
+            lo = mag
+        else:
+            hi = mag
+    return ((lo + hi) / 2) * direction
+
+
 def full_target_kl(beta_true: np.ndarray, beta_est: np.ndarray, reference_samples: np.ndarray, scale: np.ndarray | None = None) -> float:
     mean_true, _ = tilted_moments(beta_true, reference_samples, scale)
     return float((np.asarray(beta_true) - np.asarray(beta_est)) @ mean_true - log_partition(beta_true, reference_samples, scale) + log_partition(beta_est, reference_samples, scale))

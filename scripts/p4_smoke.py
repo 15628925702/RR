@@ -16,7 +16,7 @@ def main() -> None:
     rows = []
     for budget in (200, 400, 800):
         for rep in range(3):
-            rows.extend(run_replication(mixture, scale, all_pairs(), budget, 202600 + budget + rep))
+            rows.extend(run_replication(mixture, scale, all_pairs(), budget, 202600 + budget + rep, reference_size=800, information_samples=32, conditional_samples=4))
     summary = {"stage": "P4", "alpha": 1.0, "budgets": [200, 400, 800], "replications_per_budget": 3, "rows": rows, "formal_replications_required": 200}
     payload = json.dumps(summary, sort_keys=True, indent=2) + "\n"
     Path("results").mkdir(exist_ok=True)
@@ -28,4 +28,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
