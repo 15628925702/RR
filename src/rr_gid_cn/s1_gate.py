@@ -5,25 +5,20 @@ from __future__ import annotations
 import numpy as np
 
 from .policies import covariance_information, frank_wolfe, uniform_probabilities
-from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, sample_conditional, sample_conditional_batch, sample_full, tilted_conditional_sample, tilted_conditional_batch, tilted_moments, tilted_sample_from_reference
+from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, sample_conditional, sample_conditional_batch, sample_full, tilted_conditional_sample, tilted_conditional_batch, tilted_full_sample, tilted_moments, tilted_sample_from_reference
 
 
 def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilted=256, n_conditional=64, seed=0):
     rng = np.random.default_rng(seed)
-    tilted = tilted_sample_from_reference(beta, reference_pool, n_tilted, int(rng.integers(2**31 - 1)), scale)
+    tilted = tilted_full_sample(mixture, beta, n_tilted, int(rng.integers(2**31 - 1)), scale)
     phi = feature_map(tilted, scale)
     mu = phi.mean(0)
     fisher = np.cov(phi, rowvar=False)
     infos = []
     for panel in panels:
-        projected_a = []
-        projected_b = []
-        for row in tilted:
-            batches = []
-            for _ in range(2):
-                chosen = tilted_conditional_sample(mixture, beta, row[list(panel)], panel, n_conditional, int(rng.integers(2**31 - 1)), scale)
-                batches.append(feature_map(chosen, scale).mean(0) - mu)
-            projected_a.append(batches[0]); projected_b.append(batches[1])
+        observed = tilted[:, list(panel)]
+        projected_a = feature_map(tilted_conditional_batch(mixture, beta, observed, panel, n_conditional, int(rng.integers(2**31 - 1)), scale), scale).mean(axis=1) - mu
+        projected_b = feature_map(tilted_conditional_batch(mixture, beta, observed, panel, n_conditional, int(rng.integers(2**31 - 1)), scale), scale).mean(axis=1) - mu
         a = np.asarray(projected_a); b = np.asarray(projected_b)
         a = a - a.mean(0); b = b - b.mean(0)
         info = (a.T @ b + b.T @ a) / max(2 * (len(a) - 1), 1)
@@ -70,17 +65,28 @@ def pilot_ht_moment(observations, pilot_counts, panels, scale, reference):
             if set(support).issubset(panel):
                 full = np.zeros(16); full[list(panel)] = observed
                 vals.append(feature_map(full[None, :], scale)[0, a])
-        values[a] = np.mean(vals) / rho if vals else 0.0
+        values[a] = np.sum(vals) / (n0 * rho) if vals else 0.0
     return values, np.asarray([sum(c for c, panel in zip(pilot_counts, panels) if set(s).issubset(panel)) / n0 for s in supports])
 
 
 def solve_pilot_beta(mu_pil, reference, scale, theta_bound=4.0, steps=20):
     beta = np.zeros(12)
-    for _ in range(steps):
+    features = feature_map(reference, scale)
+    target = np.asarray(mu_pil)
+    def objective(x):
+        z = features @ x
+        return float(np.logaddexp.reduce(z) - np.log(len(z)) - x @ target)
+    for _ in range(max(steps, 100)):
         mu, fisher = tilted_moments(beta, reference, scale)
-        delta = np.linalg.solve(fisher + 1e-6 * np.eye(12), np.asarray(mu_pil) - mu)
-        candidate = np.clip(beta + delta, -theta_bound, theta_bound)
-        if np.linalg.norm(candidate - beta) < 1e-7:
+        direction = np.linalg.solve(fisher + 1e-3 * np.eye(12), target - mu)
+        current = objective(beta)
+        step = 1.0
+        while step > 1e-5:
+            candidate = np.clip(beta + step * direction, -theta_bound, theta_bound)
+            if objective(candidate) <= current + 1e-9:
+                break
+            step *= 0.5
+        if step <= 1e-5 or np.linalg.norm(candidate - beta) < 1e-7:
             break
         beta = candidate
     return beta
@@ -135,7 +141,7 @@ def run_replication(mixture, scale, panels, budget, seed, reference_size=4000, i
     oracle_information = prepared["information"]
     designs = prepared["designs"]
     target_reference = sample_full(mixture, max(4000, budget * 2), seed + 2)
-    target_full = tilted_sample_from_reference(beta_true, target_reference, budget, seed + 3, scale)
+    target_full = tilted_full_sample(mixture, beta_true, budget, seed + 3, scale)
     rows = []
     pilot_budget = int(np.ceil(10.0 * budget ** (1.0 / 3.0)))
     pilot_budget = min(pilot_budget, budget)

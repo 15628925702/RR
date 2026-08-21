@@ -193,10 +193,31 @@ def tilted_conditional_batch(
 ) -> np.ndarray:
     rng = np.random.default_rng(seed)
     rows = np.atleast_2d(np.asarray(x_s))
-    return np.asarray([
-        tilted_conditional_sample(mixture, beta, row, panel, n, int(rng.integers(2**31 - 1)), scale)
-        for row in rows
-    ])
+    out = np.empty((len(rows), n, mixture.dimension))
+    panel_set = set(panel)
+    fixed = np.zeros(beta.shape[0], dtype=bool)
+    fixed[:6] = [i in panel_set for i in range(6)]
+    fixed[6:] = [i in panel_set and i + 6 in panel_set for i in range(6)]
+    full = np.zeros((len(rows), mixture.dimension)); full[:, list(panel)] = rows
+    fixed_features = feature_map(full, scale)[:, fixed] @ beta[fixed]
+    envelope = fixed_features + np.sum(np.abs(beta[~fixed]))
+    filled = np.zeros(len(rows), dtype=int)
+    while np.any(filled < n):
+        need = np.maximum(n - filled, 0)
+        proposal_n = int(max(64, min(2048, 4 * int(need.max()))))
+        observed_rep = np.repeat(rows, proposal_n, axis=0)
+        proposals = sample_conditional_batch(mixture, observed_rep, panel, 1, int(rng.integers(2**31 - 1)))[:, 0]
+        feats = feature_map(proposals, scale)
+        logits = feats @ beta
+        row_ids = np.repeat(np.arange(len(rows)), proposal_n)
+        keep = rng.random(len(proposals)) < np.exp(logits - envelope[row_ids])
+        for row_id in np.flatnonzero(need):
+            selected = proposals[(row_ids == row_id) & keep]
+            take = min(len(selected), n - filled[row_id])
+            if take:
+                out[row_id, filled[row_id]:filled[row_id] + take] = selected[:take]
+                filled[row_id] += take
+    return out
 
 
 def conditional_moments(mixture: FrozenMixture, x_s: np.ndarray, panel: tuple[int, ...]) -> tuple[np.ndarray, np.ndarray]:
@@ -276,6 +297,19 @@ def tilted_sample_from_reference(beta: np.ndarray, reference_samples: np.ndarray
     weights = np.exp(logits - logits.max())
     weights /= weights.sum()
     return np.asarray(reference_samples)[rng.choice(len(reference_samples), size=n, replace=True, p=weights)]
+
+
+def tilted_full_sample(mixture: FrozenMixture, beta: np.ndarray, n: int, seed: int = 0, scale: np.ndarray | None = None) -> np.ndarray:
+    """Exact accept-reject samples from Q_beta relative to Q0."""
+    rng = np.random.default_rng(seed)
+    envelope = float(np.sum(np.abs(np.asarray(beta))))
+    accepted = []
+    while len(accepted) < n:
+        proposal = sample_full(mixture, max(256, min(4096, 4 * (n - len(accepted)))), int(rng.integers(2**31 - 1)))
+        logits = feature_map(proposal, scale) @ beta
+        keep = rng.random(len(proposal)) < np.exp(logits - envelope)
+        accepted.extend(proposal[keep])
+    return np.asarray(accepted[:n])
 
 
 def beta_direction_and_scale(reference_samples: np.ndarray, seed: int = 2026, target_ess_fraction: float = 0.5, scale: np.ndarray | None = None) -> np.ndarray:
