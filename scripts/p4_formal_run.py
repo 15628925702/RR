@@ -19,6 +19,7 @@ def main() -> None:
     ap.add_argument("--config", type=Path, default=Path("configs/p4_formal.yaml"))
     ap.add_argument("--max-replications", type=int, default=None, help="limit replications per budget (for smoke runs)")
     ap.add_argument("--scoring-steps", type=int, default=None, help="J Fisher-scoring steps (default from config, 2; J ablation passes 0/1/2 explicitly)")
+    ap.add_argument("--rep-range", type=int, nargs=2, default=None, help="[start, end) replication range for sharding a budget across processes")
     args = ap.parse_args()
     with args.config.open(encoding="utf-8") as stream:
         cfg = yaml.safe_load(stream)
@@ -65,7 +66,8 @@ def main() -> None:
     for budget in budgets:
         fp = out / f"p4_exact_{budget}{suffix}.jsonl"
         with fp.open("a", encoding="utf-8") as stream:
-            for replication in range(replications):
+            start, end = args.rep_range if args.rep_range else (0, replications)
+            for replication in range(start, min(end, replications)):
                 if all((replication, pol) in done[budget] for pol in ("Uniform SQD", "A-OSQD", "oracle RR-GID")):
                     continue
                 seed = 202600000 + budget * 1000 + replication
