@@ -10,6 +10,8 @@ logs/
 tmp/
 results/*
 !results/.gitkeep
+!results/*_summary.json
+!results/*summary*.json
 figures/*
 !figures/.gitkeep
 experiments/runs/*
