@@ -60,6 +60,8 @@ def main() -> None:
         fp = out / f"p4_exact_{budget}.jsonl"
         with fp.open("a", encoding="utf-8") as stream:
             for replication in range(replications):
+                if all((replication, pol) in done[budget] for pol in ("Uniform SQD", "A-OSQD", "oracle RR-GID")):
+                    continue
                 seed = 202600000 + budget * 1000 + replication
                 rows = run_replication(mixture, scale, panels, budget, seed, prepared=prepared, **kwargs)
                 for row in rows:
