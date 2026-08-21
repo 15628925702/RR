@@ -206,7 +206,8 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
 
 
 def run_replication(mixture, scale, panels, budget, seed, prepared=None,
-                    lu=128, h_tilted=128, h_cond=32, pilot_norm_cap=2.0, kl_samples=20000):
+                    lu=128, h_tilted=128, h_cond=32, pilot_norm_cap=2.0, kl_samples=20000,
+                    scoring_steps=2):
     prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed)
     reference = prepared["reference"]
     ref_large = prepared["reference_large"]
@@ -249,7 +250,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
         beta_hat = solve_pilot_beta(pilot_mu, reference, scale, norm_cap=pilot_norm_cap)
         observations = pilot_observations + main_observations
         update_diagnostics = [{"step": "pilot", "pilot_budget": int(pilot_counts.sum()), "beta_norm": float(np.linalg.norm(beta_hat)), "rho_min": float(np.min(pilot_rho[pilot_rho > 0])) if np.any(pilot_rho > 0) else 0.0}]
-        for update in range(2):
+        for update in range(scoring_steps):
             beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=1.0, norm_cap=pilot_norm_cap * 1.25)
             update_diagnostics.append({"step": update, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": int(pilot_counts.sum())})
             beta_hat = beta_next

@@ -18,16 +18,19 @@ def main() -> None:
     ap.add_argument("--budget", type=int, default=None)
     ap.add_argument("--config", type=Path, default=Path("configs/p4_formal.yaml"))
     ap.add_argument("--max-replications", type=int, default=None, help="limit replications per budget (for smoke runs)")
+    ap.add_argument("--scoring-steps", type=int, default=2, help="J Fisher-scoring steps (PDF default 2; J ablation uses 0/1/2 at B=8000)")
     args = ap.parse_args()
     with args.config.open(encoding="utf-8") as stream:
         cfg = yaml.safe_load(stream)
     p4 = cfg["p4"]
     budgets = (args.budget,) if args.budget is not None else tuple(p4["budgets"])
     replications = args.max_replications or int(p4["replications"])
+    steps = args.scoring_steps
+    suffix = "" if steps == int(p4["scoring_steps"]) else f"_J{steps}"
     out = Path("results")
     done: dict[int, set] = {b: set() for b in budgets}
     for b in budgets:
-        fp = out / f"p4_exact_{b}.jsonl"
+        fp = out / f"p4_exact_{b}{suffix}.jsonl"
         if fp.exists():
             for line in fp.read_text(encoding="utf-8").splitlines():
                 if line.strip():
@@ -55,9 +58,10 @@ def main() -> None:
         with prepared_path.open("wb") as stream:
             pickle.dump(prepared, stream, protocol=5)
     kwargs = dict(lu=p4["lu"], h_tilted=p4["h_tilted"], h_cond=p4["h_cond"],
-                  pilot_norm_cap=p4["pilot_norm_cap"], kl_samples=p4["kl_samples"])
+                  pilot_norm_cap=p4["pilot_norm_cap"], kl_samples=p4["kl_samples"],
+                  scoring_steps=steps)
     for budget in budgets:
-        fp = out / f"p4_exact_{budget}.jsonl"
+        fp = out / f"p4_exact_{budget}{suffix}.jsonl"
         with fp.open("a", encoding="utf-8") as stream:
             for replication in range(replications):
                 if all((replication, pol) in done[budget] for pol in ("Uniform SQD", "A-OSQD", "oracle RR-GID")):
