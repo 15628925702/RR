@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from .policies import frank_wolfe, uniform_probabilities
+from .discriminative import MaskedScoreMLP, masked_input, score_information
 from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, log_partition, sample_conditional, sample_conditional_batch, sample_full, tilted_conditional_sample, tilted_conditional_batch, tilted_full_sample, tilted_moments, tilted_sample_from_reference
 
 
@@ -57,6 +58,41 @@ def policy_designs(reference, panels, fisher, oracle_information):
     a_p, _, _ = frank_wolfe(np.eye(16), a_info, costs, uniform, tolerance=1e-4, max_iter=500)
     rr_p, _, _ = frank_wolfe(fisher, oracle_information, costs, uniform, tolerance=0.2, max_iter=300)
     return {"Uniform SQD": uniform, "A-OSQD": a_p, "oracle RR-GID": rr_p}
+
+
+def discriminative_design(reference_train, validation, beta, panels, scale, seed=0,
+                          hidden=64, steps=200, lr=0.01, fw_tolerance=1e-4):
+    """PDF P5 Discriminative Score OED design.
+
+    Trains a mask-conditioned MLP on tilt-weighted score labels
+    ``s_beta(X) = phi(X) - mu_beta`` pooled over all candidate panels, then
+    estimates ``I_hat_S = Cov_w(g(X_S))`` on an independent validation set with
+    tilt weights ``w prop exp(beta^T phi)`` (PDF Sec. 6). The cost-aware
+    Frank-Wolfe solver minimizes ``tr(F_hat M(p)^-1)`` with the tilted reference
+    Fisher ``F_hat``.
+    """
+    phi_train = feature_map(reference_train, scale)
+    mu_beta, _ = tilted_moments(beta, reference_train, scale)
+    labels = phi_train - mu_beta
+    logits = phi_train @ beta
+    w = np.exp(logits - logits.max())
+    X_pool, Y_pool, W_pool = [], [], []
+    for panel in panels:
+        enc, _ = masked_input(reference_train, panel)
+        X_pool.append(enc)
+        Y_pool.append(labels)
+        W_pool.append(w)
+    model = MaskedScoreMLP(X_pool[0].shape[1], 12, hidden=hidden, seed=seed)
+    model.fit(np.concatenate(X_pool), np.concatenate(Y_pool),
+              weights=np.concatenate(W_pool), steps=steps, lr=lr)
+    phi_val = feature_map(validation, scale)
+    w_val = np.exp(phi_val @ beta)
+    infos = score_information(model, validation, panels, w_val)
+    _, fisher_hat = tilted_moments(beta, validation, scale)
+    costs = np.ones(len(panels))
+    uniform = uniform_probabilities(len(panels))
+    p, _, _ = frank_wolfe(fisher_hat, infos, costs, uniform, tolerance=fw_tolerance, max_iter=300)
+    return p
 
 
 def balanced_pilot_counts(panels: tuple[tuple[int, int], ...], budget: int) -> np.ndarray:
@@ -212,7 +248,8 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
 def run_replication(mixture, scale, panels, budget, seed, prepared=None,
                     lu=128, h_tilted=128, h_cond=32, pilot_norm_cap=2.0, kl_samples=20000,
                     scoring_steps=2, theta_norm_cap=None, policies=None, mu_direct=False, mu_samples=10000,
-                    kl_mu_direct=True, use_oracle_H=False):
+                    kl_mu_direct=True, use_oracle_H=False, validation_size=10000,
+                    mlp_hidden=64, mlp_steps=200):
     prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed)
     reference = prepared["reference"]
     ref_large = prepared["reference_large"]
@@ -233,7 +270,22 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
         mu_bt = tilted_moments(beta_true, target_reference, scale)[0]
     policy_names = policies if policies is not None else list(designs)
     for name in policy_names:
-        probabilities = designs[name]
+        pilot_counts = balanced_pilot_counts(panels, pilot_budget)
+        pilot_observations = []
+        pilot_cursor = 0
+        for panel, count in zip(panels, pilot_counts):
+            for row in target_full[pilot_cursor : pilot_cursor + count]:
+                pilot_observations.append((panel, row[list(panel)]))
+            pilot_cursor += count
+        pilot_mu, pilot_rho = pilot_ht_moment(pilot_observations, pilot_counts, panels, scale, reference)
+        beta_hat = solve_pilot_beta(pilot_mu, reference, scale, norm_cap=pilot_norm_cap)
+        if name == "Discriminative Score OED":
+            # PDF P5: each campaign retrains the mask-conditioned MLP and redesigns.
+            validation = sample_full(mixture, validation_size, seed + 555)
+            probabilities = discriminative_design(reference, validation, beta_hat, panels, scale,
+                                                  seed + 11, hidden=mlp_hidden, steps=mlp_steps)
+        else:
+            probabilities = designs[name]
         expected = remaining_budget * probabilities
         counts = np.floor(expected).astype(int)
         # Largest-remainder apportionment exactly honors the frozen acquisition
@@ -243,21 +295,12 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
             counts[np.argsort(expected - counts)[-remainder:]] += 1
         if int(counts.sum()) != remaining_budget:
             raise RuntimeError("main panel allocation does not exhaust the remaining acquisition budget")
-        pilot_counts = balanced_pilot_counts(panels, pilot_budget)
-        pilot_observations = []
-        pilot_cursor = 0
-        for panel, count in zip(panels, pilot_counts):
-            for row in target_full[pilot_cursor : pilot_cursor + count]:
-                pilot_observations.append((panel, row[list(panel)]))
-            pilot_cursor += count
         main_observations = []
         main_cursor = pilot_budget
         for panel, count in zip(panels, counts):
             for row in target_full[main_cursor : main_cursor + count]:
                 main_observations.append((panel, row[list(panel)]))
             main_cursor += count
-        pilot_mu, pilot_rho = pilot_ht_moment(pilot_observations, pilot_counts, panels, scale, reference)
-        beta_hat = solve_pilot_beta(pilot_mu, reference, scale, norm_cap=pilot_norm_cap)
         observations = pilot_observations + main_observations
         update_diagnostics = [{"step": "pilot", "pilot_budget": int(pilot_counts.sum()), "beta_norm": float(np.linalg.norm(beta_hat)), "rho_min": float(np.min(pilot_rho[pilot_rho > 0])) if np.any(pilot_rho > 0) else 0.0}]
         norm_cap_val = theta_norm_cap if theta_norm_cap is not None else pilot_norm_cap * 1.25
