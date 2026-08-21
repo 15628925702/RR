@@ -172,7 +172,8 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
 
 
 def final_rr_estimator(mixture, beta_start, observations, panels, reference, scale, lu, seed,
-                       theta_bound=4.0, h_tilted=128, h_cond=32, step_size=1.0, norm_cap=None):
+                       theta_bound=4.0, h_tilted=128, h_cond=32, step_size=1.0, norm_cap=None,
+                       mu_samples=10000, mu_direct=False, oracle_information=None):
     """One Fisher-scoring update following PDF Algorithm 2 step 6.
 
     Re-estimates ``I_S(beta^(j))`` by cross-completion at the current beta, builds
@@ -185,14 +186,17 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
     grouped = {}
     for panel, obs in observations:
         grouped.setdefault(panel, []).append(obs)
-    infos = panel_information_cross(mixture, beta_start, panels, reference, scale, h_tilted, h_cond, seed + 7)
+    infos = panel_information_cross(mixture, beta_start, panels, reference, scale, h_tilted, h_cond, seed + 7) if oracle_information is None else oracle_information
     H = np.zeros((12, 12))
     projected = []
     for panel, rows in grouped.items():
         H += len(rows) * infos[panels.index(panel)]
         projected.append(imp_conditional_mean(mixture, beta_start, np.asarray(rows), panel, lu, int(rng.integers(2**31 - 1)), scale))
     projected = np.concatenate(projected, axis=0)
-    mu_beta, _ = tilted_moments(beta_start, reference, scale)
+    if mu_direct:
+        mu_beta = feature_map(tilted_full_sample(mixture, beta_start, mu_samples, seed + 99, scale), scale).mean(0)
+    else:
+        mu_beta, _ = tilted_moments(beta_start, reference, scale)
     U = np.sum(projected - mu_beta, axis=0)
     H = (H + H.T) / 2
     step = np.linalg.solve(H + 1e-2 * np.eye(12), U)
@@ -207,7 +211,8 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
 
 def run_replication(mixture, scale, panels, budget, seed, prepared=None,
                     lu=128, h_tilted=128, h_cond=32, pilot_norm_cap=2.0, kl_samples=20000,
-                    scoring_steps=2):
+                    scoring_steps=2, theta_norm_cap=None, policies=None, mu_direct=False, mu_samples=10000,
+                    kl_mu_direct=True, use_oracle_H=False):
     prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed)
     reference = prepared["reference"]
     ref_large = prepared["reference_large"]
@@ -222,8 +227,13 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
     pilot_budget = min(pilot_budget, budget)
     remaining_budget = budget - pilot_budget
     rr_phi = float(np.trace(fisher @ np.linalg.pinv(np.tensordot(designs["oracle RR-GID"], oracle_information, axes=(0, 0)))))
-    mu_bt = feature_map(tilted_full_sample(mixture, beta_true, kl_samples, seed + 90, scale), scale).mean(0)
-    for name, probabilities in designs.items():
+    if kl_mu_direct:
+        mu_bt = feature_map(tilted_full_sample(mixture, beta_true, kl_samples, seed + 90, scale), scale).mean(0)
+    else:
+        mu_bt = tilted_moments(beta_true, target_reference, scale)[0]
+    policy_names = policies if policies is not None else list(designs)
+    for name in policy_names:
+        probabilities = designs[name]
         expected = remaining_budget * probabilities
         counts = np.floor(expected).astype(int)
         # Largest-remainder apportionment exactly honors the frozen acquisition
@@ -250,10 +260,11 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
         beta_hat = solve_pilot_beta(pilot_mu, reference, scale, norm_cap=pilot_norm_cap)
         observations = pilot_observations + main_observations
         update_diagnostics = [{"step": "pilot", "pilot_budget": int(pilot_counts.sum()), "beta_norm": float(np.linalg.norm(beta_hat)), "rho_min": float(np.min(pilot_rho[pilot_rho > 0])) if np.any(pilot_rho > 0) else 0.0}]
+        norm_cap_val = theta_norm_cap if theta_norm_cap is not None else pilot_norm_cap * 1.25
         for update in range(scoring_steps):
-            beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=1.0, norm_cap=pilot_norm_cap * 1.25)
+            beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=1.0, norm_cap=norm_cap_val, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None)
             update_diagnostics.append({"step": update, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": int(pilot_counts.sum())})
             beta_hat = beta_next
         kl = max(0.0, float((beta_true - beta_hat) @ mu_bt - log_partition(beta_true, target_reference, scale) + log_partition(beta_hat, target_reference, scale)))
-        rows.append({"policy": name, "budget": budget, "allocated_observations": int(counts.sum() + pilot_counts.sum()), "pilot_budget": int(pilot_counts.sum()), "seed": seed, "beta_true_norm": float(np.linalg.norm(beta_true)), "beta_hat_norm": float(np.linalg.norm(beta_hat)), "kl": kl, "B_kl": budget * kl, "design_ratio": float(kl / max(rr_phi / (2 * budget), 1e-12)), "target_draw_seed": seed + 3, "update_diagnostics": update_diagnostics})
+        rows.append({"policy": name, "budget": budget, "allocated_observations": int(counts.sum() + pilot_counts.sum()), "pilot_budget": int(pilot_counts.sum()), "seed": seed, "beta_true_norm": float(np.linalg.norm(beta_true)), "beta_hat_norm": float(np.linalg.norm(beta_hat)), "kl": kl, "B_kl": budget * kl, "design_ratio": float(kl / max(rr_phi / (2 * budget), 1e-12)), "target_draw_seed": seed + 3, "beta_hat": beta_hat.tolist(), "update_diagnostics": update_diagnostics})
     return rows
