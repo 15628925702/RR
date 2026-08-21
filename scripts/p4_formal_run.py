@@ -18,15 +18,17 @@ def main() -> None:
     ap.add_argument("--budget", type=int, default=None)
     ap.add_argument("--config", type=Path, default=Path("configs/p4_formal.yaml"))
     ap.add_argument("--max-replications", type=int, default=None, help="limit replications per budget (for smoke runs)")
-    ap.add_argument("--scoring-steps", type=int, default=2, help="J Fisher-scoring steps (PDF default 2; J ablation uses 0/1/2 at B=8000)")
+    ap.add_argument("--scoring-steps", type=int, default=None, help="J Fisher-scoring steps (default from config, 2; J ablation passes 0/1/2 explicitly)")
     args = ap.parse_args()
     with args.config.open(encoding="utf-8") as stream:
         cfg = yaml.safe_load(stream)
     p4 = cfg["p4"]
     budgets = (args.budget,) if args.budget is not None else tuple(p4["budgets"])
     replications = args.max_replications or int(p4["replications"])
-    steps = args.scoring_steps
-    suffix = "" if steps == int(p4["scoring_steps"]) else f"_J{steps}"
+    steps = int(p4["scoring_steps"]) if args.scoring_steps is None else args.scoring_steps
+    # Explicit --scoring-steps always writes a J-suffixed file so the J ablation
+    # never collides with the default (J=2) main-configuration output.
+    suffix = "" if args.scoring_steps is None else f"_J{steps}"
     out = Path("results")
     done: dict[int, set] = {b: set() for b in budgets}
     for b in budgets:
