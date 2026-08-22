@@ -1,0 +1,17 @@
+seed: 2026
+device: cuda
+dtype: float64
+paths:
+  root: ..
+  data: data
+  results: results
+  figures: figures
+  experiments: experiments
+p9:
+  budgets: [400, 800, 1600, 3200]
+  replications: 200
+  scoring_steps: 2
+  validation_size: 5000
+  gen_info_tilted: 256
+  gen_info_cond: 32
+  generator_ckpt: experiments/p9_gas_vaeac.pt
