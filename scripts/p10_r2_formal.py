@@ -95,8 +95,33 @@ def log_partition_emp(phi, beta):
     return float(np.logaddexp.reduce(logits) - np.log(phi.shape[0]))
 
 
-def c2st_auc(gen_samples, test_pool, rng_seed=0, folds=5):
-    """5-fold C2ST AUC between generated and held-out target records (0.5 = indistinguishable)."""
+def empirical_panel_infos(pool_x, pool_phi, coord_panels, k=60, n_sub=800):
+    """Kernel cross-completion panel information (PDF Eq. 9) on the empirical pool."""
+    rng = np.random.default_rng(0)
+    n = len(pool_x)
+    sub = np.minimum(n, n_sub)
+    idx = rng.choice(n, size=sub, replace=False)
+    Xs, Ps = pool_x[idx], pool_phi[idx]
+    mu = Ps.mean(0)
+    infos = []
+    for panel in coord_panels:
+        obs = Xs[:, list(panel)]
+        a = empirical_kernel_cm(pool_x, pool_phi, obs, panel) - mu
+        b = empirical_kernel_cm(pool_x, pool_phi, obs, panel) - mu
+        a = a - a.mean(0); b = b - b.mean(0)
+        info = (a.T @ b + b.T @ a) / max(2 * (len(a) - 1), 1)
+        vals, vecs = np.linalg.eigh((info + info.T) / 2)
+        infos.append((vecs * np.maximum(vals, 1e-10)) @ vecs.T)
+    return np.asarray(infos)
+
+
+def c2st_auc(gen_samples, test_pool, rng_seed=0, folds=5, max_iter=5000):
+    """5-fold C2ST AUC between generated and held-out target records (0.5 = indistinguishable).
+
+    Inputs are standardized to unit variance per feature before the 5-fold
+    logistic-regression classifier so the discriminator actually converges on
+    the 128-dim standardized feature space (PDF 8.3's C2ST).
+    """
     from sklearn.linear_model import LogisticRegression
     from sklearn.metrics import roc_auc_score
     from sklearn.model_selection import StratifiedKFold
@@ -106,9 +131,11 @@ def c2st_auc(gen_samples, test_pool, rng_seed=0, folds=5):
     skf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=rng_seed)
     aucs = []
     for tr, te in skf.split(X, y):
-        clf = LogisticRegression(max_iter=2000)
-        clf.fit(X[tr], y[tr])
-        aucs.append(roc_auc_score(y[te], clf.predict_proba(X[te])[:, 1]))
+        # per-fold standardization on the training partition only (no leakage)
+        mu, sd = X[tr].mean(0), X[tr].std(0) + 1e-8
+        clf = LogisticRegression(max_iter=max_iter)
+        clf.fit((X[tr] - mu) / sd, y[tr])
+        aucs.append(roc_auc_score(y[te], clf.predict_proba((X[te] - mu) / sd)[:, 1]))
     return float(np.mean(aucs))
 
 
@@ -157,6 +184,8 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
     b_pilot = min(b_pilot, budget)
 
     fisher = np.cov(pool_phi, rowvar=False)
+    # empirical kernel panel infos (shared by non-generator policies and H)
+    emp_infos = empirical_panel_infos(pool_x, pool_phi, coord_panels)
     pilot_counts = gas_balanced_pilot_counts(coord_panels, b_pilot)
     pilot_obs = []
     cursor = 0
@@ -214,14 +243,17 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
                 cm = empirical_kernel_cm(pool_x, pool_phi, obs_arr, panel)
                 U += (cm - mu_beta_j).sum(0)
                 idx = coord_panels.index(panel)
-                info_panel = policy_infos[idx] if policy_infos is not None else fisher
+                info_panel = policy_infos[idx] if policy_infos is not None else emp_infos[idx]
                 H += len(obs_arr) * info_panel
             step = np.linalg.solve(H + 1e-2 * np.eye(16), U)
             beta_hat_final = np.clip(beta_hat_final + step, -4.0, 4.0)
         logits = pool_phi @ beta_hat_final
         wgt = np.exp(logits - logits.max())
         ess = float(wgt.sum() ** 2 / np.sum(wgt ** 2) / len(pool_phi))
-        M_hat = np.tensordot(probs, policy_infos, axes=(0, 0)) if policy_infos is not None else (fisher if name != "RR-GID" else fisher)
+        # M_hat(p) = sum_S p_S I_S: empirical kernel infos for non-generator
+        # policies, learned-generator infos for RR-GID.
+        info_for_M = policy_infos if policy_infos is not None else emp_infos
+        M_hat = np.tensordot(probs, info_for_M, axes=(0, 0))
         lambda_min_M = float(np.linalg.eigvalsh((np.asarray(M_hat) + np.asarray(M_hat).T) / 2).min())
         gen_samples = gen.sample_full(cfg["c2st_samples"], seed + 33)
         mean_rmse, std_rmse = heldout_moment_rmse(gen_samples, test_x, mean, std)
