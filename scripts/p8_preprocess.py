@@ -101,6 +101,9 @@ def main() -> None:
         train_idx=train_idx, val_idx=val_idx,
         mean=mean, std=std, pcs=pcs,
         **{f"phi_{k}": v for k, v in phi_targets.items()},
+        # Raw 128-dim standardized target records (needed for R2 panel masking,
+        # full-test evaluation, held-out moment RMSE and C2ST).
+        **{f"x_{k}": v for k, v in target_campaigns.items()},
     )
     # Data card
     card = {
@@ -111,6 +114,7 @@ def main() -> None:
         "ref_train_rows": int(len(train_idx)), "ref_val_rows": int(len(val_idx)),
         "n_features_raw": 128, "n_sensors": 16, "features_per_sensor": 8,
         "feature_dim": 16, "n_panels": len(panels),
+        "target_raw_records_saved": list(target_campaigns.keys()),
         "phi_in_unit_range": bool(np.all(np.abs(phi_train) <= 1.0) and np.all(np.abs(phi_val) <= 1.0)),
         "ref_train_mean_abs": float(np.abs(phi_train.mean(0)).max()),
         "ref_train_std_range": [float(phi_train.std(0).min()), float(phi_train.std(0).max())],

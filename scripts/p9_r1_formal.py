@@ -245,27 +245,27 @@ def run_gas_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, budget, se
         remainder = rem - int(counts.sum())
         if remainder:
             counts[np.argsort(rem * probs - counts)[-remainder:]] += 1
-        # final beta via J=2 Fisher scoring on the empirical base with observed scores
+        # main + pilot observations
+        main_obs = []
+        cursor = b_pilot
+        for panel, count in zip(coord_panels, counts):
+            for row in target[cursor:cursor + count]:
+                main_obs.append((panel, row[list(panel)]))
+            cursor += count
+        all_obs = pilot_obs + main_obs
+        # final beta via J=2 Fisher scoring on the empirical base (PDF Alg.2 step 6)
         beta_hat_final = beta_hat.copy()
         for _ in range(2):
-            # U_j: sum of conditional-score projections under current beta
-            grouped = {}
-            for panel, obs in pilot_obs:
-                grouped.setdefault(panel, []).append(obs)
-            main_obs = []
-            cursor = b_pilot
-            for panel, count in zip(coord_panels, counts):
-                for row in target[cursor:cursor + count]:
-                    main_obs.append((panel, row[list(panel)]))
-                cursor += count
-            all_obs = pilot_obs + main_obs
+            # tilted mean mu_beta^(j) on the empirical base pool
+            logits = phi_val @ beta_hat_final
+            wb = np.exp(logits - logits.max()); wb /= wb.sum()
+            mu_beta_j = wb @ phi_val
             U = np.zeros(16)
             H = 1e-2 * np.eye(16)
-            for panel, obs in all_obs:
-                idx = list(panel)
-                obs_arr = np.asarray(obs)[None, :] if not isinstance(obs, np.ndarray) else np.atleast_2d(obs)
+            for panel, obs_row in all_obs:
+                obs_arr = np.atleast_2d(np.asarray(obs_row))
                 cm = empirical_conditional_mean(phi_val, ref_val, obs_arr, panel)
-                U += (cm - mu_pil).mean(0) * len(obs_arr)
+                U += (cm - mu_beta_j).sum(0)
                 H += len(obs_arr) * infos[coord_panels.index(panel)]
             step = np.linalg.solve(H, U)
             beta_hat_final = np.clip(beta_hat_final + step, -4.0, 4.0)
