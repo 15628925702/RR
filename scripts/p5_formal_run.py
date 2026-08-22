@@ -3,7 +3,6 @@
 Note: this is a scripts/ entry point. The project package is installed under
 ``src/``; running directly from a clone needs the repo root (or ``src/``) on
 ``PYTHONPATH``. We prepend it here so the same command works on any host.
-"""
 
 P4 already ran Uniform SQD / A-OSQD / oracle RR-GID (results/p4_formal_<B>.jsonl,
 frozen seed scheme ``seed = 202600000 + budget*1000 + replication``). P5 appends
