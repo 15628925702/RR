@@ -163,7 +163,7 @@ class MaskedScoreMLP:
             w = np.ones(n) if w_sum == 0 else w / w_sum * n
         try:
             import torch
-            if torch.cuda.is_available() and n >= 2000:
+            if torch.cuda.is_available() and n >= 500:
                 self._fit_torch(x, y, w, int(steps), float(lr), float(ridge))
                 return self
         except (ImportError, RuntimeError, ValueError):
