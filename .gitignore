@@ -17,3 +17,4 @@ figures/*
 experiments/runs/*
 !experiments/runs/.gitkeep
 
+data/gas/processed/gas_processed.npz
