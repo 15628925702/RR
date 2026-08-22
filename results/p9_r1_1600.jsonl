@@ -1,0 +1,800 @@
+{"B_kl": 552.163562613229, "budget": 1600, "design_ratio": 2.857007584865945, "kl": 0.34510222663326817, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 100, "seed": 41600100}
+{"B_kl": 543.6442064116337, "budget": 1600, "design_ratio": 2.8129266875844596, "kl": 0.33977762900727104, "pilot_budget": 117, "policy": "A-OSQD", "replication": 100, "seed": 41600100}
+{"B_kl": 557.597246048023, "budget": 1600, "design_ratio": 2.8851225780275644, "kl": 0.3484982787800143, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 100, "seed": 41600100}
+{"B_kl": 548.0985881592737, "budget": 1600, "design_ratio": 2.8359745728499535, "kl": 0.34256161759954606, "pilot_budget": 117, "policy": "RR-GID", "replication": 100, "seed": 41600100}
+{"B_kl": 637.5131501851703, "budget": 1600, "design_ratio": 3.298623865926165, "kl": 0.39844571886573144, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 0, "seed": 41600000}
+{"B_kl": 645.6009243746738, "budget": 1600, "design_ratio": 3.3404716693102507, "kl": 0.40350057773417114, "pilot_budget": 117, "policy": "A-OSQD", "replication": 0, "seed": 41600000}
+{"B_kl": 637.7898785606516, "budget": 1600, "design_ratio": 3.3000557153295484, "kl": 0.39861867410040724, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 0, "seed": 41600000}
+{"B_kl": 649.2403163202175, "budget": 1600, "design_ratio": 3.3593026300920683, "kl": 0.405775197700136, "pilot_budget": 117, "policy": "RR-GID", "replication": 0, "seed": 41600000}
+{"B_kl": 594.6530575800732, "budget": 1600, "design_ratio": 3.0768569512799115, "kl": 0.3716581609875457, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 101, "seed": 41600101}
+{"B_kl": 643.9006805250709, "budget": 1600, "design_ratio": 3.3316742587179116, "kl": 0.4024379253281693, "pilot_budget": 117, "policy": "A-OSQD", "replication": 101, "seed": 41600101}
+{"B_kl": 602.4258711032447, "budget": 1600, "design_ratio": 3.1170750835419363, "kl": 0.3765161694395279, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 101, "seed": 41600101}
+{"B_kl": 649.5583815744693, "budget": 1600, "design_ratio": 3.360948364989132, "kl": 0.4059739884840433, "pilot_budget": 117, "policy": "RR-GID", "replication": 101, "seed": 41600101}
+{"B_kl": 669.3305359519118, "budget": 1600, "design_ratio": 3.4632535492684906, "kl": 0.4183315849699449, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 1, "seed": 41600001}
+{"B_kl": 646.7137990665143, "budget": 1600, "design_ratio": 3.346229911343727, "kl": 0.40419612441657143, "pilot_budget": 117, "policy": "A-OSQD", "replication": 1, "seed": 41600001}
+{"B_kl": 672.4282389395794, "budget": 1600, "design_ratio": 3.4792817002198917, "kl": 0.42026764933723715, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 1, "seed": 41600001}
+{"B_kl": 656.1932305822176, "budget": 1600, "design_ratio": 3.39527843532167, "kl": 0.41012076911388595, "pilot_budget": 117, "policy": "RR-GID", "replication": 1, "seed": 41600001}
+{"B_kl": 362.44323019391913, "budget": 1600, "design_ratio": 1.8753556515873788, "kl": 0.22652701887119947, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 102, "seed": 41600102}
+{"B_kl": 352.056039957012, "budget": 1600, "design_ratio": 1.8216101977007804, "kl": 0.2200350249731325, "pilot_budget": 117, "policy": "A-OSQD", "replication": 102, "seed": 41600102}
+{"B_kl": 373.3915158160976, "budget": 1600, "design_ratio": 1.9320043281422146, "kl": 0.233369697385061, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 102, "seed": 41600102}
+{"B_kl": 364.5709909971302, "budget": 1600, "design_ratio": 1.8863651226303142, "kl": 0.22785686937320637, "pilot_budget": 117, "policy": "RR-GID", "replication": 102, "seed": 41600102}
+{"B_kl": 791.2752561870334, "budget": 1600, "design_ratio": 4.094220556575595, "kl": 0.4945470351168959, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 2, "seed": 41600002}
+{"B_kl": 820.1239198301731, "budget": 1600, "design_ratio": 4.2434894624259245, "kl": 0.5125774498938582, "pilot_budget": 117, "policy": "A-OSQD", "replication": 2, "seed": 41600002}
+{"B_kl": 794.6773962050979, "budget": 1600, "design_ratio": 4.111823927197127, "kl": 0.4966733726281862, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 2, "seed": 41600002}
+{"B_kl": 816.4724157202677, "budget": 1600, "design_ratio": 4.2245958308201095, "kl": 0.5102952598251673, "pilot_budget": 117, "policy": "RR-GID", "replication": 2, "seed": 41600002}
+{"B_kl": 1592.432795083322, "budget": 1600, "design_ratio": 8.23957407187543, "kl": 0.9952704969270761, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 103, "seed": 41600103}
+{"B_kl": 1592.2109962828333, "budget": 1600, "design_ratio": 8.238426439365398, "kl": 0.9951318726767708, "pilot_budget": 117, "policy": "A-OSQD", "replication": 103, "seed": 41600103}
+{"B_kl": 1581.6340967860654, "budget": 1600, "design_ratio": 8.18369939083721, "kl": 0.9885213104912909, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 103, "seed": 41600103}
+{"B_kl": 1591.7817059081974, "budget": 1600, "design_ratio": 8.236205202870472, "kl": 0.9948635661926234, "pilot_budget": 117, "policy": "RR-GID", "replication": 103, "seed": 41600103}
+{"B_kl": 716.2371747350394, "budget": 1600, "design_ratio": 3.7059581242493533, "kl": 0.44764823420939964, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 3, "seed": 41600003}
+{"B_kl": 727.8367925099047, "budget": 1600, "design_ratio": 3.765976927024917, "kl": 0.45489799531869046, "pilot_budget": 117, "policy": "A-OSQD", "replication": 3, "seed": 41600003}
+{"B_kl": 703.6001533779167, "budget": 1600, "design_ratio": 3.6405715824490534, "kl": 0.43975009586119795, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 3, "seed": 41600003}
+{"B_kl": 732.2342473755914, "budget": 1600, "design_ratio": 3.788730260920969, "kl": 0.4576464046097446, "pilot_budget": 117, "policy": "RR-GID", "replication": 3, "seed": 41600003}
+{"B_kl": 381.9678863892463, "budget": 1600, "design_ratio": 1.9763802294822859, "kl": 0.23872992899327894, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 104, "seed": 41600104}
+{"B_kl": 373.87207078724833, "budget": 1600, "design_ratio": 1.9344908181797407, "kl": 0.23367004424203022, "pilot_budget": 117, "policy": "A-OSQD", "replication": 104, "seed": 41600104}
+{"B_kl": 394.73727945160084, "budget": 1600, "design_ratio": 2.0424516896500333, "kl": 0.2467107996572505, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 104, "seed": 41600104}
+{"B_kl": 381.5462137238375, "budget": 1600, "design_ratio": 1.974198408578165, "kl": 0.23846638357739847, "pilot_budget": 117, "policy": "RR-GID", "replication": 104, "seed": 41600104}
+{"B_kl": 680.0536456519911, "budget": 1600, "design_ratio": 3.5187371193930477, "kl": 0.4250335285324945, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 4, "seed": 41600004}
+{"B_kl": 684.5749337554089, "budget": 1600, "design_ratio": 3.542131191873482, "kl": 0.4278593335971306, "pilot_budget": 117, "policy": "A-OSQD", "replication": 4, "seed": 41600004}
+{"B_kl": 684.8845849565688, "budget": 1600, "design_ratio": 3.5437333907331636, "kl": 0.4280528655978555, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 4, "seed": 41600004}
+{"B_kl": 679.3647683245954, "budget": 1600, "design_ratio": 3.515172726733566, "kl": 0.4246029802028721, "pilot_budget": 117, "policy": "RR-GID", "replication": 4, "seed": 41600004}
+{"B_kl": 823.7636549311574, "budget": 1600, "design_ratio": 4.262322198764412, "kl": 0.5148522843319734, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 105, "seed": 41600105}
+{"B_kl": 823.4837609967065, "budget": 1600, "design_ratio": 4.2608739701093015, "kl": 0.5146773506229415, "pilot_budget": 117, "policy": "A-OSQD", "replication": 105, "seed": 41600105}
+{"B_kl": 818.5382404029089, "budget": 1600, "design_ratio": 4.235284831665033, "kl": 0.511586400251818, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 105, "seed": 41600105}
+{"B_kl": 825.8218784167348, "budget": 1600, "design_ratio": 4.272971869455853, "kl": 0.5161386740104592, "pilot_budget": 117, "policy": "RR-GID", "replication": 105, "seed": 41600105}
+{"B_kl": 849.9843879484231, "budget": 1600, "design_ratio": 4.397993652267306, "kl": 0.5312402424677645, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 5, "seed": 41600005}
+{"B_kl": 847.426557373375, "budget": 1600, "design_ratio": 4.384758911968382, "kl": 0.5296415983583593, "pilot_budget": 117, "policy": "A-OSQD", "replication": 5, "seed": 41600005}
+{"B_kl": 848.1147283172518, "budget": 1600, "design_ratio": 4.388319649654577, "kl": 0.5300717051982824, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 5, "seed": 41600005}
+{"B_kl": 850.8747754966507, "budget": 1600, "design_ratio": 4.402600700162167, "kl": 0.5317967346854067, "pilot_budget": 117, "policy": "RR-GID", "replication": 5, "seed": 41600005}
+{"B_kl": 716.3519063821171, "budget": 1600, "design_ratio": 3.706551769335918, "kl": 0.4477199414888232, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 106, "seed": 41600106}
+{"B_kl": 732.8347186568828, "budget": 1600, "design_ratio": 3.7918372225557144, "kl": 0.45802169916055174, "pilot_budget": 117, "policy": "A-OSQD", "replication": 106, "seed": 41600106}
+{"B_kl": 727.5960656185802, "budget": 1600, "design_ratio": 3.764731356688583, "kl": 0.4547475410116126, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 106, "seed": 41600106}
+{"B_kl": 737.9162757800344, "budget": 1600, "design_ratio": 3.8181302419195133, "kl": 0.4611976723625215, "pilot_budget": 117, "policy": "RR-GID", "replication": 106, "seed": 41600106}
+{"B_kl": 771.1142418392469, "budget": 1600, "design_ratio": 3.9899033310100176, "kl": 0.48194640114952936, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 6, "seed": 41600006}
+{"B_kl": 754.4811567954732, "budget": 1600, "design_ratio": 3.9038403356452394, "kl": 0.47155072299717077, "pilot_budget": 117, "policy": "A-OSQD", "replication": 6, "seed": 41600006}
+{"B_kl": 785.0743532753671, "budget": 1600, "design_ratio": 4.062135812396165, "kl": 0.49067147079710444, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 6, "seed": 41600006}
+{"B_kl": 782.4957793124975, "budget": 1600, "design_ratio": 4.048793741551812, "kl": 0.48905986207031094, "pilot_budget": 117, "policy": "RR-GID", "replication": 6, "seed": 41600006}
+{"B_kl": 748.3478339267979, "budget": 1600, "design_ratio": 3.872105264476642, "kl": 0.4677173962042487, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 107, "seed": 41600107}
+{"B_kl": 761.4932499556085, "budget": 1600, "design_ratio": 3.940122344638154, "kl": 0.4759332812222553, "pilot_budget": 117, "policy": "A-OSQD", "replication": 107, "seed": 41600107}
+{"B_kl": 736.9502382017521, "budget": 1600, "design_ratio": 3.813131765244675, "kl": 0.4605938988760951, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 107, "seed": 41600107}
+{"B_kl": 765.5288665219639, "budget": 1600, "design_ratio": 3.9610034529190425, "kl": 0.47845554157622744, "pilot_budget": 117, "policy": "RR-GID", "replication": 107, "seed": 41600107}
+{"B_kl": 459.21917949986283, "budget": 1600, "design_ratio": 2.376094273113107, "kl": 0.2870119871874143, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 7, "seed": 41600007}
+{"B_kl": 439.09092370028526, "budget": 1600, "design_ratio": 2.2719465469984876, "kl": 0.2744318273126783, "pilot_budget": 117, "policy": "A-OSQD", "replication": 7, "seed": 41600007}
+{"B_kl": 477.43455070413745, "budget": 1600, "design_ratio": 2.4703443417801956, "kl": 0.2983965941900859, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 7, "seed": 41600007}
+{"B_kl": 462.3572523098007, "budget": 1600, "design_ratio": 2.3923313058094022, "kl": 0.28897328269362543, "pilot_budget": 117, "policy": "RR-GID", "replication": 7, "seed": 41600007}
+{"B_kl": 753.9128395480542, "budget": 1600, "design_ratio": 3.9008997455802197, "kl": 0.4711955247175339, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 108, "seed": 41600108}
+{"B_kl": 767.6104672961272, "budget": 1600, "design_ratio": 3.971774082498983, "kl": 0.4797565420600795, "pilot_budget": 117, "policy": "A-OSQD", "replication": 108, "seed": 41600108}
+{"B_kl": 759.9022514507541, "budget": 1600, "design_ratio": 3.9318901918782596, "kl": 0.47493890715672127, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 108, "seed": 41600108}
+{"B_kl": 767.8899112266297, "budget": 1600, "design_ratio": 3.973219982741317, "kl": 0.47993119451664357, "pilot_budget": 117, "policy": "RR-GID", "replication": 108, "seed": 41600108}
+{"B_kl": 660.3436166419979, "budget": 1600, "design_ratio": 3.41675338451389, "kl": 0.41271476040124866, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 8, "seed": 41600008}
+{"B_kl": 684.5791074418024, "budget": 1600, "design_ratio": 3.5421527873833822, "kl": 0.4278619421511265, "pilot_budget": 117, "policy": "A-OSQD", "replication": 8, "seed": 41600008}
+{"B_kl": 663.9495299449366, "budget": 1600, "design_ratio": 3.4354111199285704, "kl": 0.41496845621558537, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 8, "seed": 41600008}
+{"B_kl": 687.1505514373894, "budget": 1600, "design_ratio": 3.5554579663138437, "kl": 0.42946909464836835, "pilot_budget": 117, "policy": "RR-GID", "replication": 8, "seed": 41600008}
+{"B_kl": 364.0044960516219, "budget": 1600, "design_ratio": 1.8834339615293434, "kl": 0.2275028100322637, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 109, "seed": 41600109}
+{"B_kl": 365.8776470078935, "budget": 1600, "design_ratio": 1.893126028974611, "kl": 0.2286735293799334, "pilot_budget": 117, "policy": "A-OSQD", "replication": 109, "seed": 41600109}
+{"B_kl": 352.3627168767009, "budget": 1600, "design_ratio": 1.8231970070177659, "kl": 0.22022669804793807, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 109, "seed": 41600109}
+{"B_kl": 365.3683724873682, "budget": 1600, "design_ratio": 1.8904909380949566, "kl": 0.22835523280460512, "pilot_budget": 117, "policy": "RR-GID", "replication": 109, "seed": 41600109}
+{"B_kl": 763.4591913763206, "budget": 1600, "design_ratio": 3.9502945289883753, "kl": 0.47716199461020037, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 9, "seed": 41600009}
+{"B_kl": 774.2293130826033, "budget": 1600, "design_ratio": 4.0060213488805685, "kl": 0.48389332067662705, "pilot_budget": 117, "policy": "A-OSQD", "replication": 9, "seed": 41600009}
+{"B_kl": 765.5871696864808, "budget": 1600, "design_ratio": 3.961305125456901, "kl": 0.4784919810540505, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 9, "seed": 41600009}
+{"B_kl": 788.8933144202825, "budget": 1600, "design_ratio": 4.081895901065715, "kl": 0.4930583215126766, "pilot_budget": 117, "policy": "RR-GID", "replication": 9, "seed": 41600009}
+{"B_kl": 702.9621135961687, "budget": 1600, "design_ratio": 3.6372702336833487, "kl": 0.43935132099760543, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 110, "seed": 41600110}
+{"B_kl": 727.3113785625833, "budget": 1600, "design_ratio": 3.7632583274389764, "kl": 0.4545696116016145, "pilot_budget": 117, "policy": "A-OSQD", "replication": 110, "seed": 41600110}
+{"B_kl": 709.7416618670277, "budget": 1600, "design_ratio": 3.6723490076975915, "kl": 0.4435885386668923, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 110, "seed": 41600110}
+{"B_kl": 711.7706914314291, "budget": 1600, "design_ratio": 3.682847623049856, "kl": 0.4448566821446432, "pilot_budget": 117, "policy": "RR-GID", "replication": 110, "seed": 41600110}
+{"B_kl": 740.3429928128184, "budget": 1600, "design_ratio": 3.830686573844377, "kl": 0.46271437050801145, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 10, "seed": 41600010}
+{"B_kl": 702.916449004422, "budget": 1600, "design_ratio": 3.63703395571462, "kl": 0.43932278062776375, "pilot_budget": 117, "policy": "A-OSQD", "replication": 10, "seed": 41600010}
+{"B_kl": 759.4235663878117, "budget": 1600, "design_ratio": 3.929413377129536, "kl": 0.47463972899238227, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 10, "seed": 41600010}
+{"B_kl": 737.139104819371, "budget": 1600, "design_ratio": 3.8141089998823814, "kl": 0.4607119405121069, "pilot_budget": 117, "policy": "RR-GID", "replication": 10, "seed": 41600010}
+{"B_kl": 679.2269406801786, "budget": 1600, "design_ratio": 3.5144595782171386, "kl": 0.42451683792511163, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 111, "seed": 41600111}
+{"B_kl": 622.6114808917386, "budget": 1600, "design_ratio": 3.221519570965072, "kl": 0.3891321755573366, "pilot_budget": 117, "policy": "A-OSQD", "replication": 111, "seed": 41600111}
+{"B_kl": 689.2155183548456, "budget": 1600, "design_ratio": 3.566142528905675, "kl": 0.4307596989717785, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 111, "seed": 41600111}
+{"B_kl": 675.4057877897326, "budget": 1600, "design_ratio": 3.494688149006436, "kl": 0.42212861736858287, "pilot_budget": 117, "policy": "RR-GID", "replication": 111, "seed": 41600111}
+{"B_kl": 148.3997092267953, "budget": 1600, "design_ratio": 0.7678505492942806, "kl": 0.09274981826674705, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 11, "seed": 41600011}
+{"B_kl": 131.08151570237126, "budget": 1600, "design_ratio": 0.6782426620565031, "kl": 0.08192594731398203, "pilot_budget": 117, "policy": "A-OSQD", "replication": 11, "seed": 41600011}
+{"B_kl": 138.39665764642203, "budget": 1600, "design_ratio": 0.7160927076473662, "kl": 0.08649791102901377, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 11, "seed": 41600011}
+{"B_kl": 124.21698683879252, "budget": 1600, "design_ratio": 0.6427241810162879, "kl": 0.07763561677424533, "pilot_budget": 117, "policy": "RR-GID", "replication": 11, "seed": 41600011}
+{"B_kl": 823.3217229008131, "budget": 1600, "design_ratio": 4.260035551748602, "kl": 0.5145760768130082, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 112, "seed": 41600112}
+{"B_kl": 771.7295484153709, "budget": 1600, "design_ratio": 3.9930870535046425, "kl": 0.4823309677596068, "pilot_budget": 117, "policy": "A-OSQD", "replication": 112, "seed": 41600112}
+{"B_kl": 816.1974242701301, "budget": 1600, "design_ratio": 4.223172968624897, "kl": 0.5101233901688313, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 112, "seed": 41600112}
+{"B_kl": 740.502994128349, "budget": 1600, "design_ratio": 3.8315144534855037, "kl": 0.4628143713302181, "pilot_budget": 117, "policy": "RR-GID", "replication": 112, "seed": 41600112}
+{"B_kl": 469.10063339679954, "budget": 1600, "design_ratio": 2.427222943392327, "kl": 0.2931878958729997, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 12, "seed": 41600012}
+{"B_kl": 472.8193475738646, "budget": 1600, "design_ratio": 2.4464643336780987, "kl": 0.29551209223366537, "pilot_budget": 117, "policy": "A-OSQD", "replication": 12, "seed": 41600012}
+{"B_kl": 506.8982187455524, "budget": 1600, "design_ratio": 2.6227954065949497, "kl": 0.31681138671597026, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 12, "seed": 41600012}
+{"B_kl": 451.7699475137679, "budget": 1600, "design_ratio": 2.3375504181275018, "kl": 0.28235621719610493, "pilot_budget": 117, "policy": "RR-GID", "replication": 12, "seed": 41600012}
+{"B_kl": 646.462267289106, "budget": 1600, "design_ratio": 3.3449284343094776, "kl": 0.4040389170556912, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 113, "seed": 41600113}
+{"B_kl": 662.1760158341468, "budget": 1600, "design_ratio": 3.426234593968739, "kl": 0.41386000989634175, "pilot_budget": 117, "policy": "A-OSQD", "replication": 113, "seed": 41600113}
+{"B_kl": 650.841365021498, "budget": 1600, "design_ratio": 3.3675867846307153, "kl": 0.4067758531384362, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 113, "seed": 41600113}
+{"B_kl": 668.5563772448872, "budget": 1600, "design_ratio": 3.459247893249844, "kl": 0.4178477357780545, "pilot_budget": 117, "policy": "RR-GID", "replication": 113, "seed": 41600113}
+{"B_kl": 690.984900584456, "budget": 1600, "design_ratio": 3.5752976756643626, "kl": 0.431865562865285, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 13, "seed": 41600013}
+{"B_kl": 698.8203497783657, "budget": 1600, "design_ratio": 3.615839897740527, "kl": 0.43676271861147853, "pilot_budget": 117, "policy": "A-OSQD", "replication": 13, "seed": 41600013}
+{"B_kl": 698.9922328302213, "budget": 1600, "design_ratio": 3.6167292559237025, "kl": 0.4368701455188883, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 13, "seed": 41600013}
+{"B_kl": 706.9001518680375, "budget": 1600, "design_ratio": 3.657646451844094, "kl": 0.44181259491752345, "pilot_budget": 117, "policy": "RR-GID", "replication": 13, "seed": 41600013}
+{"B_kl": 729.2048037433166, "budget": 1600, "design_ratio": 3.773055297882172, "kl": 0.4557530023395729, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 114, "seed": 41600114}
+{"B_kl": 725.0678739518956, "budget": 1600, "design_ratio": 3.7516499741838634, "kl": 0.4531674212199348, "pilot_budget": 117, "policy": "A-OSQD", "replication": 114, "seed": 41600114}
+{"B_kl": 729.1428583052423, "budget": 1600, "design_ratio": 3.7727347794734802, "kl": 0.4557142864407764, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 114, "seed": 41600114}
+{"B_kl": 747.4104016657332, "budget": 1600, "design_ratio": 3.8672547975833096, "kl": 0.46713150104108325, "pilot_budget": 117, "policy": "RR-GID", "replication": 114, "seed": 41600114}
+{"B_kl": 708.3241729790498, "budget": 1600, "design_ratio": 3.6650146293020858, "kl": 0.4427026081119061, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 14, "seed": 41600014}
+{"B_kl": 717.7488019584728, "budget": 1600, "design_ratio": 3.7137795937110463, "kl": 0.4485930012240455, "pilot_budget": 117, "policy": "A-OSQD", "replication": 14, "seed": 41600014}
+{"B_kl": 710.4496251134624, "budget": 1600, "design_ratio": 3.6760121548188858, "kl": 0.44403101569591397, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 14, "seed": 41600014}
+{"B_kl": 723.26418896453, "budget": 1600, "design_ratio": 3.742317337917131, "kl": 0.4520401181028313, "pilot_budget": 117, "policy": "RR-GID", "replication": 14, "seed": 41600014}
+{"B_kl": 598.065288510696, "budget": 1600, "design_ratio": 3.0945125343538207, "kl": 0.37379080531918496, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 115, "seed": 41600115}
+{"B_kl": 583.1916961682626, "budget": 1600, "design_ratio": 3.0175535152989874, "kl": 0.36449481010516416, "pilot_budget": 117, "policy": "A-OSQD", "replication": 115, "seed": 41600115}
+{"B_kl": 622.282631090825, "budget": 1600, "design_ratio": 3.2198180346104364, "kl": 0.38892664443176567, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 115, "seed": 41600115}
+{"B_kl": 610.163905166153, "budget": 1600, "design_ratio": 3.1571132597393134, "kl": 0.3813524407288456, "pilot_budget": 117, "policy": "RR-GID", "replication": 115, "seed": 41600115}
+{"B_kl": 745.2153821076953, "budget": 1600, "design_ratio": 3.855897315940436, "kl": 0.46575961381730957, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 15, "seed": 41600015}
+{"B_kl": 764.4525624134974, "budget": 1600, "design_ratio": 3.955434434588753, "kl": 0.47778285150843586, "pilot_budget": 117, "policy": "A-OSQD", "replication": 15, "seed": 41600015}
+{"B_kl": 754.9547859770109, "budget": 1600, "design_ratio": 3.906290990226036, "kl": 0.47184674123563186, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 15, "seed": 41600015}
+{"B_kl": 756.3614137215493, "budget": 1600, "design_ratio": 3.913569170836523, "kl": 0.47272588357596834, "pilot_budget": 117, "policy": "RR-GID", "replication": 15, "seed": 41600015}
+{"B_kl": 659.4590010989803, "budget": 1600, "design_ratio": 3.412176202158484, "kl": 0.4121618756868627, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 116, "seed": 41600116}
+{"B_kl": 680.7694200408334, "budget": 1600, "design_ratio": 3.5224406829681176, "kl": 0.42548088752552093, "pilot_budget": 117, "policy": "A-OSQD", "replication": 116, "seed": 41600116}
+{"B_kl": 676.1001917214868, "budget": 1600, "design_ratio": 3.498281137451007, "kl": 0.42256261982592924, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 116, "seed": 41600116}
+{"B_kl": 680.5287300658251, "budget": 1600, "design_ratio": 3.5211953036443795, "kl": 0.4253304562911407, "pilot_budget": 117, "policy": "RR-GID", "replication": 116, "seed": 41600116}
+{"B_kl": 694.9230566323359, "budget": 1600, "design_ratio": 3.595674503222359, "kl": 0.43432691039521, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 117, "seed": 41600117}
+{"B_kl": 675.361111074519, "budget": 1600, "design_ratio": 3.4944569825136162, "kl": 0.4221006944215744, "pilot_budget": 117, "policy": "A-OSQD", "replication": 117, "seed": 41600117}
+{"B_kl": 709.1643585317084, "budget": 1600, "design_ratio": 3.6693619217697018, "kl": 0.44322772408231775, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 117, "seed": 41600117}
+{"B_kl": 684.160086019705, "budget": 1600, "design_ratio": 3.5399846845562273, "kl": 0.4276000537623156, "pilot_budget": 117, "policy": "RR-GID", "replication": 117, "seed": 41600117}
+{"B_kl": 620.4324539935529, "budget": 1600, "design_ratio": 3.2102448386261977, "kl": 0.38777028374597056, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 16, "seed": 41600016}
+{"B_kl": 614.2909112863515, "budget": 1600, "design_ratio": 3.1784672363262376, "kl": 0.3839318195539697, "pilot_budget": 117, "policy": "A-OSQD", "replication": 16, "seed": 41600016}
+{"B_kl": 627.9281427031643, "budget": 1600, "design_ratio": 3.2490290702328646, "kl": 0.3924550891894777, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 16, "seed": 41600016}
+{"B_kl": 621.886985779645, "budget": 1600, "design_ratio": 3.217770884578282, "kl": 0.3886793661122781, "pilot_budget": 117, "policy": "RR-GID", "replication": 16, "seed": 41600016}
+{"B_kl": 631.1338478086082, "budget": 1600, "design_ratio": 3.265616046305228, "kl": 0.3944586548803801, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 118, "seed": 41600118}
+{"B_kl": 643.2011445749062, "budget": 1600, "design_ratio": 3.3280547161569207, "kl": 0.40200071535931636, "pilot_budget": 117, "policy": "A-OSQD", "replication": 118, "seed": 41600118}
+{"B_kl": 611.48367961628, "budget": 1600, "design_ratio": 3.163942043580971, "kl": 0.382177299760175, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 118, "seed": 41600118}
+{"B_kl": 635.0011456654667, "budget": 1600, "design_ratio": 3.2856262390417594, "kl": 0.39687571604091665, "pilot_budget": 117, "policy": "RR-GID", "replication": 118, "seed": 41600118}
+{"B_kl": 707.8118097996266, "budget": 1600, "design_ratio": 3.6623635570674566, "kl": 0.4423823811247667, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 17, "seed": 41600017}
+{"B_kl": 706.143515226298, "budget": 1600, "design_ratio": 3.6537314585870115, "kl": 0.4413396970164362, "pilot_budget": 117, "policy": "A-OSQD", "replication": 17, "seed": 41600017}
+{"B_kl": 699.9520898129039, "budget": 1600, "design_ratio": 3.621695752928561, "kl": 0.4374700561330649, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 17, "seed": 41600017}
+{"B_kl": 709.7765984740442, "budget": 1600, "design_ratio": 3.67252977687179, "kl": 0.4436103740462777, "pilot_budget": 117, "policy": "RR-GID", "replication": 17, "seed": 41600017}
+{"B_kl": 719.9376327106056, "budget": 1600, "design_ratio": 3.725105053202135, "kl": 0.4499610204441285, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 119, "seed": 41600119}
+{"B_kl": 714.1846146696089, "budget": 1600, "design_ratio": 3.6953377572559676, "kl": 0.4463653841685056, "pilot_budget": 117, "policy": "A-OSQD", "replication": 119, "seed": 41600119}
+{"B_kl": 720.4765755627194, "budget": 1600, "design_ratio": 3.7278936541177967, "kl": 0.4502978597266996, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 119, "seed": 41600119}
+{"B_kl": 717.6060239628955, "budget": 1600, "design_ratio": 3.713040831061831, "kl": 0.44850376497680966, "pilot_budget": 117, "policy": "RR-GID", "replication": 119, "seed": 41600119}
+{"B_kl": 688.8705249176336, "budget": 1600, "design_ratio": 3.5643574620639242, "kl": 0.43054407807352096, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 18, "seed": 41600018}
+{"B_kl": 708.3538303448819, "budget": 1600, "design_ratio": 3.665168082599019, "kl": 0.4427211439655512, "pilot_budget": 117, "policy": "A-OSQD", "replication": 18, "seed": 41600018}
+{"B_kl": 694.0168999048851, "budget": 1600, "design_ratio": 3.5909858623581346, "kl": 0.4337605624405532, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 18, "seed": 41600018}
+{"B_kl": 708.3682122155747, "budget": 1600, "design_ratio": 3.6652424973493503, "kl": 0.44273013263473415, "pilot_budget": 117, "policy": "RR-GID", "replication": 18, "seed": 41600018}
+{"B_kl": 297.13884680672464, "budget": 1600, "design_ratio": 1.5374573705432573, "kl": 0.1857117792542029, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 120, "seed": 41600120}
+{"B_kl": 301.1155803542501, "budget": 1600, "design_ratio": 1.5580338060010772, "kl": 0.1881972377214063, "pilot_budget": 117, "policy": "A-OSQD", "replication": 120, "seed": 41600120}
+{"B_kl": 295.3581381987085, "budget": 1600, "design_ratio": 1.5282436187783628, "kl": 0.18459883637419283, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 120, "seed": 41600120}
+{"B_kl": 299.9479825797894, "budget": 1600, "design_ratio": 1.5519924155081601, "kl": 0.18746748911236838, "pilot_budget": 117, "policy": "RR-GID", "replication": 120, "seed": 41600120}
+{"B_kl": 759.8542377936876, "budget": 1600, "design_ratio": 3.9316417593635054, "kl": 0.4749088986210548, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 19, "seed": 41600019}
+{"B_kl": 732.9257651189399, "budget": 1600, "design_ratio": 3.792308315634442, "kl": 0.45807860319933746, "pilot_budget": 117, "policy": "A-OSQD", "replication": 19, "seed": 41600019}
+{"B_kl": 772.9967923339245, "budget": 1600, "design_ratio": 3.9996440335959185, "kl": 0.48312299520870283, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 19, "seed": 41600019}
+{"B_kl": 761.6980555419569, "budget": 1600, "design_ratio": 3.941182050770973, "kl": 0.4760612847137231, "pilot_budget": 117, "policy": "RR-GID", "replication": 19, "seed": 41600019}
+{"B_kl": 1145.5015218440446, "budget": 1600, "design_ratio": 5.927059947409701, "kl": 0.715938451152528, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 121, "seed": 41600121}
+{"B_kl": 1116.143351158194, "budget": 1600, "design_ratio": 5.775154747562211, "kl": 0.6975895944738713, "pilot_budget": 117, "policy": "A-OSQD", "replication": 121, "seed": 41600121}
+{"B_kl": 1125.719654528932, "budget": 1600, "design_ratio": 5.824704506397603, "kl": 0.7035747840805826, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 121, "seed": 41600121}
+{"B_kl": 1139.4433492203664, "budget": 1600, "design_ratio": 5.8957137190306295, "kl": 0.712152093262729, "pilot_budget": 117, "policy": "RR-GID", "replication": 121, "seed": 41600121}
+{"B_kl": 512.3310795750242, "budget": 1600, "design_ratio": 2.650906143427823, "kl": 0.32020692473439016, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 20, "seed": 41600020}
+{"B_kl": 505.6411313440461, "budget": 1600, "design_ratio": 2.61629097840714, "kl": 0.3160257070900288, "pilot_budget": 117, "policy": "A-OSQD", "replication": 20, "seed": 41600020}
+{"B_kl": 461.5779730998325, "budget": 1600, "design_ratio": 2.3882991552577244, "kl": 0.2884862331873953, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 20, "seed": 41600020}
+{"B_kl": 500.1751323098827, "budget": 1600, "design_ratio": 2.5880087777027567, "kl": 0.3126094576936767, "pilot_budget": 117, "policy": "RR-GID", "replication": 20, "seed": 41600020}
+{"B_kl": 604.569395260716, "budget": 1600, "design_ratio": 3.128166117414681, "kl": 0.37785587203794746, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 122, "seed": 41600122}
+{"B_kl": 603.7407083229848, "budget": 1600, "design_ratio": 3.123878321140381, "kl": 0.3773379427018655, "pilot_budget": 117, "policy": "A-OSQD", "replication": 122, "seed": 41600122}
+{"B_kl": 572.6534313523828, "budget": 1600, "design_ratio": 2.963026370538108, "kl": 0.35790839459523927, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 122, "seed": 41600122}
+{"B_kl": 616.1373364871271, "budget": 1600, "design_ratio": 3.188021019228059, "kl": 0.3850858353044544, "pilot_budget": 117, "policy": "RR-GID", "replication": 122, "seed": 41600122}
+{"B_kl": 692.6327773261414, "budget": 1600, "design_ratio": 3.5838241280938528, "kl": 0.4328954858288384, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 21, "seed": 41600021}
+{"B_kl": 693.9559773484149, "budget": 1600, "design_ratio": 3.590670636548772, "kl": 0.4337224858427593, "pilot_budget": 117, "policy": "A-OSQD", "replication": 21, "seed": 41600021}
+{"B_kl": 712.4565046407162, "budget": 1600, "design_ratio": 3.686396161333442, "kl": 0.4452853154004476, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 21, "seed": 41600021}
+{"B_kl": 719.2553864357083, "budget": 1600, "design_ratio": 3.7215749709690678, "kl": 0.4495346165223177, "pilot_budget": 117, "policy": "RR-GID", "replication": 21, "seed": 41600021}
+{"B_kl": 658.6972014231194, "budget": 1600, "design_ratio": 3.4082344943033287, "kl": 0.4116857508894496, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 123, "seed": 41600123}
+{"B_kl": 667.9878122337623, "budget": 1600, "design_ratio": 3.456306021204565, "kl": 0.4174923826461014, "pilot_budget": 117, "policy": "A-OSQD", "replication": 123, "seed": 41600123}
+{"B_kl": 652.2164634412288, "budget": 1600, "design_ratio": 3.3747018260443773, "kl": 0.407635289650768, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 123, "seed": 41600123}
+{"B_kl": 663.347966013487, "budget": 1600, "design_ratio": 3.4322985046976795, "kl": 0.4145924787584294, "pilot_budget": 117, "policy": "RR-GID", "replication": 123, "seed": 41600123}
+{"B_kl": 317.32923163492075, "budget": 1600, "design_ratio": 1.6419265650017194, "kl": 0.19833076977182548, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 22, "seed": 41600022}
+{"B_kl": 306.3920607280958, "budget": 1600, "design_ratio": 1.5853353982650222, "kl": 0.1914950379550599, "pilot_budget": 117, "policy": "A-OSQD", "replication": 22, "seed": 41600022}
+{"B_kl": 324.83000460214316, "budget": 1600, "design_ratio": 1.6807371036006282, "kl": 0.20301875287633947, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 22, "seed": 41600022}
+{"B_kl": 317.8346461156119, "budget": 1600, "design_ratio": 1.6445416832431363, "kl": 0.19864665382225744, "pilot_budget": 117, "policy": "RR-GID", "replication": 22, "seed": 41600022}
+{"B_kl": 598.8399852590591, "budget": 1600, "design_ratio": 3.0985209743087667, "kl": 0.3742749907869119, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 124, "seed": 41600124}
+{"B_kl": 679.470673073369, "budget": 1600, "design_ratio": 3.515720699636898, "kl": 0.42466917067085563, "pilot_budget": 117, "policy": "A-OSQD", "replication": 124, "seed": 41600124}
+{"B_kl": 692.646740523428, "budget": 1600, "design_ratio": 3.583896376542062, "kl": 0.4329042128271425, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 124, "seed": 41600124}
+{"B_kl": 692.738401042242, "budget": 1600, "design_ratio": 3.584370646876463, "kl": 0.43296150065140127, "pilot_budget": 117, "policy": "RR-GID", "replication": 124, "seed": 41600124}
+{"B_kl": 544.7095862727423, "budget": 1600, "design_ratio": 2.818439181617107, "kl": 0.34044349142046393, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 23, "seed": 41600023}
+{"B_kl": 559.2483696331608, "budget": 1600, "design_ratio": 2.8936658302913765, "kl": 0.3495302310207255, "pilot_budget": 117, "policy": "A-OSQD", "replication": 23, "seed": 41600023}
+{"B_kl": 556.8565463561189, "budget": 1600, "design_ratio": 2.8812900458194224, "kl": 0.3480353414725743, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 23, "seed": 41600023}
+{"B_kl": 564.9925443435721, "budget": 1600, "design_ratio": 2.923387369030317, "kl": 0.3531203402147326, "pilot_budget": 117, "policy": "RR-GID", "replication": 23, "seed": 41600023}
+{"B_kl": 794.0214369007632, "budget": 1600, "design_ratio": 4.108429859144215, "kl": 0.49626339806297703, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 24, "seed": 41600024}
+{"B_kl": 785.5650028624407, "budget": 1600, "design_ratio": 4.064674534048036, "kl": 0.4909781267890254, "pilot_budget": 117, "policy": "A-OSQD", "replication": 24, "seed": 41600024}
+{"B_kl": 808.0828876436218, "budget": 1600, "design_ratio": 4.181186690899711, "kl": 0.5050518047772636, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 24, "seed": 41600024}
+{"B_kl": 797.8904421437715, "budget": 1600, "design_ratio": 4.128448886247066, "kl": 0.4986815263398572, "pilot_budget": 117, "policy": "RR-GID", "replication": 24, "seed": 41600024}
+{"B_kl": 597.3116657142077, "budget": 1600, "design_ratio": 3.0906131353505533, "kl": 0.37331979107137986, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 125, "seed": 41600125}
+{"B_kl": 609.2920073498908, "budget": 1600, "design_ratio": 3.152601881512, "kl": 0.38080750459368173, "pilot_budget": 117, "policy": "A-OSQD", "replication": 125, "seed": 41600125}
+{"B_kl": 635.3266313143522, "budget": 1600, "design_ratio": 3.2873103685834297, "kl": 0.3970791445714701, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 125, "seed": 41600125}
+{"B_kl": 639.0394108768842, "budget": 1600, "design_ratio": 3.3065210519557398, "kl": 0.3993996317980526, "pilot_budget": 117, "policy": "RR-GID", "replication": 125, "seed": 41600125}
+{"B_kl": 627.5796439493565, "budget": 1600, "design_ratio": 3.2472258661637063, "kl": 0.3922372774683478, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 25, "seed": 41600025}
+{"B_kl": 628.2073372740726, "budget": 1600, "design_ratio": 3.2504736802374863, "kl": 0.3926295857962954, "pilot_budget": 117, "policy": "A-OSQD", "replication": 25, "seed": 41600025}
+{"B_kl": 650.0148829739273, "budget": 1600, "design_ratio": 3.3633103969105815, "kl": 0.4062593018587046, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 25, "seed": 41600025}
+{"B_kl": 640.2397164838545, "budget": 1600, "design_ratio": 3.312731679486179, "kl": 0.40014982280240907, "pilot_budget": 117, "policy": "RR-GID", "replication": 25, "seed": 41600025}
+{"B_kl": 623.3767128213103, "budget": 1600, "design_ratio": 3.2254790380052745, "kl": 0.3896104455133189, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 126, "seed": 41600126}
+{"B_kl": 640.3456012838257, "budget": 1600, "design_ratio": 3.313279549170314, "kl": 0.40021600080239106, "pilot_budget": 117, "policy": "A-OSQD", "replication": 126, "seed": 41600126}
+{"B_kl": 661.6426625249917, "budget": 1600, "design_ratio": 3.4234749144954, "kl": 0.4135266640781198, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 126, "seed": 41600126}
+{"B_kl": 665.2075495198391, "budget": 1600, "design_ratio": 3.4419203713728272, "kl": 0.4157547184498994, "pilot_budget": 117, "policy": "RR-GID", "replication": 126, "seed": 41600126}
+{"B_kl": 594.066136471623, "budget": 1600, "design_ratio": 3.073820101020137, "kl": 0.3712913352947644, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 26, "seed": 41600026}
+{"B_kl": 587.2748949115727, "budget": 1600, "design_ratio": 3.0386808235279865, "kl": 0.36704680931973294, "pilot_budget": 117, "policy": "A-OSQD", "replication": 26, "seed": 41600026}
+{"B_kl": 594.4685495704776, "budget": 1600, "design_ratio": 3.0759022689745668, "kl": 0.37154284348154853, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 26, "seed": 41600026}
+{"B_kl": 591.1379085963789, "budget": 1600, "design_ratio": 3.0586688490791456, "kl": 0.3694611928727368, "pilot_budget": 117, "policy": "RR-GID", "replication": 26, "seed": 41600026}
+{"B_kl": 339.3834658240411, "budget": 1600, "design_ratio": 1.7560396985423006, "kl": 0.21211466614002566, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 127, "seed": 41600127}
+{"B_kl": 336.285127089753, "budget": 1600, "design_ratio": 1.740008258107421, "kl": 0.21017820443109564, "pilot_budget": 117, "policy": "A-OSQD", "replication": 127, "seed": 41600127}
+{"B_kl": 354.5686687312954, "budget": 1600, "design_ratio": 1.8346110546064878, "kl": 0.22160541795705965, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 127, "seed": 41600127}
+{"B_kl": 332.0035271880427, "budget": 1600, "design_ratio": 1.7178543815700877, "kl": 0.2075022044925267, "pilot_budget": 117, "policy": "RR-GID", "replication": 127, "seed": 41600127}
+{"B_kl": 589.2285483705266, "budget": 1600, "design_ratio": 3.048789427442404, "kl": 0.3682678427315791, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 27, "seed": 41600027}
+{"B_kl": 599.5071865871299, "budget": 1600, "design_ratio": 3.101973210899515, "kl": 0.3746919916169562, "pilot_budget": 117, "policy": "A-OSQD", "replication": 27, "seed": 41600027}
+{"B_kl": 586.8255326180035, "budget": 1600, "design_ratio": 3.036355730805454, "kl": 0.3667659578862522, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 27, "seed": 41600027}
+{"B_kl": 598.2347477053478, "budget": 1600, "design_ratio": 3.0953893510024133, "kl": 0.37389671731584234, "pilot_budget": 117, "policy": "RR-GID", "replication": 27, "seed": 41600027}
+{"B_kl": 611.6332168267728, "budget": 1600, "design_ratio": 3.164715779795247, "kl": 0.38227076051673303, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 128, "seed": 41600128}
+{"B_kl": 617.8098236532412, "budget": 1600, "design_ratio": 3.1966748110439567, "kl": 0.38613113978327573, "pilot_budget": 117, "policy": "A-OSQD", "replication": 128, "seed": 41600128}
+{"B_kl": 615.2572270387171, "budget": 1600, "design_ratio": 3.1834671523308686, "kl": 0.3845357668991982, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 128, "seed": 41600128}
+{"B_kl": 619.0301644459497, "budget": 1600, "design_ratio": 3.202989104736914, "kl": 0.38689385277871857, "pilot_budget": 117, "policy": "RR-GID", "replication": 128, "seed": 41600128}
+{"B_kl": 708.6052384634572, "budget": 1600, "design_ratio": 3.6664689197970897, "kl": 0.44287827403966074, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 28, "seed": 41600028}
+{"B_kl": 727.6464075413951, "budget": 1600, "design_ratio": 3.7649918361281145, "kl": 0.45477900471337196, "pilot_budget": 117, "policy": "A-OSQD", "replication": 28, "seed": 41600028}
+{"B_kl": 711.2779925269822, "budget": 1600, "design_ratio": 3.6802982978093457, "kl": 0.4445487453293639, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 28, "seed": 41600028}
+{"B_kl": 724.3653385947605, "budget": 1600, "design_ratio": 3.7480149120756856, "kl": 0.4527283366217253, "pilot_budget": 117, "policy": "RR-GID", "replication": 28, "seed": 41600028}
+{"B_kl": 679.2684590317933, "budget": 1600, "design_ratio": 3.514674402688556, "kl": 0.42454278689487085, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 129, "seed": 41600129}
+{"B_kl": 693.9415238961982, "budget": 1600, "design_ratio": 3.590595851420947, "kl": 0.4337134524351239, "pilot_budget": 117, "policy": "A-OSQD", "replication": 129, "seed": 41600129}
+{"B_kl": 675.2723684459801, "budget": 1600, "design_ratio": 3.4939978099422926, "kl": 0.4220452302787376, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 129, "seed": 41600129}
+{"B_kl": 696.8981917026108, "budget": 1600, "design_ratio": 3.605894257402087, "kl": 0.43556136981413174, "pilot_budget": 117, "policy": "RR-GID", "replication": 129, "seed": 41600129}
+{"B_kl": 536.8046613897244, "budget": 1600, "design_ratio": 2.7775374780680857, "kl": 0.33550291336857774, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 29, "seed": 41600029}
+{"B_kl": 539.3607467006309, "budget": 1600, "design_ratio": 2.7907631880121873, "kl": 0.3371004666878943, "pilot_budget": 117, "policy": "A-OSQD", "replication": 29, "seed": 41600029}
+{"B_kl": 556.9087639739887, "budget": 1600, "design_ratio": 2.881560230490087, "kl": 0.3480679774837429, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 29, "seed": 41600029}
+{"B_kl": 551.9862025111145, "budget": 1600, "design_ratio": 2.8560898873007603, "kl": 0.34499137656944656, "pilot_budget": 117, "policy": "RR-GID", "replication": 29, "seed": 41600029}
+{"B_kl": 772.9209354541887, "budget": 1600, "design_ratio": 3.9992515345332422, "kl": 0.4830755846588679, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 130, "seed": 41600130}
+{"B_kl": 734.5208769853979, "budget": 1600, "design_ratio": 3.800561751771393, "kl": 0.45907554811587364, "pilot_budget": 117, "policy": "A-OSQD", "replication": 130, "seed": 41600130}
+{"B_kl": 788.5983850072134, "budget": 1600, "design_ratio": 4.080369875758738, "kl": 0.4928739906295084, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 130, "seed": 41600130}
+{"B_kl": 760.3378993258727, "budget": 1600, "design_ratio": 3.9341443233853344, "kl": 0.4752111870786705, "pilot_budget": 117, "policy": "RR-GID", "replication": 130, "seed": 41600130}
+{"B_kl": 654.5570447852813, "budget": 1600, "design_ratio": 3.386812474239462, "kl": 0.40909815299080077, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 30, "seed": 41600030}
+{"B_kl": 672.8678504709188, "budget": 1600, "design_ratio": 3.4815563404976513, "kl": 0.4205424065443243, "pilot_budget": 117, "policy": "A-OSQD", "replication": 30, "seed": 41600030}
+{"B_kl": 657.1216507309839, "budget": 1600, "design_ratio": 3.4000822716965557, "kl": 0.41070103170686495, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 30, "seed": 41600030}
+{"B_kl": 673.4191106298533, "budget": 1600, "design_ratio": 3.4844086736864917, "kl": 0.4208869441436583, "pilot_budget": 117, "policy": "RR-GID", "replication": 30, "seed": 41600030}
+{"B_kl": 643.6403905687738, "budget": 1600, "design_ratio": 3.330327465068788, "kl": 0.40227524410548365, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 131, "seed": 41600131}
+{"B_kl": 617.1225733837017, "budget": 1600, "design_ratio": 3.193118837115719, "kl": 0.3857016083648136, "pilot_budget": 117, "policy": "A-OSQD", "replication": 131, "seed": 41600131}
+{"B_kl": 655.421032919387, "budget": 1600, "design_ratio": 3.3912829261481177, "kl": 0.40963814557461686, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 131, "seed": 41600131}
+{"B_kl": 657.2109829681395, "budget": 1600, "design_ratio": 3.4005444950238592, "kl": 0.41075686435508724, "pilot_budget": 117, "policy": "RR-GID", "replication": 131, "seed": 41600131}
+{"B_kl": 836.5190426266994, "budget": 1600, "design_ratio": 4.3283211922901685, "kl": 0.5228244016416871, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 31, "seed": 41600031}
+{"B_kl": 802.8498593835671, "budget": 1600, "design_ratio": 4.15410992878952, "kl": 0.5017811621147295, "pilot_budget": 117, "policy": "A-OSQD", "replication": 31, "seed": 41600031}
+{"B_kl": 852.115164083653, "budget": 1600, "design_ratio": 4.409018725256897, "kl": 0.5325719775522831, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 31, "seed": 41600031}
+{"B_kl": 806.5462636475824, "budget": 1600, "design_ratio": 4.173235883006857, "kl": 0.504091414779739, "pilot_budget": 117, "policy": "RR-GID", "replication": 31, "seed": 41600031}
+{"B_kl": 757.3766961975293, "budget": 1600, "design_ratio": 3.9188224507178107, "kl": 0.4733604351234558, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 132, "seed": 41600132}
+{"B_kl": 748.0541388423983, "budget": 1600, "design_ratio": 3.8705856258395026, "kl": 0.46753383677649896, "pilot_budget": 117, "policy": "A-OSQD", "replication": 132, "seed": 41600132}
+{"B_kl": 764.8273366386509, "budget": 1600, "design_ratio": 3.9573735933387586, "kl": 0.47801708539915677, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 132, "seed": 41600132}
+{"B_kl": 754.2300036935002, "budget": 1600, "design_ratio": 3.9025408179554018, "kl": 0.4713937523084376, "pilot_budget": 117, "policy": "RR-GID", "replication": 132, "seed": 41600132}
+{"B_kl": 777.8733715884209, "budget": 1600, "design_ratio": 4.024876455402888, "kl": 0.48617085724276304, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 32, "seed": 41600032}
+{"B_kl": 785.3873162549938, "budget": 1600, "design_ratio": 4.063755147077259, "kl": 0.49086707265937113, "pilot_budget": 117, "policy": "A-OSQD", "replication": 32, "seed": 41600032}
+{"B_kl": 787.3974993490283, "budget": 1600, "design_ratio": 4.074156246924278, "kl": 0.49212343709314266, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 32, "seed": 41600032}
+{"B_kl": 786.0776392289285, "budget": 1600, "design_ratio": 4.067327019808601, "kl": 0.4912985245180803, "pilot_budget": 117, "policy": "RR-GID", "replication": 32, "seed": 41600032}
+{"B_kl": 617.2577793866191, "budget": 1600, "design_ratio": 3.19381842072103, "kl": 0.38578611211663694, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 133, "seed": 41600133}
+{"B_kl": 608.0351750195301, "budget": 1600, "design_ratio": 3.1460987731146424, "kl": 0.38002198438720636, "pilot_budget": 117, "policy": "A-OSQD", "replication": 133, "seed": 41600133}
+{"B_kl": 617.5259419719998, "budget": 1600, "design_ratio": 3.1952059489686095, "kl": 0.38595371373249987, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 133, "seed": 41600133}
+{"B_kl": 604.6488309414488, "budget": 1600, "design_ratio": 3.1285771339281365, "kl": 0.37790551933840544, "pilot_budget": 117, "policy": "RR-GID", "replication": 133, "seed": 41600133}
+{"B_kl": 163.9540057706959, "budget": 1600, "design_ratio": 0.8483316715777987, "kl": 0.10247125360668494, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 33, "seed": 41600033}
+{"B_kl": 165.8190463083958, "budget": 1600, "design_ratio": 0.857981774053002, "kl": 0.10363690394274737, "pilot_budget": 117, "policy": "A-OSQD", "replication": 33, "seed": 41600033}
+{"B_kl": 163.33163438327693, "budget": 1600, "design_ratio": 0.8451113942997324, "kl": 0.10208227148954808, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 33, "seed": 41600033}
+{"B_kl": 164.47016790323195, "budget": 1600, "design_ratio": 0.851002400375434, "kl": 0.10279385493951997, "pilot_budget": 117, "policy": "RR-GID", "replication": 33, "seed": 41600033}
+{"B_kl": 594.5876587373903, "budget": 1600, "design_ratio": 3.076518564247087, "kl": 0.3716172867108689, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 34, "seed": 41600034}
+{"B_kl": 639.9587207960046, "budget": 1600, "design_ratio": 3.311277750132887, "kl": 0.3999742004975029, "pilot_budget": 117, "policy": "A-OSQD", "replication": 34, "seed": 41600034}
+{"B_kl": 517.1708953243651, "budget": 1600, "design_ratio": 2.675948343314718, "kl": 0.32323180957772824, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 34, "seed": 41600034}
+{"B_kl": 623.8837354604065, "budget": 1600, "design_ratio": 3.2281024771882967, "kl": 0.38992733466275403, "pilot_budget": 117, "policy": "RR-GID", "replication": 34, "seed": 41600034}
+{"B_kl": 574.1944818818977, "budget": 1600, "design_ratio": 2.9710000822235525, "kl": 0.3588715511761861, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 134, "seed": 41600134}
+{"B_kl": 570.1446775164451, "budget": 1600, "design_ratio": 2.9500455633585942, "kl": 0.35634042344777817, "pilot_budget": 117, "policy": "A-OSQD", "replication": 134, "seed": 41600134}
+{"B_kl": 569.7429881053647, "budget": 1600, "design_ratio": 2.94796713991322, "kl": 0.35608936756585297, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 134, "seed": 41600134}
+{"B_kl": 591.0113023094882, "budget": 1600, "design_ratio": 3.0580137621693417, "kl": 0.3693820639434301, "pilot_budget": 117, "policy": "RR-GID", "replication": 134, "seed": 41600134}
+{"B_kl": 503.87390837807243, "budget": 1600, "design_ratio": 2.6071470041216207, "kl": 0.31492119273629526, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 35, "seed": 41600035}
+{"B_kl": 507.3188925534817, "budget": 1600, "design_ratio": 2.624972059205492, "kl": 0.31707430784592605, "pilot_budget": 117, "policy": "A-OSQD", "replication": 35, "seed": 41600035}
+{"B_kl": 513.8289604237004, "budget": 1600, "design_ratio": 2.658656486325568, "kl": 0.32114310026481274, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 35, "seed": 41600035}
+{"B_kl": 518.5770423337539, "budget": 1600, "design_ratio": 2.683224036502887, "kl": 0.3241106514585962, "pilot_budget": 117, "policy": "RR-GID", "replication": 35, "seed": 41600035}
+{"B_kl": 640.0307570494579, "budget": 1600, "design_ratio": 3.3116504804911293, "kl": 0.40001922315591115, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 135, "seed": 41600135}
+{"B_kl": 650.5819646132763, "budget": 1600, "design_ratio": 3.3662445936858822, "kl": 0.40661372788329775, "pilot_budget": 117, "policy": "A-OSQD", "replication": 135, "seed": 41600135}
+{"B_kl": 638.2994153641476, "budget": 1600, "design_ratio": 3.302692163315118, "kl": 0.3989371346025923, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 135, "seed": 41600135}
+{"B_kl": 648.8927651742856, "budget": 1600, "design_ratio": 3.357504329140522, "kl": 0.4055579782339285, "pilot_budget": 117, "policy": "RR-GID", "replication": 135, "seed": 41600135}
+{"B_kl": 808.4969745048327, "budget": 1600, "design_ratio": 4.183329261296196, "kl": 0.5053106090655204, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 36, "seed": 41600036}
+{"B_kl": 743.7510981316366, "budget": 1600, "design_ratio": 3.8483208101561748, "kl": 0.46484443633227285, "pilot_budget": 117, "policy": "A-OSQD", "replication": 36, "seed": 41600036}
+{"B_kl": 829.3842949007626, "budget": 1600, "design_ratio": 4.291404543403315, "kl": 0.5183651843129766, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 36, "seed": 41600036}
+{"B_kl": 809.4558635353709, "budget": 1600, "design_ratio": 4.188290749918022, "kl": 0.5059099147096068, "pilot_budget": 117, "policy": "RR-GID", "replication": 36, "seed": 41600036}
+{"B_kl": 761.4689670864329, "budget": 1600, "design_ratio": 3.939996700089846, "kl": 0.4759181044290206, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 136, "seed": 41600136}
+{"B_kl": 784.399677467761, "budget": 1600, "design_ratio": 4.058644901314431, "kl": 0.4902497984173506, "pilot_budget": 117, "policy": "A-OSQD", "replication": 136, "seed": 41600136}
+{"B_kl": 744.2705236557017, "budget": 1600, "design_ratio": 3.8510084244112766, "kl": 0.4651690772848136, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 136, "seed": 41600136}
+{"B_kl": 784.2450389073971, "budget": 1600, "design_ratio": 4.057844769669051, "kl": 0.49015314931712317, "pilot_budget": 117, "policy": "RR-GID", "replication": 136, "seed": 41600136}
+{"B_kl": 776.8816112808177, "budget": 1600, "design_ratio": 4.019744884047869, "kl": 0.485551007050511, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 37, "seed": 41600037}
+{"B_kl": 770.0454716235861, "budget": 1600, "design_ratio": 3.9843732945871673, "kl": 0.4812784197647413, "pilot_budget": 117, "policy": "A-OSQD", "replication": 37, "seed": 41600037}
+{"B_kl": 790.0211434231766, "budget": 1600, "design_ratio": 4.087731519773422, "kl": 0.49376321463948536, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 37, "seed": 41600037}
+{"B_kl": 787.5868799506568, "budget": 1600, "design_ratio": 4.075136141020727, "kl": 0.4922417999691605, "pilot_budget": 117, "policy": "RR-GID", "replication": 37, "seed": 41600037}
+{"B_kl": 525.4059402246115, "budget": 1600, "design_ratio": 2.718558155578255, "kl": 0.3283787126403822, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 137, "seed": 41600137}
+{"B_kl": 533.2092889781045, "budget": 1600, "design_ratio": 2.7589342833882315, "kl": 0.3332558056113153, "pilot_budget": 117, "policy": "A-OSQD", "replication": 137, "seed": 41600137}
+{"B_kl": 528.3871293199776, "budget": 1600, "design_ratio": 2.7339834397405616, "kl": 0.330241955824986, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 137, "seed": 41600137}
+{"B_kl": 532.1515821286379, "budget": 1600, "design_ratio": 2.753461491092432, "kl": 0.3325947388303987, "pilot_budget": 117, "policy": "RR-GID", "replication": 137, "seed": 41600137}
+{"B_kl": 551.5710522151512, "budget": 1600, "design_ratio": 2.8539418144746342, "kl": 0.34473190763446954, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 38, "seed": 41600038}
+{"B_kl": 538.2778661191535, "budget": 1600, "design_ratio": 2.7851601416609526, "kl": 0.33642366632447096, "pilot_budget": 117, "policy": "A-OSQD", "replication": 38, "seed": 41600038}
+{"B_kl": 565.9748091312989, "budget": 1600, "design_ratio": 2.928469808616878, "kl": 0.35373425570706185, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 38, "seed": 41600038}
+{"B_kl": 551.0614578609313, "budget": 1600, "design_ratio": 2.8513050687098094, "kl": 0.3444134111630821, "pilot_budget": 117, "policy": "RR-GID", "replication": 38, "seed": 41600038}
+{"B_kl": 296.59117062764204, "budget": 1600, "design_ratio": 1.5346235816016542, "kl": 0.18536948164227626, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 138, "seed": 41600138}
+{"B_kl": 289.33347600213233, "budget": 1600, "design_ratio": 1.497070780225939, "kl": 0.18083342250133272, "pilot_budget": 117, "policy": "A-OSQD", "replication": 138, "seed": 41600138}
+{"B_kl": 292.6024545142065, "budget": 1600, "design_ratio": 1.513985145888821, "kl": 0.18287653407137908, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 138, "seed": 41600138}
+{"B_kl": 291.55422569400105, "budget": 1600, "design_ratio": 1.5085613948614467, "kl": 0.18222139105875065, "pilot_budget": 117, "policy": "RR-GID", "replication": 138, "seed": 41600138}
+{"B_kl": 592.5657075981036, "budget": 1600, "design_ratio": 3.0660565741189614, "kl": 0.37035356724881474, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 39, "seed": 41600039}
+{"B_kl": 631.6291696545493, "budget": 1600, "design_ratio": 3.268178943183295, "kl": 0.3947682310340933, "pilot_budget": 117, "policy": "A-OSQD", "replication": 39, "seed": 41600039}
+{"B_kl": 672.8079240092729, "budget": 1600, "design_ratio": 3.481246268687324, "kl": 0.4205049525057956, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 39, "seed": 41600039}
+{"B_kl": 620.0651151781012, "budget": 1600, "design_ratio": 3.2083441522118425, "kl": 0.38754069698631327, "pilot_budget": 117, "policy": "RR-GID", "replication": 39, "seed": 41600039}
+{"B_kl": 432.78665849680567, "budget": 1600, "design_ratio": 2.239326985109787, "kl": 0.2704916615605035, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 139, "seed": 41600139}
+{"B_kl": 462.28648776346574, "budget": 1600, "design_ratio": 2.3919651555247623, "kl": 0.2889290548521661, "pilot_budget": 117, "policy": "A-OSQD", "replication": 139, "seed": 41600139}
+{"B_kl": 464.53512487633725, "budget": 1600, "design_ratio": 2.4036000653994387, "kl": 0.29033445304771077, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 139, "seed": 41600139}
+{"B_kl": 461.5967443985394, "budget": 1600, "design_ratio": 2.3883962818093742, "kl": 0.2884979652490871, "pilot_budget": 117, "policy": "RR-GID", "replication": 139, "seed": 41600139}
+{"B_kl": 850.5394789665075, "budget": 1600, "design_ratio": 4.400865807107536, "kl": 0.5315871743540672, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 40, "seed": 41600040}
+{"B_kl": 859.2493694702487, "budget": 1600, "design_ratio": 4.445932567968703, "kl": 0.5370308559189054, "pilot_budget": 117, "policy": "A-OSQD", "replication": 40, "seed": 41600040}
+{"B_kl": 856.1724878195232, "budget": 1600, "design_ratio": 4.430012150887478, "kl": 0.535107804887202, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 40, "seed": 41600040}
+{"B_kl": 862.9026931001483, "budget": 1600, "design_ratio": 4.46483561414436, "kl": 0.5393141831875927, "pilot_budget": 117, "policy": "RR-GID", "replication": 40, "seed": 41600040}
+{"B_kl": 345.6676206307601, "budget": 1600, "design_ratio": 1.7885552051112195, "kl": 0.21604226289422507, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 140, "seed": 41600140}
+{"B_kl": 349.7530460725311, "budget": 1600, "design_ratio": 1.8096940347350061, "kl": 0.21859565379533194, "pilot_budget": 117, "policy": "A-OSQD", "replication": 140, "seed": 41600140}
+{"B_kl": 346.76065911391146, "budget": 1600, "design_ratio": 1.794210810530263, "kl": 0.21672541194619466, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 140, "seed": 41600140}
+{"B_kl": 347.26734068413396, "budget": 1600, "design_ratio": 1.7968324849529405, "kl": 0.21704208792758373, "pilot_budget": 117, "policy": "RR-GID", "replication": 140, "seed": 41600140}
+{"B_kl": 733.8781500492731, "budget": 1600, "design_ratio": 3.7972361507070724, "kl": 0.45867384378079573, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 41, "seed": 41600041}
+{"B_kl": 735.5595358571412, "budget": 1600, "design_ratio": 3.805935985921534, "kl": 0.4597247099107133, "pilot_budget": 117, "policy": "A-OSQD", "replication": 41, "seed": 41600041}
+{"B_kl": 751.6150697574071, "budget": 1600, "design_ratio": 3.8890106131480007, "kl": 0.46975941859837944, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 41, "seed": 41600041}
+{"B_kl": 743.1143482917631, "budget": 1600, "design_ratio": 3.845026135814444, "kl": 0.464446467682352, "pilot_budget": 117, "policy": "RR-GID", "replication": 41, "seed": 41600041}
+{"B_kl": 635.7948214191173, "budget": 1600, "design_ratio": 3.2897328802648285, "kl": 0.3973717633869483, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 141, "seed": 41600141}
+{"B_kl": 636.1416635253588, "budget": 1600, "design_ratio": 3.291527512499511, "kl": 0.3975885397033493, "pilot_budget": 117, "policy": "A-OSQD", "replication": 141, "seed": 41600141}
+{"B_kl": 632.2935736039058, "budget": 1600, "design_ratio": 3.271616705562512, "kl": 0.3951834835024411, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 141, "seed": 41600141}
+{"B_kl": 639.7691109674586, "budget": 1600, "design_ratio": 3.310296669969326, "kl": 0.3998556943546616, "pilot_budget": 117, "policy": "RR-GID", "replication": 141, "seed": 41600141}
+{"B_kl": 719.1472637210123, "budget": 1600, "design_ratio": 3.721015521854895, "kl": 0.44946703982563274, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 42, "seed": 41600042}
+{"B_kl": 716.738040740925, "budget": 1600, "design_ratio": 3.708549707748714, "kl": 0.4479612754630781, "pilot_budget": 117, "policy": "A-OSQD", "replication": 42, "seed": 41600042}
+{"B_kl": 714.7269553090916, "budget": 1600, "design_ratio": 3.6981439390207513, "kl": 0.4467043470681823, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 42, "seed": 41600042}
+{"B_kl": 714.9040160125307, "budget": 1600, "design_ratio": 3.699060087435748, "kl": 0.44681501000783175, "pilot_budget": 117, "policy": "RR-GID", "replication": 42, "seed": 41600042}
+{"B_kl": 498.3331998924073, "budget": 1600, "design_ratio": 2.578478241383713, "kl": 0.31145824993275456, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 142, "seed": 41600142}
+{"B_kl": 604.377301843821, "budget": 1600, "design_ratio": 3.1271721866553346, "kl": 0.3777358136523881, "pilot_budget": 117, "policy": "A-OSQD", "replication": 142, "seed": 41600142}
+{"B_kl": 572.3421019092958, "budget": 1600, "design_ratio": 2.9614154881102963, "kl": 0.3577138136933099, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 142, "seed": 41600142}
+{"B_kl": 647.7441244361321, "budget": 1600, "design_ratio": 3.351561026243715, "kl": 0.4048400777725826, "pilot_budget": 117, "policy": "RR-GID", "replication": 142, "seed": 41600142}
+{"B_kl": 660.8618017244478, "budget": 1600, "design_ratio": 3.419434580469518, "kl": 0.41303862607777986, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 43, "seed": 41600043}
+{"B_kl": 720.3865422849478, "budget": 1600, "design_ratio": 3.7274278034624833, "kl": 0.4502415889280924, "pilot_budget": 117, "policy": "A-OSQD", "replication": 43, "seed": 41600043}
+{"B_kl": 735.3158658172235, "budget": 1600, "design_ratio": 3.8046751871304028, "kl": 0.4595724161357647, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 43, "seed": 41600043}
+{"B_kl": 670.8132499332348, "budget": 1600, "design_ratio": 3.4709254156820912, "kl": 0.41925828120827174, "pilot_budget": 117, "policy": "RR-GID", "replication": 43, "seed": 41600043}
+{"B_kl": 646.2124414926097, "budget": 1600, "design_ratio": 3.3436357843705595, "kl": 0.4038827759328811, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 44, "seed": 41600044}
+{"B_kl": 667.3405271486158, "budget": 1600, "design_ratio": 3.4529568353418076, "kl": 0.4170878294678849, "pilot_budget": 117, "policy": "A-OSQD", "replication": 44, "seed": 41600044}
+{"B_kl": 645.2092073041712, "budget": 1600, "design_ratio": 3.3384448448014927, "kl": 0.403255754565107, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 44, "seed": 41600044}
+{"B_kl": 675.7857529335204, "budget": 1600, "design_ratio": 3.496654166634707, "kl": 0.42236609558345023, "pilot_budget": 117, "policy": "RR-GID", "replication": 44, "seed": 41600044}
+{"B_kl": 717.8672079877451, "budget": 1600, "design_ratio": 3.7143922508051217, "kl": 0.4486670049923407, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 143, "seed": 41600143}
+{"B_kl": 719.8356488523896, "budget": 1600, "design_ratio": 3.7245773677911704, "kl": 0.44989728053274347, "pilot_budget": 117, "policy": "A-OSQD", "replication": 143, "seed": 41600143}
+{"B_kl": 737.6154156490829, "budget": 1600, "design_ratio": 3.816573529861144, "kl": 0.4610096347806768, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 143, "seed": 41600143}
+{"B_kl": 726.3257767562495, "budget": 1600, "design_ratio": 3.7581586214333385, "kl": 0.4539536104726559, "pilot_budget": 117, "policy": "RR-GID", "replication": 143, "seed": 41600143}
+{"B_kl": 655.5812994915862, "budget": 1600, "design_ratio": 3.392112178281682, "kl": 0.4097383121822413, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 144, "seed": 41600144}
+{"B_kl": 678.7656637365121, "budget": 1600, "design_ratio": 3.5120728366499443, "kl": 0.42422853983532005, "pilot_budget": 117, "policy": "A-OSQD", "replication": 144, "seed": 41600144}
+{"B_kl": 665.2773322785719, "budget": 1600, "design_ratio": 3.4422814416869367, "kl": 0.41579833267410743, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 144, "seed": 41600144}
+{"B_kl": 680.6641263649933, "budget": 1600, "design_ratio": 3.521895871881544, "kl": 0.4254150789781208, "pilot_budget": 117, "policy": "RR-GID", "replication": 144, "seed": 41600144}
+{"B_kl": 675.3229832841486, "budget": 1600, "design_ratio": 3.4942597015018686, "kl": 0.42207686455259286, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 45, "seed": 41600045}
+{"B_kl": 696.492116773606, "budget": 1600, "design_ratio": 3.603793142387, "kl": 0.43530757298350375, "pilot_budget": 117, "policy": "A-OSQD", "replication": 45, "seed": 41600045}
+{"B_kl": 662.9831404461164, "budget": 1600, "design_ratio": 3.43041082234465, "kl": 0.4143644627788228, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 45, "seed": 41600045}
+{"B_kl": 698.3853952484532, "budget": 1600, "design_ratio": 3.6135893537438344, "kl": 0.43649087203028325, "pilot_budget": 117, "policy": "RR-GID", "replication": 45, "seed": 41600045}
+{"B_kl": 682.4834670059157, "budget": 1600, "design_ratio": 3.5313095137125448, "kl": 0.42655216687869735, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 46, "seed": 41600046}
+{"B_kl": 689.8996489009378, "budget": 1600, "design_ratio": 3.5696823607445842, "kl": 0.43118728056308614, "pilot_budget": 117, "policy": "A-OSQD", "replication": 46, "seed": 41600046}
+{"B_kl": 684.8266053679575, "budget": 1600, "design_ratio": 3.5434333924434434, "kl": 0.42801662835497345, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 46, "seed": 41600046}
+{"B_kl": 690.2337083282374, "budget": 1600, "design_ratio": 3.571410852775232, "kl": 0.4313960677051484, "pilot_budget": 117, "policy": "RR-GID", "replication": 46, "seed": 41600046}
+{"B_kl": 819.1344486578444, "budget": 1600, "design_ratio": 4.238369735526579, "kl": 0.5119590304111528, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 145, "seed": 41600145}
+{"B_kl": 829.3447881953468, "budget": 1600, "design_ratio": 4.291200127602151, "kl": 0.5183404926220918, "pilot_budget": 117, "policy": "A-OSQD", "replication": 145, "seed": 41600145}
+{"B_kl": 823.2287019160174, "budget": 1600, "design_ratio": 4.2595542420840244, "kl": 0.5145179386975108, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 145, "seed": 41600145}
+{"B_kl": 835.837442266672, "budget": 1600, "design_ratio": 4.324794452153189, "kl": 0.52239840141667, "pilot_budget": 117, "policy": "RR-GID", "replication": 145, "seed": 41600145}
+{"B_kl": 284.1197937363835, "budget": 1600, "design_ratio": 1.4700941182603624, "kl": 0.17757487108523967, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 47, "seed": 41600047}
+{"B_kl": 284.4112023877833, "budget": 1600, "design_ratio": 1.4716019264239517, "kl": 0.17775700149236456, "pilot_budget": 117, "policy": "A-OSQD", "replication": 47, "seed": 41600047}
+{"B_kl": 279.8750737877637, "budget": 1600, "design_ratio": 1.4481310661686162, "kl": 0.1749219211173523, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 47, "seed": 41600047}
+{"B_kl": 282.4834562964898, "budget": 1600, "design_ratio": 1.4616273725463735, "kl": 0.17655216018530612, "pilot_budget": 117, "policy": "RR-GID", "replication": 47, "seed": 41600047}
+{"B_kl": 682.6909297123652, "budget": 1600, "design_ratio": 3.5323829683300456, "kl": 0.4266818310702283, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 146, "seed": 41600146}
+{"B_kl": 708.0744415335988, "budget": 1600, "design_ratio": 3.663722467554838, "kl": 0.44254652595849925, "pilot_budget": 117, "policy": "A-OSQD", "replication": 146, "seed": 41600146}
+{"B_kl": 694.005697616665, "budget": 1600, "design_ratio": 3.590927899420013, "kl": 0.4337535610104156, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 146, "seed": 41600146}
+{"B_kl": 713.9344125848671, "budget": 1600, "design_ratio": 3.694043160324447, "kl": 0.44620900786554196, "pilot_budget": 117, "policy": "RR-GID", "replication": 146, "seed": 41600146}
+{"B_kl": 654.3807293301388, "budget": 1600, "design_ratio": 3.3859001818920875, "kl": 0.40898795583133674, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 48, "seed": 41600048}
+{"B_kl": 679.515469313592, "budget": 1600, "design_ratio": 3.515952484576645, "kl": 0.424697168320995, "pilot_budget": 117, "policy": "A-OSQD", "replication": 48, "seed": 41600048}
+{"B_kl": 670.4079853013353, "budget": 1600, "design_ratio": 3.4688284933105122, "kl": 0.4190049908133346, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 48, "seed": 41600048}
+{"B_kl": 680.9634964656605, "budget": 1600, "design_ratio": 3.5234448742174465, "kl": 0.42560218529103777, "pilot_budget": 117, "policy": "RR-GID", "replication": 48, "seed": 41600048}
+{"B_kl": 781.2664297723186, "budget": 1600, "design_ratio": 4.042432834750718, "kl": 0.48829151860769915, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 147, "seed": 41600147}
+{"B_kl": 776.6133376844398, "budget": 1600, "design_ratio": 4.0183567814066095, "kl": 0.4853833360527749, "pilot_budget": 117, "policy": "A-OSQD", "replication": 147, "seed": 41600147}
+{"B_kl": 789.1444100183897, "budget": 1600, "design_ratio": 4.08319512121875, "kl": 0.4932152562614936, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 147, "seed": 41600147}
+{"B_kl": 784.1418078589923, "budget": 1600, "design_ratio": 4.057310631040109, "kl": 0.4900886299118702, "pilot_budget": 117, "policy": "RR-GID", "replication": 147, "seed": 41600147}
+{"B_kl": 817.231855536949, "budget": 1600, "design_ratio": 4.228525328279591, "kl": 0.5107699097105931, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 49, "seed": 41600049}
+{"B_kl": 822.1756090905511, "budget": 1600, "design_ratio": 4.254105323695267, "kl": 0.5138597556815945, "pilot_budget": 117, "policy": "A-OSQD", "replication": 49, "seed": 41600049}
+{"B_kl": 814.8137427964846, "budget": 1600, "design_ratio": 4.216013516728914, "kl": 0.5092585892478029, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 49, "seed": 41600049}
+{"B_kl": 824.5291755120124, "budget": 1600, "design_ratio": 4.2662831593455905, "kl": 0.5153307346950078, "pilot_budget": 117, "policy": "RR-GID", "replication": 49, "seed": 41600049}
+{"B_kl": 778.9352198225903, "budget": 1600, "design_ratio": 4.030370676073011, "kl": 0.4868345123891189, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 148, "seed": 41600148}
+{"B_kl": 774.4358725662406, "budget": 1600, "design_ratio": 4.007090130037885, "kl": 0.4840224203539004, "pilot_budget": 117, "policy": "A-OSQD", "replication": 148, "seed": 41600148}
+{"B_kl": 779.3107346391963, "budget": 1600, "design_ratio": 4.032313666795172, "kl": 0.4870692091494977, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 148, "seed": 41600148}
+{"B_kl": 782.9662768200199, "budget": 1600, "design_ratio": 4.051228192208589, "kl": 0.4893539230125124, "pilot_budget": 117, "policy": "RR-GID", "replication": 148, "seed": 41600148}
+{"B_kl": 653.6054398500972, "budget": 1600, "design_ratio": 3.3818886750218002, "kl": 0.4085033999063108, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 50, "seed": 41600050}
+{"B_kl": 640.8543323313987, "budget": 1600, "design_ratio": 3.3159118280093853, "kl": 0.4005339577071242, "pilot_budget": 117, "policy": "A-OSQD", "replication": 50, "seed": 41600050}
+{"B_kl": 590.5908190800382, "budget": 1600, "design_ratio": 3.055838095650961, "kl": 0.36911926192502387, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 50, "seed": 41600050}
+{"B_kl": 644.097709680312, "budget": 1600, "design_ratio": 3.332693728000346, "kl": 0.402561068550195, "pilot_budget": 117, "policy": "RR-GID", "replication": 50, "seed": 41600050}
+{"B_kl": 695.9859020783335, "budget": 1600, "design_ratio": 3.601173883671123, "kl": 0.43499118879895843, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 149, "seed": 41600149}
+{"B_kl": 687.2900499189021, "budget": 1600, "design_ratio": 3.5561797600842855, "kl": 0.4295562811993138, "pilot_budget": 117, "policy": "A-OSQD", "replication": 149, "seed": 41600149}
+{"B_kl": 709.8404588831761, "budget": 1600, "design_ratio": 3.6728602037337126, "kl": 0.4436502868019851, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 149, "seed": 41600149}
+{"B_kl": 693.8257045367076, "budget": 1600, "design_ratio": 3.589996578287144, "kl": 0.4336410653354422, "pilot_budget": 117, "policy": "RR-GID", "replication": 149, "seed": 41600149}
+{"B_kl": 596.2816595297622, "budget": 1600, "design_ratio": 3.0852836719801475, "kl": 0.3726760372061014, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 51, "seed": 41600051}
+{"B_kl": 599.3828511175849, "budget": 1600, "design_ratio": 3.101329873664662, "kl": 0.37461428194849056, "pilot_budget": 117, "policy": "A-OSQD", "replication": 51, "seed": 41600051}
+{"B_kl": 592.0983871542015, "budget": 1600, "design_ratio": 3.063638562241335, "kl": 0.37006149197137594, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 51, "seed": 41600051}
+{"B_kl": 601.6353196829465, "budget": 1600, "design_ratio": 3.1129846082607906, "kl": 0.3760220748018415, "pilot_budget": 117, "policy": "RR-GID", "replication": 51, "seed": 41600051}
+{"B_kl": 672.568388132155, "budget": 1600, "design_ratio": 3.4800068609029076, "kl": 0.4203552425825968, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 150, "seed": 41600150}
+{"B_kl": 624.0160769837537, "budget": 1600, "design_ratio": 3.2287872393884793, "kl": 0.3900100481148461, "pilot_budget": 117, "policy": "A-OSQD", "replication": 150, "seed": 41600150}
+{"B_kl": 697.4580273251395, "budget": 1600, "design_ratio": 3.6087909617993725, "kl": 0.4359112670782122, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 150, "seed": 41600150}
+{"B_kl": 666.7914496926988, "budget": 1600, "design_ratio": 3.450115795906301, "kl": 0.41674465605793676, "pilot_budget": 117, "policy": "RR-GID", "replication": 150, "seed": 41600150}
+{"B_kl": 595.087142345989, "budget": 1600, "design_ratio": 3.079102994939198, "kl": 0.37192946396624316, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 52, "seed": 41600052}
+{"B_kl": 563.8035453204797, "budget": 1600, "design_ratio": 2.917235244085135, "kl": 0.3523772158252998, "pilot_budget": 117, "policy": "A-OSQD", "replication": 52, "seed": 41600052}
+{"B_kl": 605.0509852672443, "budget": 1600, "design_ratio": 3.1306579629376547, "kl": 0.3781568657920277, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 52, "seed": 41600052}
+{"B_kl": 590.3313349770082, "budget": 1600, "design_ratio": 3.0544954716520136, "kl": 0.3689570843606301, "pilot_budget": 117, "policy": "RR-GID", "replication": 52, "seed": 41600052}
+{"B_kl": 707.8768426694785, "budget": 1600, "design_ratio": 3.66270005048175, "kl": 0.44242302666842404, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 151, "seed": 41600151}
+{"B_kl": 720.1166810259108, "budget": 1600, "design_ratio": 3.726031485928814, "kl": 0.4500729256411943, "pilot_budget": 117, "policy": "A-OSQD", "replication": 151, "seed": 41600151}
+{"B_kl": 723.414907917274, "budget": 1600, "design_ratio": 3.7430971887083255, "kl": 0.4521343174482963, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 151, "seed": 41600151}
+{"B_kl": 729.6376808371173, "budget": 1600, "design_ratio": 3.775295092798103, "kl": 0.4560235505231983, "pilot_budget": 117, "policy": "RR-GID", "replication": 151, "seed": 41600151}
+{"B_kl": 748.5473305385826, "budget": 1600, "design_ratio": 3.8731375008855897, "kl": 0.4678420815866141, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 53, "seed": 41600053}
+{"B_kl": 754.7776497047664, "budget": 1600, "design_ratio": 3.905374450802532, "kl": 0.471736031065479, "pilot_budget": 117, "policy": "A-OSQD", "replication": 53, "seed": 41600053}
+{"B_kl": 735.6007316599403, "budget": 1600, "design_ratio": 3.806149141459187, "kl": 0.45975045728746267, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 53, "seed": 41600053}
+{"B_kl": 758.7820649436902, "budget": 1600, "design_ratio": 3.9260941170123282, "kl": 0.4742387905898064, "pilot_budget": 117, "policy": "RR-GID", "replication": 53, "seed": 41600053}
+{"B_kl": 662.2127655856503, "budget": 1600, "design_ratio": 3.426424744724596, "kl": 0.41388297849103145, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 152, "seed": 41600152}
+{"B_kl": 652.3800147233355, "budget": 1600, "design_ratio": 3.375548073941073, "kl": 0.40773750920208474, "pilot_budget": 117, "policy": "A-OSQD", "replication": 152, "seed": 41600152}
+{"B_kl": 635.2957523852075, "budget": 1600, "design_ratio": 3.2871505946672355, "kl": 0.3970598452407547, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 152, "seed": 41600152}
+{"B_kl": 639.1241108978675, "budget": 1600, "design_ratio": 3.30695930724597, "kl": 0.3994525693111672, "pilot_budget": 117, "policy": "RR-GID", "replication": 152, "seed": 41600152}
+{"B_kl": 425.822170100237, "budget": 1600, "design_ratio": 2.2032912929327475, "kl": 0.2661388563126481, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 54, "seed": 41600054}
+{"B_kl": 428.64912255931847, "budget": 1600, "design_ratio": 2.2179185250873417, "kl": 0.26790570159957405, "pilot_budget": 117, "policy": "A-OSQD", "replication": 54, "seed": 41600054}
+{"B_kl": 426.96032503771556, "budget": 1600, "design_ratio": 2.2091803401450254, "kl": 0.2668502031485722, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 54, "seed": 41600054}
+{"B_kl": 428.7056333608863, "budget": 1600, "design_ratio": 2.2182109235714824, "kl": 0.26794102085055393, "pilot_budget": 117, "policy": "RR-GID", "replication": 54, "seed": 41600054}
+{"B_kl": 109.93671113218446, "budget": 1600, "design_ratio": 0.5688351039923224, "kl": 0.06871044445761529, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 153, "seed": 41600153}
+{"B_kl": 88.59330792624677, "budget": 1600, "design_ratio": 0.45839995583146986, "kl": 0.05537081745390423, "pilot_budget": 117, "policy": "A-OSQD", "replication": 153, "seed": 41600153}
+{"B_kl": 107.35454208608084, "budget": 1600, "design_ratio": 0.5554744314495533, "kl": 0.06709658880380052, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 153, "seed": 41600153}
+{"B_kl": 103.90139926931545, "budget": 1600, "design_ratio": 0.5376071618810349, "kl": 0.06493837454332216, "pilot_budget": 117, "policy": "RR-GID", "replication": 153, "seed": 41600153}
+{"B_kl": 581.7204125695956, "budget": 1600, "design_ratio": 3.009940792030928, "kl": 0.36357525785599726, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 55, "seed": 41600055}
+{"B_kl": 587.3150383599659, "budget": 1600, "design_ratio": 3.0388885339679863, "kl": 0.3670718989749787, "pilot_budget": 117, "policy": "A-OSQD", "replication": 55, "seed": 41600055}
+{"B_kl": 588.0277555684548, "budget": 1600, "design_ratio": 3.0425762790645305, "kl": 0.3675173472302843, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 55, "seed": 41600055}
+{"B_kl": 594.1104379503118, "budget": 1600, "design_ratio": 3.0740493259621737, "kl": 0.37131902371894493, "pilot_budget": 117, "policy": "RR-GID", "replication": 55, "seed": 41600055}
+{"B_kl": 761.2886635472892, "budget": 1600, "design_ratio": 3.9390637725774362, "kl": 0.47580541471705573, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 154, "seed": 41600154}
+{"B_kl": 768.3929188580225, "budget": 1600, "design_ratio": 3.9758226474505447, "kl": 0.4802455742862641, "pilot_budget": 117, "policy": "A-OSQD", "replication": 154, "seed": 41600154}
+{"B_kl": 770.250659702116, "budget": 1600, "design_ratio": 3.985434979813026, "kl": 0.48140666231382245, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 154, "seed": 41600154}
+{"B_kl": 768.1835633550057, "budget": 1600, "design_ratio": 3.974739399115175, "kl": 0.4801147270968786, "pilot_budget": 117, "policy": "RR-GID", "replication": 154, "seed": 41600154}
+{"B_kl": 713.773531470027, "budget": 1600, "design_ratio": 3.6932107284211453, "kl": 0.4461084571687669, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 56, "seed": 41600056}
+{"B_kl": 718.6502560550915, "budget": 1600, "design_ratio": 3.718443902198298, "kl": 0.4491564100344322, "pilot_budget": 117, "policy": "A-OSQD", "replication": 56, "seed": 41600056}
+{"B_kl": 699.8551833344056, "budget": 1600, "design_ratio": 3.621194338922208, "kl": 0.4374094895840035, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 56, "seed": 41600056}
+{"B_kl": 729.0082800736383, "budget": 1600, "design_ratio": 3.772038444085773, "kl": 0.45563017504602393, "pilot_budget": 117, "policy": "RR-GID", "replication": 56, "seed": 41600056}
+{"B_kl": 517.6707138962236, "budget": 1600, "design_ratio": 2.6785345071754736, "kl": 0.32354419618513974, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 155, "seed": 41600155}
+{"B_kl": 501.4570994509536, "budget": 1600, "design_ratio": 2.594641938768754, "kl": 0.313410687156846, "pilot_budget": 117, "policy": "A-OSQD", "replication": 155, "seed": 41600155}
+{"B_kl": 547.941225434436, "budget": 1600, "design_ratio": 2.835160345818548, "kl": 0.3424632658965225, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 155, "seed": 41600155}
+{"B_kl": 522.9338713998178, "budget": 1600, "design_ratio": 2.7057671641746928, "kl": 0.32683366962488614, "pilot_budget": 117, "policy": "RR-GID", "replication": 155, "seed": 41600155}
+{"B_kl": 639.7929205766585, "budget": 1600, "design_ratio": 3.310419865773401, "kl": 0.3998705753604116, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 57, "seed": 41600057}
+{"B_kl": 604.2137211661736, "budget": 1600, "design_ratio": 3.1263257866600793, "kl": 0.37763357572885853, "pilot_budget": 117, "policy": "A-OSQD", "replication": 57, "seed": 41600057}
+{"B_kl": 621.655914163929, "budget": 1600, "design_ratio": 3.216575272619348, "kl": 0.3885349463524556, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 57, "seed": 41600057}
+{"B_kl": 598.6597596272493, "budget": 1600, "design_ratio": 3.097588449904891, "kl": 0.3741623497670308, "pilot_budget": 117, "policy": "RR-GID", "replication": 57, "seed": 41600057}
+{"B_kl": 644.5085486376452, "budget": 1600, "design_ratio": 3.334819493075651, "kl": 0.40281784289852823, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 156, "seed": 41600156}
+{"B_kl": 658.6637885288493, "budget": 1600, "design_ratio": 3.4080616091315687, "kl": 0.4116648678305308, "pilot_budget": 117, "policy": "A-OSQD", "replication": 156, "seed": 41600156}
+{"B_kl": 652.597527689385, "budget": 1600, "design_ratio": 3.3766735306642017, "kl": 0.40787345480586557, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 156, "seed": 41600156}
+{"B_kl": 657.9305510831002, "budget": 1600, "design_ratio": 3.4042676881163927, "kl": 0.41120659442693763, "pilot_budget": 117, "policy": "RR-GID", "replication": 156, "seed": 41600156}
+{"B_kl": 633.5301854302218, "budget": 1600, "design_ratio": 3.2780151889224047, "kl": 0.3959563658938886, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 58, "seed": 41600058}
+{"B_kl": 658.8875286670163, "budget": 1600, "design_ratio": 3.4092192865211395, "kl": 0.4118047054168852, "pilot_budget": 117, "policy": "A-OSQD", "replication": 58, "seed": 41600058}
+{"B_kl": 676.4015826695772, "budget": 1600, "design_ratio": 3.4998405960661843, "kl": 0.42275098916848575, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 58, "seed": 41600058}
+{"B_kl": 670.0463634278944, "budget": 1600, "design_ratio": 3.4669573875273194, "kl": 0.41877897714243406, "pilot_budget": 117, "policy": "RR-GID", "replication": 58, "seed": 41600058}
+{"B_kl": 638.5950618553921, "budget": 1600, "design_ratio": 3.304221898931729, "kl": 0.3991219136596201, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 157, "seed": 41600157}
+{"B_kl": 638.8825355891097, "budget": 1600, "design_ratio": 3.305709347023729, "kl": 0.39930158474319355, "pilot_budget": 117, "policy": "A-OSQD", "replication": 157, "seed": 41600157}
+{"B_kl": 662.4325827324798, "budget": 1600, "design_ratio": 3.427562123751932, "kl": 0.41402036420779986, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 157, "seed": 41600157}
+{"B_kl": 658.4926497170605, "budget": 1600, "design_ratio": 3.407176101799228, "kl": 0.41155790607316284, "pilot_budget": 117, "policy": "RR-GID", "replication": 157, "seed": 41600157}
+{"B_kl": 203.58186789017515, "budget": 1600, "design_ratio": 1.053374362391279, "kl": 0.12723866743135948, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 59, "seed": 41600059}
+{"B_kl": 196.29404312751032, "budget": 1600, "design_ratio": 1.0156656615027853, "kl": 0.12268377695469396, "pilot_budget": 117, "policy": "A-OSQD", "replication": 59, "seed": 41600059}
+{"B_kl": 198.51549906280513, "budget": 1600, "design_ratio": 1.0271599303867107, "kl": 0.1240721869142532, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 59, "seed": 41600059}
+{"B_kl": 197.66004761682925, "budget": 1600, "design_ratio": 1.0227336490542906, "kl": 0.12353752976051828, "pilot_budget": 117, "policy": "RR-GID", "replication": 59, "seed": 41600059}
+{"B_kl": 626.5436412241206, "budget": 1600, "design_ratio": 3.241865375460675, "kl": 0.39158977576507537, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 158, "seed": 41600158}
+{"B_kl": 709.1268470650472, "budget": 1600, "design_ratio": 3.669167829743304, "kl": 0.4432042794156545, "pilot_budget": 117, "policy": "A-OSQD", "replication": 158, "seed": 41600158}
+{"B_kl": 713.8788482354263, "budget": 1600, "design_ratio": 3.693755658977836, "kl": 0.44617428014714144, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 158, "seed": 41600158}
+{"B_kl": 710.6684520571035, "budget": 1600, "design_ratio": 3.6771444103317217, "kl": 0.4441677825356897, "pilot_budget": 117, "policy": "RR-GID", "replication": 158, "seed": 41600158}
+{"B_kl": 631.8359343352616, "budget": 1600, "design_ratio": 3.2692487860723873, "kl": 0.39489745895953854, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 60, "seed": 41600060}
+{"B_kl": 657.2671246685145, "budget": 1600, "design_ratio": 3.4008349837026834, "kl": 0.41079195291782156, "pilot_budget": 117, "policy": "A-OSQD", "replication": 60, "seed": 41600060}
+{"B_kl": 570.2447329555125, "budget": 1600, "design_ratio": 2.9505632707331446, "kl": 0.35640295809719535, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 60, "seed": 41600060}
+{"B_kl": 654.3882034224351, "budget": 1600, "design_ratio": 3.38593885437942, "kl": 0.40899262713902196, "pilot_budget": 117, "policy": "RR-GID", "replication": 60, "seed": 41600060}
+{"B_kl": 348.43808917819155, "budget": 1600, "design_ratio": 1.8028901779156246, "kl": 0.2177738057363697, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 159, "seed": 41600159}
+{"B_kl": 341.4281278800958, "budget": 1600, "design_ratio": 1.7666191996143912, "kl": 0.2133925799250599, "pilot_budget": 117, "policy": "A-OSQD", "replication": 159, "seed": 41600159}
+{"B_kl": 349.1778664107228, "budget": 1600, "design_ratio": 1.8067179371296702, "kl": 0.21823616650670175, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 159, "seed": 41600159}
+{"B_kl": 343.7631532034022, "budget": 1600, "design_ratio": 1.7787010998179609, "kl": 0.2148519707521264, "pilot_budget": 117, "policy": "RR-GID", "replication": 159, "seed": 41600159}
+{"B_kl": 954.9927959237841, "budget": 1600, "design_ratio": 4.94132870436753, "kl": 0.5968704974523651, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 61, "seed": 41600061}
+{"B_kl": 949.0140191900322, "budget": 1600, "design_ratio": 4.910393286616116, "kl": 0.5931337619937701, "pilot_budget": 117, "policy": "A-OSQD", "replication": 61, "seed": 41600061}
+{"B_kl": 960.2193078383459, "budget": 1600, "design_ratio": 4.9683717495688935, "kl": 0.6001370673989662, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 61, "seed": 41600061}
+{"B_kl": 963.3646235629594, "budget": 1600, "design_ratio": 4.984646258592071, "kl": 0.6021028897268497, "pilot_budget": 117, "policy": "RR-GID", "replication": 61, "seed": 41600061}
+{"B_kl": 728.0954136593098, "budget": 1600, "design_ratio": 3.767315085924718, "kl": 0.4550596335370686, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 160, "seed": 41600160}
+{"B_kl": 738.5860109540623, "budget": 1600, "design_ratio": 3.8215955891492244, "kl": 0.46161625684628893, "pilot_budget": 117, "policy": "A-OSQD", "replication": 160, "seed": 41600160}
+{"B_kl": 732.2703392029827, "budget": 1600, "design_ratio": 3.7889170074424534, "kl": 0.45766896200186413, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 160, "seed": 41600160}
+{"B_kl": 736.0598938201907, "budget": 1600, "design_ratio": 3.808524940703003, "kl": 0.46003743363761923, "pilot_budget": 117, "policy": "RR-GID", "replication": 160, "seed": 41600160}
+{"B_kl": 741.7204210187779, "budget": 1600, "design_ratio": 3.8378136700500916, "kl": 0.46357526313673614, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 62, "seed": 41600062}
+{"B_kl": 744.5544304379754, "budget": 1600, "design_ratio": 3.852477416364516, "kl": 0.46534651902373464, "pilot_budget": 117, "policy": "A-OSQD", "replication": 62, "seed": 41600062}
+{"B_kl": 737.02951664059, "budget": 1600, "design_ratio": 3.813541968156298, "kl": 0.46064344790036876, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 62, "seed": 41600062}
+{"B_kl": 746.6635956973386, "budget": 1600, "design_ratio": 3.8633906702475094, "kl": 0.4666647473108366, "pilot_budget": 117, "policy": "RR-GID", "replication": 62, "seed": 41600062}
+{"B_kl": 382.4861612674574, "budget": 1600, "design_ratio": 1.97906189005961, "kl": 0.2390538507921609, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 161, "seed": 41600161}
+{"B_kl": 382.38649579205855, "budget": 1600, "design_ratio": 1.978546200437107, "kl": 0.2389915598700366, "pilot_budget": 117, "policy": "A-OSQD", "replication": 161, "seed": 41600161}
+{"B_kl": 379.64175812900146, "budget": 1600, "design_ratio": 1.9643443645088023, "kl": 0.23727609883062592, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 161, "seed": 41600161}
+{"B_kl": 381.4842885167897, "budget": 1600, "design_ratio": 1.9738779948489562, "kl": 0.23842768032299358, "pilot_budget": 117, "policy": "RR-GID", "replication": 161, "seed": 41600161}
+{"B_kl": 716.604718509304, "budget": 1600, "design_ratio": 3.7078598711626674, "kl": 0.447877949068315, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 63, "seed": 41600063}
+{"B_kl": 717.8370739686376, "budget": 1600, "design_ratio": 3.7142363312063247, "kl": 0.44864817123039846, "pilot_budget": 117, "policy": "A-OSQD", "replication": 63, "seed": 41600063}
+{"B_kl": 719.1151326015456, "budget": 1600, "design_ratio": 3.7208492688490056, "kl": 0.449446957875966, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 63, "seed": 41600063}
+{"B_kl": 718.776039774784, "budget": 1600, "design_ratio": 3.719094732976615, "kl": 0.44923502485923994, "pilot_budget": 117, "policy": "RR-GID", "replication": 63, "seed": 41600063}
+{"B_kl": 386.0467602837382, "budget": 1600, "design_ratio": 1.9974851600559784, "kl": 0.24127922517733635, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 162, "seed": 41600162}
+{"B_kl": 378.6682081850905, "budget": 1600, "design_ratio": 1.9593070173125553, "kl": 0.23666763011568157, "pilot_budget": 117, "policy": "A-OSQD", "replication": 162, "seed": 41600162}
+{"B_kl": 411.2418910448421, "budget": 1600, "design_ratio": 2.1278499370171566, "kl": 0.2570261819030263, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 162, "seed": 41600162}
+{"B_kl": 393.85124434156904, "budget": 1600, "design_ratio": 2.0378671621635798, "kl": 0.24615702771348064, "pilot_budget": 117, "policy": "RR-GID", "replication": 162, "seed": 41600162}
+{"B_kl": 419.08517245853255, "budget": 1600, "design_ratio": 2.1684326846057513, "kl": 0.26192823278658284, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 64, "seed": 41600064}
+{"B_kl": 416.6047003021221, "budget": 1600, "design_ratio": 2.1555982126399194, "kl": 0.26037793768882633, "pilot_budget": 117, "policy": "A-OSQD", "replication": 64, "seed": 41600064}
+{"B_kl": 452.2438470528411, "budget": 1600, "design_ratio": 2.3400024715936687, "kl": 0.2826524044080257, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 64, "seed": 41600064}
+{"B_kl": 416.157550076138, "budget": 1600, "design_ratio": 2.1532845656090194, "kl": 0.26009846879758625, "pilot_budget": 117, "policy": "RR-GID", "replication": 64, "seed": 41600064}
+{"B_kl": 650.2086958279696, "budget": 1600, "design_ratio": 3.364313224390581, "kl": 0.406380434892481, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 163, "seed": 41600163}
+{"B_kl": 648.6030962532208, "budget": 1600, "design_ratio": 3.356005522698704, "kl": 0.405376935158263, "pilot_budget": 117, "policy": "A-OSQD", "replication": 163, "seed": 41600163}
+{"B_kl": 648.1991295200468, "budget": 1600, "design_ratio": 3.353915315921477, "kl": 0.4051244559500292, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 163, "seed": 41600163}
+{"B_kl": 652.1467724895546, "budget": 1600, "design_ratio": 3.374341230758829, "kl": 0.4075917328059716, "pilot_budget": 117, "policy": "RR-GID", "replication": 163, "seed": 41600163}
+{"B_kl": 666.6990592154704, "budget": 1600, "design_ratio": 3.4496377486172665, "kl": 0.41668691200966895, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 65, "seed": 41600065}
+{"B_kl": 637.8179831793714, "budget": 1600, "design_ratio": 3.300201134394276, "kl": 0.3986362394871071, "pilot_budget": 117, "policy": "A-OSQD", "replication": 65, "seed": 41600065}
+{"B_kl": 680.0824179942888, "budget": 1600, "design_ratio": 3.518885993396594, "kl": 0.4250515112464305, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 65, "seed": 41600065}
+{"B_kl": 662.9382161330684, "budget": 1600, "design_ratio": 3.430178374729824, "kl": 0.4143363850831677, "pilot_budget": 117, "policy": "RR-GID", "replication": 65, "seed": 41600065}
+{"B_kl": 512.9019645345712, "budget": 1600, "design_ratio": 2.653860019362324, "kl": 0.320563727834107, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 66, "seed": 41600066}
+{"B_kl": 499.08864188508414, "budget": 1600, "design_ratio": 2.582387053281386, "kl": 0.3119304011781776, "pilot_budget": 117, "policy": "A-OSQD", "replication": 66, "seed": 41600066}
+{"B_kl": 514.639693399832, "budget": 1600, "design_ratio": 2.6628513851181412, "kl": 0.32164980837489504, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 66, "seed": 41600066}
+{"B_kl": 520.1519838032441, "budget": 1600, "design_ratio": 2.691373106866672, "kl": 0.32509498987702756, "pilot_budget": 117, "policy": "RR-GID", "replication": 66, "seed": 41600066}
+{"B_kl": 695.5364144695214, "budget": 1600, "design_ratio": 3.598848142541807, "kl": 0.4347102590434509, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 164, "seed": 41600164}
+{"B_kl": 699.0562766456047, "budget": 1600, "design_ratio": 3.6170606317672083, "kl": 0.4369101729035029, "pilot_budget": 117, "policy": "A-OSQD", "replication": 164, "seed": 41600164}
+{"B_kl": 693.7361708318684, "budget": 1600, "design_ratio": 3.5895333125247024, "kl": 0.4335851067699178, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 164, "seed": 41600164}
+{"B_kl": 700.1688948715307, "budget": 1600, "design_ratio": 3.6228175467934127, "kl": 0.4376055592947067, "pilot_budget": 117, "policy": "RR-GID", "replication": 164, "seed": 41600164}
+{"B_kl": 676.1584574599946, "budget": 1600, "design_ratio": 3.498582616339014, "kl": 0.4225990359124966, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 67, "seed": 41600067}
+{"B_kl": 666.9791995573294, "budget": 1600, "design_ratio": 3.4510872522348723, "kl": 0.4168619997233308, "pilot_budget": 117, "policy": "A-OSQD", "replication": 67, "seed": 41600067}
+{"B_kl": 678.6441917651023, "budget": 1600, "design_ratio": 3.511444315742074, "kl": 0.4241526198531889, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 67, "seed": 41600067}
+{"B_kl": 677.4017197507519, "budget": 1600, "design_ratio": 3.505015510566697, "kl": 0.42337607484421996, "pilot_budget": 117, "policy": "RR-GID", "replication": 67, "seed": 41600067}
+{"B_kl": 343.95383582009174, "budget": 1600, "design_ratio": 1.7796877308075278, "kl": 0.21497114738755732, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 165, "seed": 41600165}
+{"B_kl": 333.6403616541029, "budget": 1600, "design_ratio": 1.7263236989994588, "kl": 0.2085252260338143, "pilot_budget": 117, "policy": "A-OSQD", "replication": 165, "seed": 41600165}
+{"B_kl": 348.08207460808643, "budget": 1600, "design_ratio": 1.8010480854705904, "kl": 0.21755129663005401, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 165, "seed": 41600165}
+{"B_kl": 335.89889266461955, "budget": 1600, "design_ratio": 1.738009801930921, "kl": 0.2099368079153872, "pilot_budget": 117, "policy": "RR-GID", "replication": 165, "seed": 41600165}
+{"B_kl": 692.4413762293437, "budget": 1600, "design_ratio": 3.5828337795407634, "kl": 0.43277586014333985, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 68, "seed": 41600068}
+{"B_kl": 697.7040755227329, "budget": 1600, "design_ratio": 3.6100640656663496, "kl": 0.436065047201708, "pilot_budget": 117, "policy": "A-OSQD", "replication": 68, "seed": 41600068}
+{"B_kl": 687.2355225873248, "budget": 1600, "design_ratio": 3.5558976244809117, "kl": 0.429522201617078, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 68, "seed": 41600068}
+{"B_kl": 697.9050334674222, "budget": 1600, "design_ratio": 3.611103863311633, "kl": 0.43619064591713885, "pilot_budget": 117, "policy": "RR-GID", "replication": 68, "seed": 41600068}
+{"B_kl": 607.5436631944622, "budget": 1600, "design_ratio": 3.1435555900664442, "kl": 0.37971478949653886, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 166, "seed": 41600166}
+{"B_kl": 580.2028235333602, "budget": 1600, "design_ratio": 3.002088474926347, "kl": 0.3626267647083501, "pilot_budget": 117, "policy": "A-OSQD", "replication": 166, "seed": 41600166}
+{"B_kl": 611.0055497407823, "budget": 1600, "design_ratio": 3.161468101486018, "kl": 0.3818784685879889, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 166, "seed": 41600166}
+{"B_kl": 585.6773963003984, "budget": 1600, "design_ratio": 3.0304150378840786, "kl": 0.36604837268774904, "pilot_budget": 117, "policy": "RR-GID", "replication": 166, "seed": 41600166}
+{"B_kl": 689.6869153700806, "budget": 1600, "design_ratio": 3.5685816337999485, "kl": 0.43105432210630035, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 69, "seed": 41600069}
+{"B_kl": 679.0000874970874, "budget": 1600, "design_ratio": 3.5132857932942883, "kl": 0.4243750546856796, "pilot_budget": 117, "policy": "A-OSQD", "replication": 69, "seed": 41600069}
+{"B_kl": 694.7067241936758, "budget": 1600, "design_ratio": 3.594555154790203, "kl": 0.43419170262104734, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 69, "seed": 41600069}
+{"B_kl": 690.519292550492, "budget": 1600, "design_ratio": 3.572888524147167, "kl": 0.43157455784405746, "pilot_budget": 117, "policy": "RR-GID", "replication": 69, "seed": 41600069}
+{"B_kl": 659.564562299208, "budget": 1600, "design_ratio": 3.4127223974711383, "kl": 0.41222785143700497, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 167, "seed": 41600167}
+{"B_kl": 668.3491220773712, "budget": 1600, "design_ratio": 3.4581755124813744, "kl": 0.417718201298357, "pilot_budget": 117, "policy": "A-OSQD", "replication": 167, "seed": 41600167}
+{"B_kl": 660.9566016801699, "budget": 1600, "design_ratio": 3.4199250948947393, "kl": 0.4130978760501062, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 167, "seed": 41600167}
+{"B_kl": 671.640085193311, "budget": 1600, "design_ratio": 3.4752036309962144, "kl": 0.41977505324581943, "pilot_budget": 117, "policy": "RR-GID", "replication": 167, "seed": 41600167}
+{"B_kl": 812.5559783611889, "budget": 1600, "design_ratio": 4.204331380214957, "kl": 0.5078474864757431, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 70, "seed": 41600070}
+{"B_kl": 811.019350605166, "budget": 1600, "design_ratio": 4.196380552867177, "kl": 0.5068870941282287, "pilot_budget": 117, "policy": "A-OSQD", "replication": 70, "seed": 41600070}
+{"B_kl": 817.2299601826659, "budget": 1600, "design_ratio": 4.228515521327577, "kl": 0.5107687251141662, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 70, "seed": 41600070}
+{"B_kl": 812.6503351794657, "budget": 1600, "design_ratio": 4.204819601756098, "kl": 0.5079064594871661, "pilot_budget": 117, "policy": "RR-GID", "replication": 70, "seed": 41600070}
+{"B_kl": 594.4361584972514, "budget": 1600, "design_ratio": 3.07573467091458, "kl": 0.3715225990607821, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 168, "seed": 41600168}
+{"B_kl": 609.7592117542065, "budget": 1600, "design_ratio": 3.155019292976993, "kl": 0.38109950734637904, "pilot_budget": 117, "policy": "A-OSQD", "replication": 168, "seed": 41600168}
+{"B_kl": 623.9014406813769, "budget": 1600, "design_ratio": 3.228194087634964, "kl": 0.3899384004258606, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 168, "seed": 41600168}
+{"B_kl": 618.9295344531259, "budget": 1600, "design_ratio": 3.2024684245033215, "kl": 0.3868309590332037, "pilot_budget": 117, "policy": "RR-GID", "replication": 168, "seed": 41600168}
+{"B_kl": 590.0651401180276, "budget": 1600, "design_ratio": 3.0531181248246337, "kl": 0.3687907125737672, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 71, "seed": 41600071}
+{"B_kl": 543.2780649444219, "budget": 1600, "design_ratio": 2.81103219649561, "kl": 0.33954879059026366, "pilot_budget": 117, "policy": "A-OSQD", "replication": 71, "seed": 41600071}
+{"B_kl": 597.6799305652835, "budget": 1600, "design_ratio": 3.092518613263263, "kl": 0.37354995660330215, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 71, "seed": 41600071}
+{"B_kl": 561.8137634817647, "budget": 1600, "design_ratio": 2.9069397045197705, "kl": 0.35113360217610295, "pilot_budget": 117, "policy": "RR-GID", "replication": 71, "seed": 41600071}
+{"B_kl": 447.5710590104983, "budget": 1600, "design_ratio": 2.3158245073392694, "kl": 0.27973191188156143, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 169, "seed": 41600169}
+{"B_kl": 444.34435929803726, "budget": 1600, "design_ratio": 2.299128900861804, "kl": 0.2777152245612733, "pilot_budget": 117, "policy": "A-OSQD", "replication": 169, "seed": 41600169}
+{"B_kl": 454.798622725418, "budget": 1600, "design_ratio": 2.353221405200296, "kl": 0.28424913920338624, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 169, "seed": 41600169}
+{"B_kl": 450.68810051746783, "budget": 1600, "design_ratio": 2.331952719758081, "kl": 0.2816800628234174, "pilot_budget": 117, "policy": "RR-GID", "replication": 169, "seed": 41600169}
+{"B_kl": 613.3258708822713, "budget": 1600, "design_ratio": 3.1734739192353545, "kl": 0.3833286693014195, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 72, "seed": 41600072}
+{"B_kl": 555.9048626303596, "budget": 1600, "design_ratio": 2.876365838923155, "kl": 0.34744053914397477, "pilot_budget": 117, "policy": "A-OSQD", "replication": 72, "seed": 41600072}
+{"B_kl": 636.0183266925175, "budget": 1600, "design_ratio": 3.290889342415898, "kl": 0.3975114541828234, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 72, "seed": 41600072}
+{"B_kl": 591.5765813883347, "budget": 1600, "design_ratio": 3.0609386321266916, "kl": 0.3697353633677092, "pilot_budget": 117, "policy": "RR-GID", "replication": 72, "seed": 41600072}
+{"B_kl": 258.083173775444, "budget": 1600, "design_ratio": 1.3353753034935474, "kl": 0.16130198360965248, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 170, "seed": 41600170}
+{"B_kl": 260.4987026583272, "budget": 1600, "design_ratio": 1.3478737456348557, "kl": 0.1628116891614545, "pilot_budget": 117, "policy": "A-OSQD", "replication": 170, "seed": 41600170}
+{"B_kl": 257.6693357906099, "budget": 1600, "design_ratio": 1.333234020834509, "kl": 0.1610433348691312, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 170, "seed": 41600170}
+{"B_kl": 257.24144309655895, "budget": 1600, "design_ratio": 1.3310200162257542, "kl": 0.16077590193534935, "pilot_budget": 117, "policy": "RR-GID", "replication": 170, "seed": 41600170}
+{"B_kl": 726.5597174080747, "budget": 1600, "design_ratio": 3.7593690783738687, "kl": 0.4540998233800467, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 73, "seed": 41600073}
+{"B_kl": 720.114567925817, "budget": 1600, "design_ratio": 3.7260205523152896, "kl": 0.45007160495363563, "pilot_budget": 117, "policy": "A-OSQD", "replication": 73, "seed": 41600073}
+{"B_kl": 732.8821885715215, "budget": 1600, "design_ratio": 3.792082841635564, "kl": 0.4580513678572009, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 73, "seed": 41600073}
+{"B_kl": 726.5269797093621, "budget": 1600, "design_ratio": 3.759199686802483, "kl": 0.45407936231835133, "pilot_budget": 117, "policy": "RR-GID", "replication": 73, "seed": 41600073}
+{"B_kl": 246.8543082921756, "budget": 1600, "design_ratio": 1.2772748491584092, "kl": 0.15428394268260975, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 171, "seed": 41600171}
+{"B_kl": 250.3388142640602, "budget": 1600, "design_ratio": 1.295304398127685, "kl": 0.15646175891503764, "pilot_budget": 117, "policy": "A-OSQD", "replication": 171, "seed": 41600171}
+{"B_kl": 246.03935060277428, "budget": 1600, "design_ratio": 1.273058090832407, "kl": 0.15377459412673392, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 171, "seed": 41600171}
+{"B_kl": 248.23170542883574, "budget": 1600, "design_ratio": 1.2844017846051932, "kl": 0.15514481589302234, "pilot_budget": 117, "policy": "RR-GID", "replication": 171, "seed": 41600171}
+{"B_kl": 1295.7752286229465, "budget": 1600, "design_ratio": 6.704606944609833, "kl": 0.8098595178893415, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 74, "seed": 41600074}
+{"B_kl": 1248.4546821579997, "budget": 1600, "design_ratio": 6.459760726343428, "kl": 0.7802841763487498, "pilot_budget": 117, "policy": "A-OSQD", "replication": 74, "seed": 41600074}
+{"B_kl": 1309.599681932998, "budget": 1600, "design_ratio": 6.776137503012703, "kl": 0.8184998012081237, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 74, "seed": 41600074}
+{"B_kl": 1284.1777227252849, "budget": 1600, "design_ratio": 6.644599069120308, "kl": 0.802611076703303, "pilot_budget": 117, "policy": "RR-GID", "replication": 74, "seed": 41600074}
+{"B_kl": 692.2888609690173, "budget": 1600, "design_ratio": 3.5820446342855092, "kl": 0.4326805381056358, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 75, "seed": 41600075}
+{"B_kl": 675.594313373474, "budget": 1600, "design_ratio": 3.4956636190648758, "kl": 0.4222464458584213, "pilot_budget": 117, "policy": "A-OSQD", "replication": 75, "seed": 41600075}
+{"B_kl": 660.6847072274404, "budget": 1600, "design_ratio": 3.4185182571996644, "kl": 0.4129279420171503, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 75, "seed": 41600075}
+{"B_kl": 682.8199794897181, "budget": 1600, "design_ratio": 3.5330506983609395, "kl": 0.4267624871810738, "pilot_budget": 117, "policy": "RR-GID", "replication": 75, "seed": 41600075}
+{"B_kl": 782.4225085670371, "budget": 1600, "design_ratio": 4.048414623678589, "kl": 0.48901406785439816, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 76, "seed": 41600076}
+{"B_kl": 766.8568148123595, "budget": 1600, "design_ratio": 3.9678745298876397, "kl": 0.47928550925772473, "pilot_budget": 117, "policy": "A-OSQD", "replication": 76, "seed": 41600076}
+{"B_kl": 781.8256162291691, "budget": 1600, "design_ratio": 4.045326180231567, "kl": 0.4886410101432307, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 76, "seed": 41600076}
+{"B_kl": 781.3583541950544, "budget": 1600, "design_ratio": 4.042908470578167, "kl": 0.488348971371909, "pilot_budget": 117, "policy": "RR-GID", "replication": 76, "seed": 41600076}
+{"B_kl": 156.8697901713535, "budget": 1600, "design_ratio": 0.811676486283864, "kl": 0.09804361885709592, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 77, "seed": 41600077}
+{"B_kl": 152.89469362395022, "budget": 1600, "design_ratio": 0.7911085210006121, "kl": 0.09555918351496888, "pilot_budget": 117, "policy": "A-OSQD", "replication": 77, "seed": 41600077}
+{"B_kl": 156.5819580548411, "budget": 1600, "design_ratio": 0.8101871838457386, "kl": 0.09786372378427569, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 77, "seed": 41600077}
+{"B_kl": 155.6144616136693, "budget": 1600, "design_ratio": 0.8051811587149301, "kl": 0.09725903850854332, "pilot_budget": 117, "policy": "RR-GID", "replication": 77, "seed": 41600077}
+{"B_kl": 644.9248032176779, "budget": 1600, "design_ratio": 3.3369732796941673, "kl": 0.4030780020110487, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 78, "seed": 41600078}
+{"B_kl": 651.4098998363683, "budget": 1600, "design_ratio": 3.3705285004343755, "kl": 0.40713118739773013, "pilot_budget": 117, "policy": "A-OSQD", "replication": 78, "seed": 41600078}
+{"B_kl": 642.3442436666793, "budget": 1600, "design_ratio": 3.3236209350093633, "kl": 0.40146515229167457, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 78, "seed": 41600078}
+{"B_kl": 648.1423826703013, "budget": 1600, "design_ratio": 3.3536216960756247, "kl": 0.4050889891689383, "pilot_budget": 117, "policy": "RR-GID", "replication": 78, "seed": 41600078}
+{"B_kl": 499.64219452415637, "budget": 1600, "design_ratio": 2.5852512482329093, "kl": 0.31227637157759774, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 79, "seed": 41600079}
+{"B_kl": 521.0899021271941, "budget": 1600, "design_ratio": 2.6962260887491203, "kl": 0.32568118882949637, "pilot_budget": 117, "policy": "A-OSQD", "replication": 79, "seed": 41600079}
+{"B_kl": 512.9869565213762, "budget": 1600, "design_ratio": 2.654299785343631, "kl": 0.32061684782586014, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 79, "seed": 41600079}
+{"B_kl": 524.3875991230361, "budget": 1600, "design_ratio": 2.7132890497404625, "kl": 0.32774224945189756, "pilot_budget": 117, "policy": "RR-GID", "replication": 79, "seed": 41600079}
+{"B_kl": 354.27901738732777, "budget": 1600, "design_ratio": 1.833112339112177, "kl": 0.22142438586707985, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 80, "seed": 41600080}
+{"B_kl": 363.67785208817816, "budget": 1600, "design_ratio": 1.8817438386304457, "kl": 0.22729865755511133, "pilot_budget": 117, "policy": "A-OSQD", "replication": 80, "seed": 41600080}
+{"B_kl": 355.2833324990589, "budget": 1600, "design_ratio": 1.8383088716001803, "kl": 0.2220520828119118, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 80, "seed": 41600080}
+{"B_kl": 358.8714745957811, "budget": 1600, "design_ratio": 1.8568746551469895, "kl": 0.2242946716223632, "pilot_budget": 117, "policy": "RR-GID", "replication": 80, "seed": 41600080}
+{"B_kl": 570.8570682161233, "budget": 1600, "design_ratio": 2.9537316190315472, "kl": 0.356785667635077, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 81, "seed": 41600081}
+{"B_kl": 576.7347431372507, "budget": 1600, "design_ratio": 2.984143915256896, "kl": 0.36045921446078166, "pilot_budget": 117, "policy": "A-OSQD", "replication": 81, "seed": 41600081}
+{"B_kl": 577.2521419840274, "budget": 1600, "design_ratio": 2.986821043067804, "kl": 0.3607825887400171, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 81, "seed": 41600081}
+{"B_kl": 583.3493728880919, "budget": 1600, "design_ratio": 3.0183693670049148, "kl": 0.36459335805505744, "pilot_budget": 117, "policy": "RR-GID", "replication": 81, "seed": 41600081}
+{"B_kl": 452.71318345690935, "budget": 1600, "design_ratio": 2.3424309144628985, "kl": 0.28294573966056835, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 82, "seed": 41600082}
+{"B_kl": 459.99816328339625, "budget": 1600, "design_ratio": 2.3801248950677856, "kl": 0.28749885205212267, "pilot_budget": 117, "policy": "A-OSQD", "replication": 82, "seed": 41600082}
+{"B_kl": 452.24076889278103, "budget": 1600, "design_ratio": 2.339986544561835, "kl": 0.28265048055798814, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 82, "seed": 41600082}
+{"B_kl": 459.9689367178562, "budget": 1600, "design_ratio": 2.37997367081997, "kl": 0.2874805854486601, "pilot_budget": 117, "policy": "RR-GID", "replication": 82, "seed": 41600082}
+{"B_kl": 499.4983612773508, "budget": 1600, "design_ratio": 2.5845070254972864, "kl": 0.31218647579834424, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 83, "seed": 41600083}
+{"B_kl": 536.9906481811076, "budget": 1600, "design_ratio": 2.7784998118938677, "kl": 0.3356191551131923, "pilot_budget": 117, "policy": "A-OSQD", "replication": 83, "seed": 41600083}
+{"B_kl": 502.077364788932, "budget": 1600, "design_ratio": 2.597851318914823, "kl": 0.3137983529930825, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 83, "seed": 41600083}
+{"B_kl": 503.1450323395191, "budget": 1600, "design_ratio": 2.603375649922299, "kl": 0.31446564521219944, "pilot_budget": 117, "policy": "RR-GID", "replication": 83, "seed": 41600083}
+{"B_kl": 860.1365955500997, "budget": 1600, "design_ratio": 4.450523257777405, "kl": 0.5375853722188123, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 84, "seed": 41600084}
+{"B_kl": 859.2713622892107, "budget": 1600, "design_ratio": 4.446046363327255, "kl": 0.5370446014307567, "pilot_budget": 117, "policy": "A-OSQD", "replication": 84, "seed": 41600084}
+{"B_kl": 865.0621593988417, "budget": 1600, "design_ratio": 4.476009135927344, "kl": 0.540663849624276, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 84, "seed": 41600084}
+{"B_kl": 881.7191415618354, "budget": 1600, "design_ratio": 4.562195779891, "kl": 0.5510744634761471, "pilot_budget": 117, "policy": "RR-GID", "replication": 84, "seed": 41600084}
+{"B_kl": 708.6632328847676, "budget": 1600, "design_ratio": 3.6667689948342392, "kl": 0.44291452055297975, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 85, "seed": 41600085}
+{"B_kl": 711.5692743878626, "budget": 1600, "design_ratio": 3.6818054499327686, "kl": 0.44473079649241415, "pilot_budget": 117, "policy": "A-OSQD", "replication": 85, "seed": 41600085}
+{"B_kl": 703.2881361536859, "budget": 1600, "design_ratio": 3.6389571413004607, "kl": 0.4395550850960537, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 85, "seed": 41600085}
+{"B_kl": 715.8747291022969, "budget": 1600, "design_ratio": 3.7040827561664864, "kl": 0.4474217056889356, "pilot_budget": 117, "policy": "RR-GID", "replication": 85, "seed": 41600085}
+{"B_kl": 825.2156461913787, "budget": 1600, "design_ratio": 4.269835099514288, "kl": 0.5157597788696117, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 86, "seed": 41600086}
+{"B_kl": 843.6700980188792, "budget": 1600, "design_ratio": 4.365322220388731, "kl": 0.5272938112617995, "pilot_budget": 117, "policy": "A-OSQD", "replication": 86, "seed": 41600086}
+{"B_kl": 823.1849180706402, "budget": 1600, "design_ratio": 4.259327695482968, "kl": 0.5144905737941501, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 86, "seed": 41600086}
+{"B_kl": 846.5567769346588, "budget": 1600, "design_ratio": 4.380258489487009, "kl": 0.5290979855841618, "pilot_budget": 117, "policy": "RR-GID", "replication": 86, "seed": 41600086}
+{"B_kl": 735.5172985169784, "budget": 1600, "design_ratio": 3.8057174412558212, "kl": 0.4596983115731115, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 87, "seed": 41600087}
+{"B_kl": 652.4133329472872, "budget": 1600, "design_ratio": 3.375720469269178, "kl": 0.40775833309205456, "pilot_budget": 117, "policy": "A-OSQD", "replication": 87, "seed": 41600087}
+{"B_kl": 718.6894230664959, "budget": 1600, "design_ratio": 3.7186465603529384, "kl": 0.4491808894165599, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 87, "seed": 41600087}
+{"B_kl": 713.7570841488307, "budget": 1600, "design_ratio": 3.6931256266060486, "kl": 0.4460981775930192, "pilot_budget": 117, "policy": "RR-GID", "replication": 87, "seed": 41600087}
+{"B_kl": 637.4366533079217, "budget": 1600, "design_ratio": 3.298228055385021, "kl": 0.39839790831745103, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 88, "seed": 41600088}
+{"B_kl": 656.5474519294793, "budget": 1600, "design_ratio": 3.397111249263718, "kl": 0.41034215745592456, "pilot_budget": 117, "policy": "A-OSQD", "replication": 88, "seed": 41600088}
+{"B_kl": 654.4449486836337, "budget": 1600, "design_ratio": 3.386232466005805, "kl": 0.40902809292727105, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 88, "seed": 41600088}
+{"B_kl": 639.8714695896681, "budget": 1600, "design_ratio": 3.3108262944860996, "kl": 0.39991966849354255, "pilot_budget": 117, "policy": "RR-GID", "replication": 88, "seed": 41600088}
+{"B_kl": 671.5167519730663, "budget": 1600, "design_ratio": 3.4745654796049172, "kl": 0.41969796998316644, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 89, "seed": 41600089}
+{"B_kl": 679.6774265072951, "budget": 1600, "design_ratio": 3.5167904843328106, "kl": 0.42479839156705945, "pilot_budget": 117, "policy": "A-OSQD", "replication": 89, "seed": 41600089}
+{"B_kl": 671.8187601001543, "budget": 1600, "design_ratio": 3.476128131630882, "kl": 0.41988672506259644, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 89, "seed": 41600089}
+{"B_kl": 680.1689988860153, "budget": 1600, "design_ratio": 3.5193339806980313, "kl": 0.42510562430375953, "pilot_budget": 117, "policy": "RR-GID", "replication": 89, "seed": 41600089}
+{"B_kl": 747.6985441584068, "budget": 1600, "design_ratio": 3.868745705971387, "kl": 0.46731159009900425, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 90, "seed": 41600090}
+{"B_kl": 748.2944423881596, "budget": 1600, "design_ratio": 3.871829005699016, "kl": 0.46768402649259977, "pilot_budget": 117, "policy": "A-OSQD", "replication": 90, "seed": 41600090}
+{"B_kl": 764.2886781530717, "budget": 1600, "design_ratio": 3.954586463793903, "kl": 0.47768042384566983, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 90, "seed": 41600090}
+{"B_kl": 749.6761246446415, "budget": 1600, "design_ratio": 3.8789781132351253, "kl": 0.4685475779029009, "pilot_budget": 117, "policy": "RR-GID", "replication": 90, "seed": 41600090}
+{"B_kl": 578.1253923325122, "budget": 1600, "design_ratio": 2.9913394195743965, "kl": 0.36132837020782016, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 91, "seed": 41600091}
+{"B_kl": 582.202880495371, "budget": 1600, "design_ratio": 3.0124371800882477, "kl": 0.3638768003096069, "pilot_budget": 117, "policy": "A-OSQD", "replication": 91, "seed": 41600091}
+{"B_kl": 576.3466363312601, "budget": 1600, "design_ratio": 2.982135770997602, "kl": 0.3602166477070376, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 91, "seed": 41600091}
+{"B_kl": 583.992216344118, "budget": 1600, "design_ratio": 3.021695570967118, "kl": 0.36499513521507376, "pilot_budget": 117, "policy": "RR-GID", "replication": 91, "seed": 41600091}
+{"B_kl": 592.4848427514502, "budget": 1600, "design_ratio": 3.0656381628077467, "kl": 0.37030302671965637, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 92, "seed": 41600092}
+{"B_kl": 602.9712963822845, "budget": 1600, "design_ratio": 3.119897225864801, "kl": 0.37685706023892784, "pilot_budget": 117, "policy": "A-OSQD", "replication": 92, "seed": 41600092}
+{"B_kl": 607.3501422579886, "budget": 1600, "design_ratio": 3.1425542730278506, "kl": 0.3795938389112429, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 92, "seed": 41600092}
+{"B_kl": 606.3325502295648, "budget": 1600, "design_ratio": 3.1372890430482654, "kl": 0.37895784389347803, "pilot_budget": 117, "policy": "RR-GID", "replication": 92, "seed": 41600092}
+{"B_kl": 284.87219904248775, "budget": 1600, "design_ratio": 1.473987217718537, "kl": 0.17804512440155484, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 93, "seed": 41600093}
+{"B_kl": 312.8714580911885, "budget": 1600, "design_ratio": 1.618861129887199, "kl": 0.19554466130699283, "pilot_budget": 117, "policy": "A-OSQD", "replication": 93, "seed": 41600093}
+{"B_kl": 321.2429797295614, "budget": 1600, "design_ratio": 1.6621771008007922, "kl": 0.20077686233097586, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 93, "seed": 41600093}
+{"B_kl": 303.4313480438751, "budget": 1600, "design_ratio": 1.5700160632560358, "kl": 0.18964459252742194, "pilot_budget": 117, "policy": "RR-GID", "replication": 93, "seed": 41600093}
+{"B_kl": 554.5568784703515, "budget": 1600, "design_ratio": 2.869391092253535, "kl": 0.34659804904396974, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 94, "seed": 41600094}
+{"B_kl": 565.1030339857601, "budget": 1600, "design_ratio": 2.923959065113061, "kl": 0.3531893962411001, "pilot_budget": 117, "policy": "A-OSQD", "replication": 94, "seed": 41600094}
+{"B_kl": 565.7947148105601, "budget": 1600, "design_ratio": 2.92753796364343, "kl": 0.35362169675660005, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 94, "seed": 41600094}
+{"B_kl": 603.0492075933356, "budget": 1600, "design_ratio": 3.1203003544592804, "kl": 0.37690575474583476, "pilot_budget": 117, "policy": "RR-GID", "replication": 94, "seed": 41600094}
+{"B_kl": 364.99211101600486, "budget": 1600, "design_ratio": 1.888544084027857, "kl": 0.22812006938500304, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 95, "seed": 41600095}
+{"B_kl": 355.0998237388619, "budget": 1600, "design_ratio": 1.837359359616284, "kl": 0.22193738983678868, "pilot_budget": 117, "policy": "A-OSQD", "replication": 95, "seed": 41600095}
+{"B_kl": 366.880889193602, "budget": 1600, "design_ratio": 1.8983170099231939, "kl": 0.22930055574600125, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 95, "seed": 41600095}
+{"B_kl": 359.61582533346103, "budget": 1600, "design_ratio": 1.8607260786152233, "kl": 0.22475989083341316, "pilot_budget": 117, "policy": "RR-GID", "replication": 95, "seed": 41600095}
+{"B_kl": 887.8983014376856, "budget": 1600, "design_ratio": 4.594168021141134, "kl": 0.5549364383985536, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 96, "seed": 41600096}
+{"B_kl": 836.406763275744, "budget": 1600, "design_ratio": 4.327740235886988, "kl": 0.52275422704734, "pilot_budget": 117, "policy": "A-OSQD", "replication": 96, "seed": 41600096}
+{"B_kl": 906.244918260119, "budget": 1600, "design_ratio": 4.689097181570064, "kl": 0.5664030739125744, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 96, "seed": 41600096}
+{"B_kl": 850.5162957461127, "budget": 1600, "design_ratio": 4.400745852367683, "kl": 0.5315726848413205, "pilot_budget": 117, "policy": "RR-GID", "replication": 96, "seed": 41600096}
+{"B_kl": 561.3958082297495, "budget": 1600, "design_ratio": 2.904777118275414, "kl": 0.3508723801435934, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 97, "seed": 41600097}
+{"B_kl": 618.6421631317626, "budget": 1600, "design_ratio": 3.2009815063138594, "kl": 0.3866513519573516, "pilot_budget": 117, "policy": "A-OSQD", "replication": 97, "seed": 41600097}
+{"B_kl": 561.3004143410428, "budget": 1600, "design_ratio": 2.9042835307190478, "kl": 0.3508127589631518, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 97, "seed": 41600097}
+{"B_kl": 615.7142764205921, "budget": 1600, "design_ratio": 3.185832019625797, "kl": 0.38482142276287007, "pilot_budget": 117, "policy": "RR-GID", "replication": 97, "seed": 41600097}
+{"B_kl": 678.6126833735725, "budget": 1600, "design_ratio": 3.511281284858324, "kl": 0.4241329271084828, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 98, "seed": 41600098}
+{"B_kl": 635.2738801697445, "budget": 1600, "design_ratio": 3.2870374233359367, "kl": 0.39704617510609036, "pilot_budget": 117, "policy": "A-OSQD", "replication": 98, "seed": 41600098}
+{"B_kl": 680.6751094842975, "budget": 1600, "design_ratio": 3.521952700794718, "kl": 0.42542194342768597, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 98, "seed": 41600098}
+{"B_kl": 655.9659657402821, "budget": 1600, "design_ratio": 3.394102520391481, "kl": 0.40997872858767626, "pilot_budget": 117, "policy": "RR-GID", "replication": 98, "seed": 41600098}
+{"B_kl": 889.2122665701479, "budget": 1600, "design_ratio": 4.6009667463810375, "kl": 0.5557576666063424, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 99, "seed": 41600099}
+{"B_kl": 816.1139557770117, "budget": 1600, "design_ratio": 4.222741085512566, "kl": 0.5100712223606323, "pilot_budget": 117, "policy": "A-OSQD", "replication": 99, "seed": 41600099}
+{"B_kl": 867.7730197224396, "budget": 1600, "design_ratio": 4.49003568354917, "kl": 0.5423581373265247, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 99, "seed": 41600099}
+{"B_kl": 824.1546999085383, "budget": 1600, "design_ratio": 4.264345545725435, "kl": 0.5150966874428364, "pilot_budget": 117, "policy": "RR-GID", "replication": 99, "seed": 41600099}
+{"B_kl": 777.0996245674157, "budget": 1600, "design_ratio": 4.02087292953219, "kl": 0.4856872653546348, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 172, "seed": 41600172}
+{"B_kl": 787.6906432662161, "budget": 1600, "design_ratio": 4.075673033709156, "kl": 0.492306652041385, "pilot_budget": 117, "policy": "A-OSQD", "replication": 172, "seed": 41600172}
+{"B_kl": 784.4700901199436, "budget": 1600, "design_ratio": 4.059009230826513, "kl": 0.4902938063249648, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 172, "seed": 41600172}
+{"B_kl": 799.4716876973823, "budget": 1600, "design_ratio": 4.13663057523578, "kl": 0.499669804810864, "pilot_budget": 117, "policy": "RR-GID", "replication": 172, "seed": 41600172}
+{"B_kl": 344.63548443934417, "budget": 1600, "design_ratio": 1.7832147206476412, "kl": 0.2153971777745901, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 173, "seed": 41600173}
+{"B_kl": 340.13009963145674, "budget": 1600, "design_ratio": 1.7599029350818658, "kl": 0.21258131226966046, "pilot_budget": 117, "policy": "A-OSQD", "replication": 173, "seed": 41600173}
+{"B_kl": 335.0797176894746, "budget": 1600, "design_ratio": 1.7337712225030335, "kl": 0.20942482355592162, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 173, "seed": 41600173}
+{"B_kl": 337.77391222974467, "budget": 1600, "design_ratio": 1.7477115379418624, "kl": 0.2111086951435904, "pilot_budget": 117, "policy": "RR-GID", "replication": 173, "seed": 41600173}
+{"B_kl": 504.976163148343, "budget": 1600, "design_ratio": 2.612850296501534, "kl": 0.3156101019677144, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 174, "seed": 41600174}
+{"B_kl": 515.0154142949305, "budget": 1600, "design_ratio": 2.664795442132712, "kl": 0.32188463393433153, "pilot_budget": 117, "policy": "A-OSQD", "replication": 174, "seed": 41600174}
+{"B_kl": 511.8817760932307, "budget": 1600, "design_ratio": 2.6485813550094863, "kl": 0.3199261100582692, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 174, "seed": 41600174}
+{"B_kl": 514.4838777510997, "budget": 1600, "design_ratio": 2.6620451629759883, "kl": 0.32155242359443736, "pilot_budget": 117, "policy": "RR-GID", "replication": 174, "seed": 41600174}
+{"B_kl": 70.22522252359653, "budget": 1600, "design_ratio": 0.3633597125628354, "kl": 0.04389076407724783, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 175, "seed": 41600175}
+{"B_kl": 69.31359271897168, "budget": 1600, "design_ratio": 0.3586427528741581, "kl": 0.0433209954493573, "pilot_budget": 117, "policy": "A-OSQD", "replication": 175, "seed": 41600175}
+{"B_kl": 71.17450079503983, "budget": 1600, "design_ratio": 0.36827147314483827, "kl": 0.044484062996899894, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 175, "seed": 41600175}
+{"B_kl": 70.60378415201562, "budget": 1600, "design_ratio": 0.3653184681145669, "kl": 0.04412736509500976, "pilot_budget": 117, "policy": "RR-GID", "replication": 175, "seed": 41600175}
+{"B_kl": 653.9527424947634, "budget": 1600, "design_ratio": 3.383685690176801, "kl": 0.40872046405922713, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 176, "seed": 41600176}
+{"B_kl": 636.0714367095984, "budget": 1600, "design_ratio": 3.2911641445432145, "kl": 0.39754464794349903, "pilot_budget": 117, "policy": "A-OSQD", "replication": 176, "seed": 41600176}
+{"B_kl": 627.7431151824849, "budget": 1600, "design_ratio": 3.248071699870561, "kl": 0.39233944698905304, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 176, "seed": 41600176}
+{"B_kl": 620.2607533803769, "budget": 1600, "design_ratio": 3.2093564244181896, "kl": 0.38766297086273555, "pilot_budget": 117, "policy": "RR-GID", "replication": 176, "seed": 41600176}
+{"B_kl": 532.8091915398218, "budget": 1600, "design_ratio": 2.7568640971368077, "kl": 0.33300574471238864, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 177, "seed": 41600177}
+{"B_kl": 529.7360308663827, "budget": 1600, "design_ratio": 2.740962933155661, "kl": 0.3310850192914892, "pilot_budget": 117, "policy": "A-OSQD", "replication": 177, "seed": 41600177}
+{"B_kl": 529.266948353108, "budget": 1600, "design_ratio": 2.7385358039694987, "kl": 0.3307918427206925, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 177, "seed": 41600177}
+{"B_kl": 538.8997951513874, "budget": 1600, "design_ratio": 2.7883781301025135, "kl": 0.3368123719696171, "pilot_budget": 117, "policy": "RR-GID", "replication": 177, "seed": 41600177}
+{"B_kl": 731.3191814667914, "budget": 1600, "design_ratio": 3.783995522124152, "kl": 0.45707448841674464, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 178, "seed": 41600178}
+{"B_kl": 706.4434630657323, "budget": 1600, "design_ratio": 3.6552834502618556, "kl": 0.4415271644160827, "pilot_budget": 117, "policy": "A-OSQD", "replication": 178, "seed": 41600178}
+{"B_kl": 737.6020660716998, "budget": 1600, "design_ratio": 3.8165044564082384, "kl": 0.4610012912948124, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 178, "seed": 41600178}
+{"B_kl": 722.3197832255581, "budget": 1600, "design_ratio": 3.7374307888180485, "kl": 0.4514498645159738, "pilot_budget": 117, "policy": "RR-GID", "replication": 178, "seed": 41600178}
+{"B_kl": 661.2332951161202, "budget": 1600, "design_ratio": 3.4213567635138187, "kl": 0.4132708094475751, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 179, "seed": 41600179}
+{"B_kl": 656.1078388359316, "budget": 1600, "design_ratio": 3.394836600902772, "kl": 0.4100673992724573, "pilot_budget": 117, "policy": "A-OSQD", "replication": 179, "seed": 41600179}
+{"B_kl": 673.0329054699718, "budget": 1600, "design_ratio": 3.4824103689344112, "kl": 0.42064556591873237, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 179, "seed": 41600179}
+{"B_kl": 654.9419785600878, "budget": 1600, "design_ratio": 3.3888042005842585, "kl": 0.4093387366000549, "pilot_budget": 117, "policy": "RR-GID", "replication": 179, "seed": 41600179}
+{"B_kl": 604.4815750648688, "budget": 1600, "design_ratio": 3.1277117176994005, "kl": 0.377800984415543, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 180, "seed": 41600180}
+{"B_kl": 587.5497931750599, "budget": 1600, "design_ratio": 3.0401032035563476, "kl": 0.36721862073441247, "pilot_budget": 117, "policy": "A-OSQD", "replication": 180, "seed": 41600180}
+{"B_kl": 618.8447895516305, "budget": 1600, "design_ratio": 3.2020299369921115, "kl": 0.38677799346976904, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 180, "seed": 41600180}
+{"B_kl": 607.677678849851, "budget": 1600, "design_ratio": 3.144249014569366, "kl": 0.37979854928115686, "pilot_budget": 117, "policy": "RR-GID", "replication": 180, "seed": 41600180}
+{"B_kl": 354.4663205113987, "budget": 1600, "design_ratio": 1.8340814839134152, "kl": 0.2215414503196242, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 181, "seed": 41600181}
+{"B_kl": 352.22201709007186, "budget": 1600, "design_ratio": 1.822468997448127, "kl": 0.2201387606812949, "pilot_budget": 117, "policy": "A-OSQD", "replication": 181, "seed": 41600181}
+{"B_kl": 356.07871673337587, "budget": 1600, "design_ratio": 1.842424352852822, "kl": 0.22254919795835992, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 181, "seed": 41600181}
+{"B_kl": 354.5384563401095, "budget": 1600, "design_ratio": 1.8344547294944746, "kl": 0.22158653521256844, "pilot_budget": 117, "policy": "RR-GID", "replication": 181, "seed": 41600181}
+{"B_kl": 639.307745330246, "budget": 1600, "design_ratio": 3.307909469483523, "kl": 0.39956734083140377, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 182, "seed": 41600182}
+{"B_kl": 684.6279237114004, "budget": 1600, "design_ratio": 3.542405372780083, "kl": 0.42789245231962525, "pilot_budget": 117, "policy": "A-OSQD", "replication": 182, "seed": 41600182}
+{"B_kl": 686.5633532958519, "budget": 1600, "design_ratio": 3.552419682628024, "kl": 0.42910209580990744, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 182, "seed": 41600182}
+{"B_kl": 691.7097489873141, "budget": 1600, "design_ratio": 3.579048190050069, "kl": 0.4323185931170713, "pilot_budget": 117, "policy": "RR-GID", "replication": 182, "seed": 41600182}
+{"B_kl": 797.0887377927521, "budget": 1600, "design_ratio": 4.124300703413628, "kl": 0.4981804611204701, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 183, "seed": 41600183}
+{"B_kl": 799.5937182500122, "budget": 1600, "design_ratio": 4.137261986357512, "kl": 0.49974607390625764, "pilot_budget": 117, "policy": "A-OSQD", "replication": 183, "seed": 41600183}
+{"B_kl": 787.8135714347846, "budget": 1600, "design_ratio": 4.076309089279958, "kl": 0.4923834821467404, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 183, "seed": 41600183}
+{"B_kl": 800.0246979185644, "budget": 1600, "design_ratio": 4.139491963605827, "kl": 0.5000154361991027, "pilot_budget": 117, "policy": "RR-GID", "replication": 183, "seed": 41600183}
+{"B_kl": 593.1202425729521, "budget": 1600, "design_ratio": 3.0689258518773803, "kl": 0.37070015160809505, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 184, "seed": 41600184}
+{"B_kl": 572.4363963538522, "budget": 1600, "design_ratio": 2.961903386917007, "kl": 0.3577727477211576, "pilot_budget": 117, "policy": "A-OSQD", "replication": 184, "seed": 41600184}
+{"B_kl": 598.9006208289163, "budget": 1600, "design_ratio": 3.0988347151904994, "kl": 0.37431288801807266, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 184, "seed": 41600184}
+{"B_kl": 566.771882948445, "budget": 1600, "design_ratio": 2.932594032117804, "kl": 0.3542324268427781, "pilot_budget": 117, "policy": "RR-GID", "replication": 184, "seed": 41600184}
+{"B_kl": 891.3278376561152, "budget": 1600, "design_ratio": 4.611913145325449, "kl": 0.557079898535072, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 185, "seed": 41600185}
+{"B_kl": 932.2390594383357, "budget": 1600, "design_ratio": 4.823596202397814, "kl": 0.5826494121489598, "pilot_budget": 117, "policy": "A-OSQD", "replication": 185, "seed": 41600185}
+{"B_kl": 939.9749852771164, "budget": 1600, "design_ratio": 4.863623470210918, "kl": 0.5874843657981977, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 185, "seed": 41600185}
+{"B_kl": 929.1615617230573, "budget": 1600, "design_ratio": 4.807672597672167, "kl": 0.5807259760769108, "pilot_budget": 117, "policy": "RR-GID", "replication": 185, "seed": 41600185}
+{"B_kl": 669.3253980065883, "budget": 1600, "design_ratio": 3.4632269644850067, "kl": 0.4183283737541177, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 186, "seed": 41600186}
+{"B_kl": 608.4125449627533, "budget": 1600, "design_ratio": 3.148051362642619, "kl": 0.3802578406017208, "pilot_budget": 117, "policy": "A-OSQD", "replication": 186, "seed": 41600186}
+{"B_kl": 681.0298519805754, "budget": 1600, "design_ratio": 3.523788211268722, "kl": 0.4256436574878596, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 186, "seed": 41600186}
+{"B_kl": 657.064265853881, "budget": 1600, "design_ratio": 3.3997853505662228, "kl": 0.4106651661586756, "pilot_budget": 117, "policy": "RR-GID", "replication": 186, "seed": 41600186}
+{"B_kl": 667.2655784767305, "budget": 1600, "design_ratio": 3.4525690355329273, "kl": 0.41704098654795657, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 187, "seed": 41600187}
+{"B_kl": 684.8039489688621, "budget": 1600, "design_ratio": 3.543316163585104, "kl": 0.42800246810553877, "pilot_budget": 117, "policy": "A-OSQD", "replication": 187, "seed": 41600187}
+{"B_kl": 701.9654223488063, "budget": 1600, "design_ratio": 3.6321131486341156, "kl": 0.4387283889680039, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 187, "seed": 41600187}
+{"B_kl": 692.2194283142182, "budget": 1600, "design_ratio": 3.581685375481, "kl": 0.4326371426963864, "pilot_budget": 117, "policy": "RR-GID", "replication": 187, "seed": 41600187}
+{"B_kl": 591.6516207966683, "budget": 1600, "design_ratio": 3.0613269014245756, "kl": 0.3697822629979177, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 188, "seed": 41600188}
+{"B_kl": 566.4807566949546, "budget": 1600, "design_ratio": 2.9310876851389502, "kl": 0.35405047293434666, "pilot_budget": 117, "policy": "A-OSQD", "replication": 188, "seed": 41600188}
+{"B_kl": 578.3796160739938, "budget": 1600, "design_ratio": 2.9926548253831906, "kl": 0.36148726004624615, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 188, "seed": 41600188}
+{"B_kl": 588.9190193071666, "budget": 1600, "design_ratio": 3.047187860548764, "kl": 0.36807438706697915, "pilot_budget": 117, "policy": "RR-GID", "replication": 188, "seed": 41600188}
+{"B_kl": 502.3375504423964, "budget": 1600, "design_ratio": 2.599197572879686, "kl": 0.3139609690264977, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 189, "seed": 41600189}
+{"B_kl": 511.5019449192225, "budget": 1600, "design_ratio": 2.6466160305683473, "kl": 0.31968871557451406, "pilot_budget": 117, "policy": "A-OSQD", "replication": 189, "seed": 41600189}
+{"B_kl": 506.2016262087359, "budget": 1600, "design_ratio": 2.619191093858653, "kl": 0.3163760163804599, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 189, "seed": 41600189}
+{"B_kl": 509.39727104907143, "budget": 1600, "design_ratio": 2.635726016054835, "kl": 0.31837329440566964, "pilot_budget": 117, "policy": "RR-GID", "replication": 189, "seed": 41600189}
+{"B_kl": 179.42657484766397, "budget": 1600, "design_ratio": 0.9283899191757559, "kl": 0.11214160927978999, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 190, "seed": 41600190}
+{"B_kl": 179.73459805439867, "budget": 1600, "design_ratio": 0.9299836944581937, "kl": 0.11233412378399918, "pilot_budget": 117, "policy": "A-OSQD", "replication": 190, "seed": 41600190}
+{"B_kl": 181.12654590833327, "budget": 1600, "design_ratio": 0.937185918302172, "kl": 0.1132040911927083, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 190, "seed": 41600190}
+{"B_kl": 179.47091422525511, "budget": 1600, "design_ratio": 0.9286193402144904, "kl": 0.11216932139078445, "pilot_budget": 117, "policy": "RR-GID", "replication": 190, "seed": 41600190}
+{"B_kl": 479.00572142844584, "budget": 1600, "design_ratio": 2.478473901534599, "kl": 0.29937857589277866, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 191, "seed": 41600191}
+{"B_kl": 482.6809153384347, "budget": 1600, "design_ratio": 2.4974901090275337, "kl": 0.3016755720865217, "pilot_budget": 117, "policy": "A-OSQD", "replication": 191, "seed": 41600191}
+{"B_kl": 495.46737493225896, "budget": 1600, "design_ratio": 2.563649874931403, "kl": 0.30966710933266184, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 191, "seed": 41600191}
+{"B_kl": 492.23926030413156, "budget": 1600, "design_ratio": 2.546946947389919, "kl": 0.30764953769008224, "pilot_budget": 117, "policy": "RR-GID", "replication": 191, "seed": 41600191}
+{"B_kl": 594.064928844527, "budget": 1600, "design_ratio": 3.0738138525097196, "kl": 0.3712905805278294, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 192, "seed": 41600192}
+{"B_kl": 591.621907020324, "budget": 1600, "design_ratio": 3.0611731562480755, "kl": 0.3697636918877025, "pilot_budget": 117, "policy": "A-OSQD", "replication": 192, "seed": 41600192}
+{"B_kl": 590.5303828980561, "budget": 1600, "design_ratio": 3.055525386443012, "kl": 0.3690814893112851, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 192, "seed": 41600192}
+{"B_kl": 603.1042645179494, "budget": 1600, "design_ratio": 3.1205852302857053, "kl": 0.37694016532371843, "pilot_budget": 117, "policy": "RR-GID", "replication": 192, "seed": 41600192}
+{"B_kl": 616.9456232144091, "budget": 1600, "design_ratio": 3.192203260627079, "kl": 0.3855910145090057, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 193, "seed": 41600193}
+{"B_kl": 643.7472215233009, "budget": 1600, "design_ratio": 3.33088023035076, "kl": 0.4023420134520631, "pilot_budget": 117, "policy": "A-OSQD", "replication": 193, "seed": 41600193}
+{"B_kl": 628.8133074424214, "budget": 1600, "design_ratio": 3.2536090942423175, "kl": 0.3930083171515134, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 193, "seed": 41600193}
+{"B_kl": 643.4709923175508, "budget": 1600, "design_ratio": 3.329450963754002, "kl": 0.4021693701984692, "pilot_budget": 117, "policy": "RR-GID", "replication": 193, "seed": 41600193}
+{"B_kl": 569.7500427713999, "budget": 1600, "design_ratio": 2.948003642203004, "kl": 0.3560937767321249, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 194, "seed": 41600194}
+{"B_kl": 585.5382584531808, "budget": 1600, "design_ratio": 3.029695110109487, "kl": 0.365961411533238, "pilot_budget": 117, "policy": "A-OSQD", "replication": 194, "seed": 41600194}
+{"B_kl": 570.8252134454676, "budget": 1600, "design_ratio": 2.953566795911118, "kl": 0.35676575840341723, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 194, "seed": 41600194}
+{"B_kl": 594.4125385980846, "budget": 1600, "design_ratio": 3.0756124567091474, "kl": 0.3715078366238028, "pilot_budget": 117, "policy": "RR-GID", "replication": 194, "seed": 41600194}
+{"B_kl": 688.0930482760048, "budget": 1600, "design_ratio": 3.5603346383707475, "kl": 0.430058155172503, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 195, "seed": 41600195}
+{"B_kl": 686.2022900217939, "budget": 1600, "design_ratio": 3.5505514671526712, "kl": 0.42887643126362124, "pilot_budget": 117, "policy": "A-OSQD", "replication": 195, "seed": 41600195}
+{"B_kl": 699.3602183867127, "budget": 1600, "design_ratio": 3.618633288708918, "kl": 0.43710013649169543, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 195, "seed": 41600195}
+{"B_kl": 689.9283427897197, "budget": 1600, "design_ratio": 3.5698308288135405, "kl": 0.43120521424357483, "pilot_budget": 117, "policy": "RR-GID", "replication": 195, "seed": 41600195}
+{"B_kl": 630.2331922042957, "budget": 1600, "design_ratio": 3.260955869381031, "kl": 0.3938957451276848, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 196, "seed": 41600196}
+{"B_kl": 630.6548706233839, "budget": 1600, "design_ratio": 3.26313772005587, "kl": 0.3941592941396149, "pilot_budget": 117, "policy": "A-OSQD", "replication": 196, "seed": 41600196}
+{"B_kl": 633.0514153088471, "budget": 1600, "design_ratio": 3.2755379340638973, "kl": 0.3956571345680295, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 196, "seed": 41600196}
+{"B_kl": 642.0186361086404, "budget": 1600, "design_ratio": 3.321936174684716, "kl": 0.4012616475679003, "pilot_budget": 117, "policy": "RR-GID", "replication": 196, "seed": 41600196}
+{"B_kl": 719.9705515122965, "budget": 1600, "design_ratio": 3.7252753818374953, "kl": 0.44998159469518534, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 197, "seed": 41600197}
+{"B_kl": 721.7425218672819, "budget": 1600, "design_ratio": 3.7344439200879935, "kl": 0.4510890761670512, "pilot_budget": 117, "policy": "A-OSQD", "replication": 197, "seed": 41600197}
+{"B_kl": 737.4898207347912, "budget": 1600, "design_ratio": 3.815923676000716, "kl": 0.4609311379592445, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 197, "seed": 41600197}
+{"B_kl": 715.7215497659128, "budget": 1600, "design_ratio": 3.703290174845432, "kl": 0.4473259686036955, "pilot_budget": 117, "policy": "RR-GID", "replication": 197, "seed": 41600197}
+{"B_kl": 628.5107031768847, "budget": 1600, "design_ratio": 3.2520433576736827, "kl": 0.39281918948555294, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 198, "seed": 41600198}
+{"B_kl": 636.8608971390087, "budget": 1600, "design_ratio": 3.2952489748136182, "kl": 0.3980380607118804, "pilot_budget": 117, "policy": "A-OSQD", "replication": 198, "seed": 41600198}
+{"B_kl": 633.4908599012181, "budget": 1600, "design_ratio": 3.2778117105651754, "kl": 0.3959317874382613, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 198, "seed": 41600198}
+{"B_kl": 638.6034735352149, "budget": 1600, "design_ratio": 3.30426542268933, "kl": 0.39912717095950934, "pilot_budget": 117, "policy": "RR-GID", "replication": 198, "seed": 41600198}
+{"B_kl": 765.9272230463612, "budget": 1600, "design_ratio": 3.9630646313247633, "kl": 0.47870451440397577, "pilot_budget": 117, "policy": "Uniform SQD", "replication": 199, "seed": 41600199}
+{"B_kl": 763.2583299080229, "budget": 1600, "design_ratio": 3.9492552305317408, "kl": 0.47703645619251434, "pilot_budget": 117, "policy": "A-OSQD", "replication": 199, "seed": 41600199}
+{"B_kl": 777.2928313681206, "budget": 1600, "design_ratio": 4.021872621167851, "kl": 0.48580801960507536, "pilot_budget": 117, "policy": "Discriminative Score OED", "replication": 199, "seed": 41600199}
+{"B_kl": 769.6160850802272, "budget": 1600, "design_ratio": 3.982151560495534, "kl": 0.481010053175142, "pilot_budget": 117, "policy": "RR-GID", "replication": 199, "seed": 41600199}

@@ -1,0 +1,88 @@
+{
+  "alpha_sweep": [
+    {
+      "alpha": 0.0,
+      "design_ratio_A-OSQD": 2.0182098868984983,
+      "design_ratio_Discriminative Score OED": 2.371043361733244,
+      "design_ratio_Uniform SQD": 1.9773101457809559,
+      "design_ratio_learned RR-GID": 2.1268238244590636,
+      "design_ratio_oracle RR-GID": 1.0,
+      "max_operator_error_learned": 1.0326087103288015
+    },
+    {
+      "alpha": 0.5,
+      "design_ratio_A-OSQD": 2.2559282100330917,
+      "design_ratio_Discriminative Score OED": 2.539765383222795,
+      "design_ratio_Uniform SQD": 2.0597188117953347,
+      "design_ratio_learned RR-GID": 2.2597749590190417,
+      "design_ratio_oracle RR-GID": 1.0,
+      "max_operator_error_learned": 1.1206687480473116
+    },
+    {
+      "alpha": 1.0,
+      "design_ratio_A-OSQD": 3.3584724149482734,
+      "design_ratio_Discriminative Score OED": 2.2890637576506974,
+      "design_ratio_Uniform SQD": 2.0635422552721217,
+      "design_ratio_learned RR-GID": 2.6620460751013684,
+      "design_ratio_oracle RR-GID": 1.0,
+      "max_operator_error_learned": 1.2382257389914297
+    },
+    {
+      "alpha": 1.5,
+      "design_ratio_A-OSQD": 5.603745137580166,
+      "design_ratio_Discriminative Score OED": 2.085678808698138,
+      "design_ratio_Uniform SQD": 2.0347985670619972,
+      "design_ratio_learned RR-GID": 3.0996084970949354,
+      "design_ratio_oracle RR-GID": 1.0,
+      "max_operator_error_learned": 1.271472936238291
+    }
+  ],
+  "budget": 8000,
+  "reuse": [
+    {
+      "campaigns": 1,
+      "cumulative_compute_Discriminative_s": 196.6,
+      "cumulative_compute_RR_GID_s": 11.9,
+      "mean_design_regret_A_OSQD": 2.8252,
+      "mean_design_regret_Discriminative": 2.1612,
+      "mean_design_regret_RR_GID": 1.6929,
+      "mean_design_regret_Uniform": 1.7561,
+      "reps": 10,
+      "se_regret_RR_GID": 0.0645
+    },
+    {
+      "campaigns": 5,
+      "cumulative_compute_Discriminative_s": 125.7,
+      "cumulative_compute_RR_GID_s": 3.6,
+      "mean_design_regret_A_OSQD": 2.9502,
+      "mean_design_regret_Discriminative": 2.208,
+      "mean_design_regret_RR_GID": 1.8051,
+      "mean_design_regret_Uniform": 1.7432,
+      "reps": 10,
+      "se_regret_RR_GID": 0.068
+    },
+    {
+      "campaigns": 20,
+      "cumulative_compute_Discriminative_s": 118.5,
+      "cumulative_compute_RR_GID_s": 3.3,
+      "mean_design_regret_A_OSQD": 2.5709,
+      "mean_design_regret_Discriminative": 2.1932,
+      "mean_design_regret_RR_GID": 1.7341,
+      "mean_design_regret_Uniform": 1.6799,
+      "reps": 10,
+      "se_regret_RR_GID": 0.1057
+    },
+    {
+      "campaigns": 50,
+      "cumulative_compute_Discriminative_s": 192.2,
+      "cumulative_compute_RR_GID_s": 8.7,
+      "mean_design_regret_A_OSQD": 2.6846,
+      "mean_design_regret_Discriminative": 2.1951,
+      "mean_design_regret_RR_GID": 1.8248,
+      "mean_design_regret_Uniform": 1.7879,
+      "reps": 10,
+      "se_regret_RR_GID": 0.0875
+    }
+  ],
+  "stage": "P7"
+}
