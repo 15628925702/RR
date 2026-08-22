@@ -1,5 +1,10 @@
 """P5 formal runner: complete the four-policy S1 Fig.1.
 
+Note: this is a scripts/ entry point. The project package is installed under
+``src/``; running directly from a clone needs the repo root (or ``src/``) on
+``PYTHONPATH``. We prepend it here so the same command works on any host.
+"""
+
 P4 already ran Uniform SQD / A-OSQD / oracle RR-GID (results/p4_formal_<B>.jsonl,
 frozen seed scheme ``seed = 202600000 + budget*1000 + replication``). P5 appends
 the two acquisition policies the final Fig.1 needs that P4 did not run:
@@ -23,11 +28,17 @@ from __future__ import annotations
 import argparse
 import json
 import pickle
+import sys
 from pathlib import Path
 
 import numpy as np
 import torch
 import yaml
+
+_here = Path(__file__).resolve().parent
+_src = _here.parent / "src"
+if str(_src) not in sys.path:
+    sys.path.insert(0, str(_src))
 
 from rr_gid_cn.s1_gate import run_replication
 from rr_gid_cn.synthetic_oracle import all_pairs, make_frozen_mixture, reference_scale, sample_full
