@@ -187,7 +187,12 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
         if np.linalg.norm(diff) < 1e-6:
             break
         fisher = np.cov(full_pool_phi, rowvar=False, aweights=w) + 1e-3 * np.eye(16)
-        beta_dag = np.clip(beta_dag + np.linalg.solve(fisher, diff), -4.0, 4.0)
+        step_dag = np.linalg.solve(fisher, diff)
+        if np.linalg.norm(step_dag) > 2.0:
+            step_dag = step_dag * (2.0 / np.linalg.norm(step_dag))
+        beta_dag = np.clip(beta_dag + step_dag, -4.0, 4.0)
+    if np.linalg.norm(beta_dag) > 4.0:
+        beta_dag = beta_dag * (4.0 / np.linalg.norm(beta_dag))
 
     # target draw from the campaign pool under beta_dag
     logits = pool_phi @ beta_dag
@@ -264,6 +269,8 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
                 info_panel = policy_infos[pidx] if policy_infos is not None else emp_infos[pidx]
                 H += len(obs_batch) * info_panel
             step = np.linalg.solve(H + 1e-2 * np.eye(16), U)
+            if np.linalg.norm(step) > 2.0:
+                step = step * (2.0 / np.linalg.norm(step))
             beta_hat_final = np.clip(beta_hat_final + step, -4.0, 4.0)
         logits = pool_phi @ beta_hat_final
         wgt = np.exp(logits - logits.max())
