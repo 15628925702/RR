@@ -53,9 +53,12 @@ class VAEAC(nn.Module):
             z[:, None, :], self.prior_mu[None, :, :], self.prior_logvar[None, :, :]).sum(-1)
         return torch.logsumexp(log_comp, dim=-1)
 
-    def kl_divergence(self, mu: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
+    def kl_divergence(self, mu: torch.Tensor, logvar: torch.Tensor, free_bits: float = 0.0) -> torch.Tensor:
         if not self.gmm_prior:
-            return -0.5 * (1.0 + logvar - mu ** 2 - logvar.exp()).sum(-1)
+            kl = -0.5 * (1.0 + logvar - mu ** 2 - logvar.exp())
+            if free_bits > 0:
+                kl = torch.maximum(kl - free_bits, torch.zeros_like(kl))
+            return kl.sum(-1)
         z = self.reparameterize(mu, logvar)
         log_q = _gaussian_log_prob(z, mu, logvar).sum(-1)
         return log_q - self.log_prior(z)
@@ -88,7 +91,7 @@ class VAEAC(nn.Module):
 def train_vaeac(model: VAEAC, reference: np.ndarray, panels, scale: np.ndarray | None = None,
                 alpha: float = 1.0, epochs: int = 30, batch: int = 512, lr: float = 1e-3,
                 device: str = "cuda", seed: int = 0, beta: float = 1.0,
-                z_normalize: bool = True) -> tuple[VAEAC, list[float]]:
+                z_normalize: bool = True, free_bits: float = 0.0) -> tuple[VAEAC, list[float]]:
     """Train ``model`` on reference samples with random panel masks (ELBO).
 
     The VAE is trained in the **inverse-warped latent space** ``Z = T_alpha^-1(X)``
@@ -132,7 +135,7 @@ def train_vaeac(model: VAEAC, reference: np.ndarray, panels, scale: np.ndarray |
                     mask[j, list(panel)] = 1.0
             recon, mu, logvar = model(xb, mask)
             recon_loss = ((recon - xb) ** 2 * (1.0 - mask)).sum(-1).mean()
-            kl = model.kl_divergence(mu, logvar).mean()
+            kl = model.kl_divergence(mu, logvar, free_bits=free_bits).mean()
             loss = recon_loss + beta * kl
             opt.zero_grad()
             loss.backward()
