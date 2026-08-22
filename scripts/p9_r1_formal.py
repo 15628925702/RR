@@ -33,6 +33,31 @@ from rr_gid_cn.s1_gate import a_optimal_information, discriminative_design
 from rr_gid_cn.vaeac import VAEAC, VAEACGenerator, learned_information
 
 
+def gas_a_optimal_information(phi_ref, sensor_pairs):
+    """A-OSQD panel Fisher info in the 16-dim phi space (PDF Sec. 6 / 8.1).
+
+    Each sensor-pair panel (a, b) observes the phi coordinates it spans: the two
+    unary coordinates ``{a, b}`` and the two pairwise coordinates ``{8+a, 8+b}``
+    (when those sensors exist).  Uses the complete-reference phi covariance.
+    """
+    x = np.asarray(phi_ref, dtype=float)
+    dim = x.shape[1]
+    full_cov = np.cov(x, rowvar=False)
+    inv_full = np.linalg.inv(full_cov + 1e-6 * np.eye(dim))
+    infos = []
+    for a, b in sensor_pairs:
+        idx = [a, b]
+        if a + 8 < dim:
+            idx.append(a + 8)
+        if b + 8 < dim:
+            idx.append(b + 8)
+        idx = sorted(set(idx))
+        info = np.zeros((dim, dim))
+        info[np.ix_(idx, idx)] = inv_full[np.ix_(idx, idx)]
+        infos.append(info)
+    return np.asarray(infos)
+
+
 def gas_balanced_pilot_counts(coord_panels, budget):
     """PDF 8.1 Gas balanced pilot: equal mass on the 8 direct (j, j+8) pairs."""
     counts = np.zeros(len(coord_panels), dtype=int)
@@ -180,32 +205,25 @@ def solve_pilot_beta_empirical(mu_pil, phi_val, steps=30, theta_bound=4.0):
 
 
 def run_gas_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, budget, seed,
-                        coord_panels, mlp_steps=200):
+                        coord_panels, sensor_pairs, mlp_steps=200, oracle_infos=None, oracle_fisher=None):
     """One R1 replication: four policies on the same target draw."""
+    import time as _t
+    t0 = _t.time()
     phi_val = gas_transform(ref_val)
     beta_true = calibrate_beta(phi_val, seed=2026)
-    # target draw: weighted resample from the empirical base
     logits = phi_val @ beta_true
     w = np.exp(logits - logits.max()); w /= w.sum()
     rng = np.random.default_rng(seed)
     target_idx = rng.choice(len(ref_val), size=budget, p=w)
     target = ref_val[target_idx]
-    # pilot budget b_B = min(0.2 B, ceil(10 B^(1/3)))
     b_pilot = min(int(np.ceil(0.2 * budget)), int(np.ceil(10.0 * budget ** (1.0 / 3.0))))
     b_pilot = min(b_pilot, budget)
-    # oracle panel information (empirical kernel) for the design ground truth
-    fisher = np.cov(phi_val, rowvar=False)
-    infos = []
-    for panel in coord_panels:
-        idx = list(panel)
-        obs = target[:, idx]
-        projected = empirical_conditional_mean(phi_val, ref_val, obs, panel)
-        projected = projected - phi_val.mean(0)
-        infos.append(np.cov(projected, rowvar=False))
-    infos = np.asarray(infos)
+    fisher = oracle_fisher if oracle_fisher is not None else np.cov(phi_val, rowvar=False)
+    infos = oracle_infos
     p_star, _, _ = frank_wolfe(fisher, infos, np.ones(len(coord_panels)),
                                uniform_probabilities(len(coord_panels)), tolerance=1e-4, max_iter=300)
     phi_star = float(np.trace(fisher @ np.linalg.pinv(np.tensordot(p_star, infos, axes=(0, 0)))))
+    print(f"[rep {seed} t+{_t.time()-t0:.1f}s oracle ready]", flush=True)
 
     # --- policies
     pilot_counts = gas_balanced_pilot_counts(coord_panels, b_pilot)
@@ -218,15 +236,17 @@ def run_gas_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, budget, se
     # pilot beta: empirical HT moment + moment-matching solve
     mu_pil, _ = gas_pilot_ht_moment(phi_val, pilot_obs, pilot_counts, coord_panels)
     beta_hat = solve_pilot_beta_empirical(mu_pil, phi_val)
+    print(f"[rep {seed} t+{_t.time()-t0:.1f}s pilot beta done]", flush=True)
 
     rows = []
     policy_names = ["Uniform SQD", "A-OSQD", "Discriminative Score OED", "RR-GID"]
     for name in policy_names:
+        t_pol = _t.time()
         if name == "Uniform SQD":
             probs = uniform_probabilities(len(coord_panels))
         elif name == "A-OSQD":
-            a_info = a_optimal_information(ref_val, coord_panels, dimension=128)
-            probs, _, _ = frank_wolfe(np.eye(128), a_info, np.ones(len(coord_panels)),
+            a_info = gas_a_optimal_information(phi_val, sensor_pairs)
+            probs, _, _ = frank_wolfe(np.eye(16), a_info, np.ones(len(coord_panels)),
                                       uniform_probabilities(len(coord_panels)), tolerance=1e-4, max_iter=300)
         elif name == "Discriminative Score OED":
             validation = ref_val[:cfg["validation_size"]]
@@ -262,17 +282,23 @@ def run_gas_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, budget, se
             mu_beta_j = wb @ phi_val
             U = np.zeros(16)
             H = 1e-2 * np.eye(16)
+            # group observations by panel so the kernel conditional mean is
+            # computed once per panel over a batch instead of per observation.
+            grouped_rows: dict[int, list[np.ndarray]] = {}
             for panel, obs_row in all_obs:
-                obs_arr = np.atleast_2d(np.asarray(obs_row))
-                cm = empirical_conditional_mean(phi_val, ref_val, obs_arr, panel)
+                grouped_rows.setdefault(coord_panels.index(panel), []).append(np.asarray(obs_row))
+            for pidx, rows_list in grouped_rows.items():
+                obs_batch = np.asarray(rows_list)
+                cm = empirical_conditional_mean(phi_val, ref_val, obs_batch, coord_panels[pidx])
                 U += (cm - mu_beta_j).sum(0)
-                H += len(obs_arr) * infos[coord_panels.index(panel)]
+                H += len(obs_batch) * infos[pidx]
             step = np.linalg.solve(H, U)
             beta_hat_final = np.clip(beta_hat_final + step, -4.0, 4.0)
         kl = empirical_full_kl(beta_true, beta_hat_final, ref_val, phi_val)
         rows.append({"policy": name, "budget": budget, "seed": seed, "kl": kl,
                      "B_kl": budget * kl, "design_ratio": float(kl / max(phi_star / (2 * budget), 1e-12)),
                      "pilot_budget": int(b_pilot)})
+        print(f"[rep {seed} t+{_t.time()-t0:.1f}s policy {name} done]", flush=True)
     return rows
 
 
@@ -306,6 +332,25 @@ def main() -> None:
     gas_transform = gas_fn
     gen = VAEACGenerator(model, np.ones(128), alpha=0.0, feature_fn=gas_fn)
 
+    # Precompute the empirical-kernel oracle panel information once (PDF 8.2).
+    # It is defined on the reference-validation pool, independent of the target
+    # draw, so every replication reuses the same ground-truth panel ranking.
+    phi_val_pool = gas_fn(ref_val)
+    oracle_fisher = np.cov(phi_val_pool, rowvar=False)
+    oracle_infos = []
+    rng_oracle = np.random.default_rng(1234)
+    n_oracle = min(len(ref_val), int(cfg.get("oracle_sub", 600)))
+    oracle_idx = rng_oracle.choice(len(ref_val), size=n_oracle, replace=False)
+    oracle_ref = ref_val[oracle_idx]
+    oracle_phi = phi_val_pool[oracle_idx]
+    for panel in coord_panels:
+        idx = list(panel)
+        obs = oracle_ref[:, idx]
+        projected = empirical_conditional_mean(oracle_phi, oracle_ref, obs, panel)
+        projected = projected - oracle_phi.mean(0)
+        oracle_infos.append(np.cov(projected, rowvar=False))
+    oracle_infos = np.asarray(oracle_infos)
+
     out = Path("results")
     for budget in budgets:
         fp = out / f"{args.out}_{budget}.jsonl"
@@ -322,7 +367,8 @@ def main() -> None:
                     continue
                 seed = 40000000 + budget * 1000 + rep
                 rows = run_gas_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, budget, seed,
-                                           coord_panels, mlp_steps=args.mlp_steps)
+                                           coord_panels, sensor_pairs, mlp_steps=args.mlp_steps,
+                                           oracle_infos=oracle_infos, oracle_fisher=oracle_fisher)
                 for r in rows:
                     r["replication"] = rep
                     if (rep, r["policy"]) not in done:
