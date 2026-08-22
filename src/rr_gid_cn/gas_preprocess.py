@@ -31,7 +31,8 @@ def fit_scaler_pca(reference_train: np.ndarray) -> tuple[np.ndarray, np.ndarray,
 
 
 def transform_features(x: np.ndarray, mean: np.ndarray, std: np.ndarray, pcs: np.ndarray) -> np.ndarray:
+    """PC1-per-sensor feature map; supports leading batch dims via ellipsis."""
     z = (np.asarray(x) - mean) / np.maximum(std, 1e-12)
-    scores = np.column_stack([z[:, i * 8 : (i + 1) * 8] @ pcs[i] for i in range(16)])
-    return np.concatenate([np.tanh(scores[:, :8]), np.tanh(scores[:, :8] * scores[:, 8:])], axis=1)
+    scores = np.stack([np.einsum("...i,i->...", z[..., i * 8 : (i + 1) * 8], pcs[i]) for i in range(16)], axis=-1)
+    return np.concatenate([np.tanh(scores[..., :8]), np.tanh(scores[..., :8] * scores[..., 8:])], axis=-1)
 

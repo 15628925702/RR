@@ -156,12 +156,15 @@ class VAEACGenerator:
     to X with ``T_alpha`` so the generator models the original Q0 over X.
     """
 
-    def __init__(self, model: VAEAC, scale: np.ndarray, alpha: float = 1.0, device: str = "cuda"):
+    def __init__(self, model: VAEAC, scale: np.ndarray, alpha: float = 1.0, device: str = "cuda",
+                 feature_fn=None):
         self.model = model.eval().to(device)
         self.scale = np.asarray(scale, dtype=float)
         self.alpha = float(alpha)
         self.device = device
         self.z_std = np.asarray(getattr(model, "z_std", np.ones(model.dim)), dtype=float)
+        # Relative-shift feature map used by the tilted samplers (synthetic by default).
+        self.feature_fn = (lambda x: feature_map(x, self.scale)) if feature_fn is None else feature_fn
 
     def _to_x(self, z_out: np.ndarray) -> np.ndarray:
         return warp(z_out * self.z_std, self.alpha)
@@ -227,7 +230,7 @@ class VAEACGenerator:
         accepted = []
         while len(accepted) < n:
             proposal = self.sample_full(max(256, min(4096, 4 * (n - len(accepted)))), int(rng.integers(2**31 - 1)))
-            logits = feature_map(proposal, self.scale) @ beta
+            logits = self.feature_fn(proposal) @ beta
             keep = rng.random(len(proposal)) < np.exp(logits - envelope)
             accepted.extend(proposal[keep])
         return np.asarray(accepted[:n])
@@ -242,19 +245,19 @@ class VAEACGenerator:
         fixed[6:] = [i in panel_set and i + 6 in panel_set for i in range(6)]
         observed_full = np.zeros(self.dimension)
         observed_full[list(panel)] = np.asarray(observed)
-        observed_features = feature_map(observed_full[None, :], self.scale)[0]
+        observed_features = self.feature_fn(observed_full[None, :])[0]
         envelope = float(np.dot(beta[fixed], observed_features[fixed]) + np.sum(np.abs(beta[~fixed])))
         accepted = []
         while len(accepted) < n:
             proposal = self.sample_conditional(observed, panel, max(32, 2 * (n - len(accepted))), int(rng.integers(2**31 - 1)))
-            logits = feature_map(proposal, self.scale) @ beta
+            logits = self.feature_fn(proposal) @ beta
             keep = rng.random(len(proposal)) < np.exp(logits - envelope)
             accepted.extend(proposal[keep])
         return np.asarray(accepted[:n])
 
     def importance_ess(self, beta: np.ndarray, pool: np.ndarray, pool_weights: np.ndarray | None = None) -> float:
         """Self-normalized importance ESS/N for a tilt beta on a generator pool."""
-        logits = feature_map(pool, self.scale) @ np.asarray(beta)
+        logits = self.feature_fn(pool) @ np.asarray(beta)
         if pool_weights is not None:
             logits = logits + np.log(np.asarray(pool_weights) + 1e-300)
         logits = logits - logits.max()
@@ -264,7 +267,8 @@ class VAEACGenerator:
 
 
 def learned_information(generator: VAEACGenerator, beta: np.ndarray, panels,
-                        n_tilted: int = 256, n_conditional: int = 32, seed: int = 0) -> tuple[np.ndarray, np.ndarray]:
+                        n_tilted: int = 256, n_conditional: int = 32, seed: int = 0,
+                        feature_fn=None) -> tuple[np.ndarray, np.ndarray]:
     """Cross-completion panel information (PDF Eq. 9) using the learned generator.
 
     Returns ``(fisher_hat, infos)`` where ``infos`` are PSD-projected panel
@@ -273,14 +277,15 @@ def learned_information(generator: VAEACGenerator, beta: np.ndarray, panels,
     """
     rng = np.random.default_rng(seed)
     tilted = generator.tilted_full_sample(beta, n_tilted, int(rng.integers(2**31 - 1)))
-    phi = feature_map(tilted, generator.scale)
+    fn = generator.feature_fn if feature_fn is None else feature_fn
+    phi = fn(tilted)
     mu = phi.mean(0)
     fisher_hat = np.cov(phi, rowvar=False)
     infos = []
     for panel in panels:
         observed = tilted[:, list(panel)]
-        a = imp_conditional_mean_from_generator(generator, beta, observed, panel, n_conditional, seed + 1) - mu
-        b = imp_conditional_mean_from_generator(generator, beta, observed, panel, n_conditional, seed + 2) - mu
+        a = imp_conditional_mean_from_generator(generator, beta, observed, panel, n_conditional, seed + 1, feature_fn=feature_fn) - mu
+        b = imp_conditional_mean_from_generator(generator, beta, observed, panel, n_conditional, seed + 2, feature_fn=feature_fn) - mu
         a = a - a.mean(0)
         b = b - b.mean(0)
         info_hat = (a.T @ b + b.T @ a) / max(2 * (len(a) - 1), 1)
@@ -289,11 +294,12 @@ def learned_information(generator: VAEACGenerator, beta: np.ndarray, panels,
     return fisher_hat, np.asarray(infos)
 
 
-def imp_conditional_mean_from_generator(generator, beta, batch, panel, n, seed, scale=None):
+def imp_conditional_mean_from_generator(generator, beta, batch, panel, n, seed, scale=None, feature_fn=None):
     """E_{Q_beta}[phi(X)|X_S] via importance weighting on generator conditionals."""
     rng = np.random.default_rng(seed)
     batch = np.atleast_2d(np.asarray(batch, dtype=float))
     comp = generator.sample_conditional_batch(batch, panel, n, int(rng.integers(2**31 - 1)))
-    phi = feature_map(comp, generator.scale)
+    fn = generator.feature_fn if feature_fn is None else feature_fn
+    phi = fn(comp)
     w = np.exp(phi @ np.asarray(beta))
     return np.einsum("onr,on->or", phi, w) / w.sum(axis=1, keepdims=True)
