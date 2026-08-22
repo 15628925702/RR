@@ -11,12 +11,14 @@ def panel_library(n_sensors: int = 16):
     return tuple(combinations(range(n_sensors), 2))
 
 
-def fit_scaler_pca(reference_train: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def fit_scaler_pca(reference_train: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     x = np.asarray(reference_train, dtype=float)
     if x.ndim != 2 or x.shape[1] != 128:
         raise ValueError("Gas input must have shape (n, 128)")
-    mean, std = x.mean(0), x.std(0, ddof=1)
-    z = (x - mean) / np.maximum(std, 1e-12)
+    mean = x.mean(0)
+    std = x.std(0, ddof=1)
+    std = np.where(std < 1e-12, 1.0, std)
+    z = (x - mean) / std
     pcs = []
     for sensor in range(16):
         block = z[:, sensor * 8 : (sensor + 1) * 8]
@@ -25,7 +27,7 @@ def fit_scaler_pca(reference_train: np.ndarray) -> tuple[np.ndarray, np.ndarray]
         if vector[np.argmax(np.abs(vector))] < 0:
             vector = -vector
         pcs.append(vector)
-    return mean, np.asarray(pcs)
+    return mean, std, np.asarray(pcs)
 
 
 def transform_features(x: np.ndarray, mean: np.ndarray, std: np.ndarray, pcs: np.ndarray) -> np.ndarray:

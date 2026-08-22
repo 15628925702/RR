@@ -15,8 +15,7 @@ def main() -> None:
     rng = np.random.default_rng(2026)
     raw = rng.normal(size=(200, 128))
     train, validation = raw[:160], raw[160:]
-    mean, pcs = fit_scaler_pca(train)
-    std = train.std(0, ddof=1)
+    mean, std, pcs = fit_scaler_pca(train)
     phi = transform_features(validation, mean, std, pcs)
     summary = {"stage": "P8", "reference_train": 160, "reference_validation": 40, "raw_dimension": 128, "sensor_blocks": 16, "panel_count": len(panel_library()), "phi_shape": list(phi.shape), "phi_min": float(phi.min()), "phi_max": float(phi.max())}
     payload = json.dumps(summary, sort_keys=True, indent=2) + "\n"
