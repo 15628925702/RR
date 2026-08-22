@@ -18,10 +18,15 @@ import torch.nn as nn
 from .synthetic_oracle import feature_map, inverse_warp, warp
 
 
+def _gaussian_log_prob(z: torch.Tensor, mu: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
+    return -0.5 * (logvar + (z - mu) ** 2 / logvar.exp() + np.log(2.0 * np.pi))
+
+
 class VAEAC(nn.Module):
     """Mask-conditioned VAE over ``dim`` continuous coordinates."""
 
-    def __init__(self, dim: int = 16, latent: int = 8, hidden: int = 64, seed: int = 0):
+    def __init__(self, dim: int = 16, latent: int = 8, hidden: int = 64, seed: int = 0,
+                 k_prior: int = 4, gmm_prior: bool = False):
         super().__init__()
         torch.manual_seed(seed)
         self.dim = int(dim)
@@ -36,6 +41,24 @@ class VAEAC(nn.Module):
             nn.Linear(hidden, hidden), nn.Tanh(),
             nn.Linear(hidden, dim),
         )
+        self.gmm_prior = bool(gmm_prior)
+        if gmm_prior:
+            # Learned Gaussian-mixture prior matching the multi-modal Z.
+            self.log_pi = nn.Parameter(torch.zeros(k_prior))
+            self.prior_mu = nn.Parameter(torch.randn(k_prior, latent) * 0.2)
+            self.prior_logvar = nn.Parameter(torch.full((k_prior, latent), -0.5))
+
+    def log_prior(self, z: torch.Tensor) -> torch.Tensor:
+        log_comp = self.log_pi + _gaussian_log_prob(
+            z[:, None, :], self.prior_mu[None, :, :], self.prior_logvar[None, :, :]).sum(-1)
+        return torch.logsumexp(log_comp, dim=-1)
+
+    def kl_divergence(self, mu: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
+        if not self.gmm_prior:
+            return -0.5 * (1.0 + logvar - mu ** 2 - logvar.exp()).sum(-1)
+        z = self.reparameterize(mu, logvar)
+        log_q = _gaussian_log_prob(z, mu, logvar).sum(-1)
+        return log_q - self.log_prior(z)
 
     def encode(self, x_masked: torch.Tensor, mask: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         h = torch.cat([x_masked, mask], dim=-1)
@@ -109,7 +132,7 @@ def train_vaeac(model: VAEAC, reference: np.ndarray, panels, scale: np.ndarray |
                     mask[j, list(panel)] = 1.0
             recon, mu, logvar = model(xb, mask)
             recon_loss = ((recon - xb) ** 2 * (1.0 - mask)).sum(-1).mean()
-            kl = -0.5 * (1.0 + logvar - mu ** 2 - logvar.exp()).sum(-1).mean()
+            kl = model.kl_divergence(mu, logvar).mean()
             loss = recon_loss + beta * kl
             opt.zero_grad()
             loss.backward()
