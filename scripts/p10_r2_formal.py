@@ -95,6 +95,21 @@ def log_partition_emp(phi, beta):
     return float(np.logaddexp.reduce(logits) - np.log(phi.shape[0]))
 
 
+def gas_a_optimal_information(phi_ref, sensor_pairs):
+    """A-OSQD panel Fisher info in the 16-dim phi space (PDF Sec. 6 / 8.1)."""
+    x = np.asarray(phi_ref, dtype=float)
+    dim = x.shape[1]
+    full_cov = np.cov(x, rowvar=False)
+    inv_full = np.linalg.inv(full_cov + 1e-6 * np.eye(dim))
+    infos = []
+    for a, b in sensor_pairs:
+        idx = sorted(set([a, b] + ([a + 8] if a + 8 < dim else []) + ([b + 8] if b + 8 < dim else [])))
+        info = np.zeros((dim, dim))
+        info[np.ix_(idx, idx)] = inv_full[np.ix_(idx, idx)]
+        infos.append(info)
+    return np.asarray(infos)
+
+
 def empirical_panel_infos(pool_x, pool_phi, coord_panels, k=60, n_sub=800):
     """Kernel cross-completion panel information (PDF Eq. 9) on the empirical pool."""
     rng = np.random.default_rng(0)
@@ -150,7 +165,8 @@ def heldout_moment_rmse(gen_samples, test_x, mean, std):
 
 
 def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x, campaign_phi,
-                       coord_panels, budget, seed, full_pool_x, mlp_steps=200):
+                       coord_panels, sensor_pairs, budget, seed, full_pool_x, mlp_steps=200,
+                       emp_infos=None, gas_ao_infos=None, phi_ref=None):
     gas_fn = lambda x: transform_features(x, mean, std, pcs)
     n = len(campaign_x)
     rng = np.random.default_rng(seed)
@@ -184,8 +200,8 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
     b_pilot = min(b_pilot, budget)
 
     fisher = np.cov(pool_phi, rowvar=False)
-    # empirical kernel panel infos (shared by non-generator policies and H)
-    emp_infos = empirical_panel_infos(pool_x, pool_phi, coord_panels)
+    # empirical kernel panel infos shared by non-generator policies and H
+    # (computed once in main on the reference pool when not passed in).
     pilot_counts = gas_balanced_pilot_counts(coord_panels, b_pilot)
     pilot_obs = []
     cursor = 0
@@ -201,8 +217,8 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
             fw_gap = 0.0
             policy_infos = None
         elif name == "A-OSQD":
-            a_info = a_optimal_information(pool_x, coord_panels, dimension=128)
-            probs, fw_gap, _ = frank_wolfe(np.eye(128), a_info, np.ones(len(coord_panels)),
+            a_info = gas_ao_infos if gas_ao_infos is not None else gas_a_optimal_information(pool_phi, sensor_pairs)
+            probs, fw_gap, _ = frank_wolfe(np.eye(16), a_info, np.ones(len(coord_panels)),
                                            uniform_probabilities(len(coord_panels)), tolerance=1e-4, max_iter=300)
             policy_infos = a_info
         elif name == "Discriminative Score OED":
@@ -238,13 +254,15 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
             mu_beta_j = wb @ pool_phi
             U = np.zeros(16)
             H = 1e-2 * np.eye(16)
+            grouped: dict[int, list[np.ndarray]] = {}
             for panel, obs_row in all_obs:
-                obs_arr = np.atleast_2d(np.asarray(obs_row))
-                cm = empirical_kernel_cm(pool_x, pool_phi, obs_arr, panel)
+                grouped.setdefault(coord_panels.index(panel), []).append(np.asarray(obs_row))
+            for pidx, rows_list in grouped.items():
+                obs_batch = np.asarray(rows_list)
+                cm = empirical_kernel_cm(ref_val, phi_ref, obs_batch, coord_panels[pidx])
                 U += (cm - mu_beta_j).sum(0)
-                idx = coord_panels.index(panel)
-                info_panel = policy_infos[idx] if policy_infos is not None else emp_infos[idx]
-                H += len(obs_arr) * info_panel
+                info_panel = policy_infos[pidx] if policy_infos is not None else emp_infos[pidx]
+                H += len(obs_batch) * info_panel
             step = np.linalg.solve(H + 1e-2 * np.eye(16), U)
             beta_hat_final = np.clip(beta_hat_final + step, -4.0, 4.0)
         logits = pool_phi @ beta_hat_final
@@ -295,6 +313,10 @@ def main() -> None:
     gen = VAEACGenerator(model, np.ones(128), alpha=0.0, feature_fn=gas_fn)
     # frozen large full-sample pool for A_hat (PDF 8.3)
     full_pool_x = gen.sample_full(cfg["full_pool_size"], seed=42)
+    # empirical kernel panel infos + A-OSQD infos, computed once on ref pool
+    phi_ref = gas_fn(ref_val)
+    emp_infos = empirical_panel_infos(ref_val, phi_ref, coord_panels)
+    gas_ao_infos = gas_a_optimal_information(phi_ref, sensor_pairs)
 
     out = Path("results")
     camp_seeds = {"batch7": 501000000, "batches89": 502000000, "batch10": 503000000}
@@ -316,8 +338,10 @@ def main() -> None:
                         continue
                     seed = camp_seeds[camp] + budget * 1000 + rep
                     rows = run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen,
-                                              campaign_x, campaign_phi, coord_panels, budget, seed,
-                                              full_pool_x, mlp_steps=args.mlp_steps)
+                                              campaign_x, campaign_phi, coord_panels, sensor_pairs,
+                                              budget, seed, full_pool_x, mlp_steps=args.mlp_steps,
+                                              emp_infos=emp_infos, gas_ao_infos=gas_ao_infos,
+                                              phi_ref=phi_ref)
                     for r in rows:
                         r["replication"] = rep
                         r["campaign"] = camp
