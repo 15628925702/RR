@@ -167,6 +167,8 @@ def heldout_moment_rmse(gen_samples, test_x, mean, std):
 def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x, campaign_phi,
                        coord_panels, sensor_pairs, budget, seed, full_pool_x, mlp_steps=200,
                        emp_infos=None, gas_ao_infos=None, phi_ref=None):
+    import time as _t
+    t0 = _t.time()
     gas_fn = lambda x: transform_features(x, mean, std, pcs)
     n = len(campaign_x)
     rng = np.random.default_rng(seed)
@@ -174,6 +176,7 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
     perm = rng.permutation(n)
     pool_x, pool_phi = campaign_x[perm[:half]], campaign_phi[perm[:half]]
     test_x, test_phi = campaign_x[perm[half:]], campaign_phi[perm[half:]]
+    print(f"[rep {seed} t+{_t.time()-t0:.1f}s split done", flush=True)
 
     # Evaluation beta_t^dagger = argmin A_hat(beta) - beta^T mu_t (full-test only)
     mu_t = test_phi.mean(0)
@@ -191,9 +194,10 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
         if np.linalg.norm(step_dag) > 2.0:
             step_dag = step_dag * (2.0 / np.linalg.norm(step_dag))
         beta_dag = np.clip(beta_dag + step_dag, -4.0, 4.0)
-    if np.linalg.norm(beta_dag) > 4.0:
-        beta_dag = beta_dag * (4.0 / np.linalg.norm(beta_dag))
+    if np.linalg.norm(beta_dag) > 2.0:
+        beta_dag = beta_dag * (2.0 / np.linalg.norm(beta_dag))
 
+    print(f"[rep {seed} t+{_t.time()-t0:.1f}s beta_dag done norm={np.linalg.norm(beta_dag):.2f}", flush=True)
     # target draw from the campaign pool under beta_dag
     logits = pool_phi @ beta_dag
     w = np.exp(logits - logits.max()); w /= w.sum()
@@ -283,6 +287,7 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
         gen_samples = gen.sample_full(cfg["c2st_samples"], seed + 33)
         mean_rmse, std_rmse = heldout_moment_rmse(gen_samples, test_x, mean, std)
         auc = c2st_auc(gen_samples, test_x, rng_seed=seed % 10000)
+        print(f"[rep {seed} t+{_t.time()-t0:.1f}s policy {name} done", flush=True)
         rows.append({"policy": name, "budget": budget, "seed": seed,
                      "projection_loss": proj_loss, "heldout_mean_rmse": mean_rmse,
                      "heldout_std_rmse": std_rmse, "c2st_auc": auc, "ess": ess,
