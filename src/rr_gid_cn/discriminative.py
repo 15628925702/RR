@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import numpy as np
 
 
@@ -98,6 +100,13 @@ class MaskedScoreMLP:
         import torch
         n = len(x)
         dev = "cuda"
+        # Keep this worker's GPU footprint to half the device by default so the
+        # host can co-locate another project on the same GPU (open config knob).
+        fraction = float(os.environ.get("RR_GID_GPU_FRACTION", "0.5"))
+        try:
+            torch.cuda.set_per_process_memory_fraction(fraction, device=dev)
+        except (RuntimeError, ValueError):
+            pass
         Xt = torch.as_tensor(x, dtype=torch.float64, device=dev)
         Yt = torch.as_tensor(y, dtype=torch.float64, device=dev)
         wt = torch.as_tensor(w, dtype=torch.float64, device=dev)
