@@ -1,0 +1,26 @@
+seed: 2026
+device: cuda
+dtype: float64
+paths:
+  root: ..
+  data: data
+  results: results
+  figures: figures
+  experiments: experiments
+p7:
+  budget: 8000
+  alpha_values: [0.0, 0.5, 1.0, 1.5]
+  reference_size: 20000
+  validation_size: 10000
+  large_reference_size: 50000
+  information_tilted: 256
+  information_cond: 32
+  gen_info_tilted: 256
+  gen_info_cond: 32
+  mlp_steps: 200
+  generator_ckpt: experiments/p6_vaeac_synthetic.pt
+  # reuse frontier
+  reuse_campaigns: [1, 5, 20, 50]
+  reuse_reps: 10
+  reuse_panels: 60
+  r_features: 12

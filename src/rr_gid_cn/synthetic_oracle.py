@@ -156,6 +156,7 @@ def tilted_conditional_sample(
     n: int,
     seed: int | None = None,
     scale: np.ndarray | None = None,
+    feature_fn=None,
 ) -> np.ndarray:
     """Exact rejection samples from the relative tilt conditional law.
 
@@ -164,6 +165,7 @@ def tilted_conditional_sample(
     has no self-normalized importance bias.
     """
     rng = np.random.default_rng(seed)
+    fn = feature_map if feature_fn is None else feature_fn
     beta = np.asarray(beta, dtype=float)
     panel_set = set(panel)
     fixed = np.zeros(beta.shape[0], dtype=bool)
@@ -171,12 +173,12 @@ def tilted_conditional_sample(
     fixed[6:] = [i in panel_set and i + 6 in panel_set for i in range(6)]
     observed_full = np.zeros(mixture.dimension)
     observed_full[list(panel)] = np.asarray(x_s)
-    observed_features = feature_map(observed_full[None, :], scale)[0]
+    observed_features = fn(observed_full[None, :])[0]
     envelope = float(np.dot(beta[fixed], observed_features[fixed]) + np.sum(np.abs(beta[~fixed])))
     accepted = []
     while len(accepted) < n:
         proposal = sample_conditional(mixture, x_s, panel, max(32, 2 * (n - len(accepted))), int(rng.integers(2**31 - 1)))
-        logits = feature_map(proposal, scale) @ beta
+        logits = fn(proposal) @ beta
         keep = rng.random(len(proposal)) < np.exp(logits - envelope)
         accepted.extend(proposal[keep])
     return np.asarray(accepted[:n])
@@ -190,8 +192,10 @@ def tilted_conditional_batch(
     n: int,
     seed: int | None = None,
     scale: np.ndarray | None = None,
+    feature_fn=None,
 ) -> np.ndarray:
     rng = np.random.default_rng(seed)
+    fn = feature_map if feature_fn is None else feature_fn
     rows = np.atleast_2d(np.asarray(x_s))
     out = np.empty((len(rows), n, mixture.dimension))
     panel_set = set(panel)
@@ -199,7 +203,7 @@ def tilted_conditional_batch(
     fixed[:6] = [i in panel_set for i in range(6)]
     fixed[6:] = [i in panel_set and i + 6 in panel_set for i in range(6)]
     full = np.zeros((len(rows), mixture.dimension)); full[:, list(panel)] = rows
-    fixed_features = feature_map(full, scale)[:, fixed] @ beta[fixed]
+    fixed_features = fn(full)[:, fixed] @ beta[fixed]
     envelope = fixed_features + np.sum(np.abs(beta[~fixed]))
     filled = np.zeros(len(rows), dtype=int)
     while np.any(filled < n):
@@ -207,7 +211,7 @@ def tilted_conditional_batch(
         proposal_n = int(max(64, min(2048, 4 * int(need.max()))))
         observed_rep = np.repeat(rows, proposal_n, axis=0)
         proposals = sample_conditional_batch(mixture, observed_rep, panel, 1, int(rng.integers(2**31 - 1)))[:, 0]
-        feats = feature_map(proposals, scale)
+        feats = fn(proposals)
         logits = feats @ beta
         row_ids = np.repeat(np.arange(len(rows)), proposal_n)
         keep = rng.random(len(proposals)) < np.exp(logits - envelope[row_ids])
@@ -260,6 +264,55 @@ def feature_map(x: np.ndarray, scale: np.ndarray | None = None) -> np.ndarray:
     return np.concatenate([unary, pair], axis=-1)
 
 
+# ---------------------------------------------------------------------------
+# P7 S2 reuse: bounded unary/pairwise feature dictionary.
+#
+# PDF 7.3 freezes the single-task feature map ``phi`` above but requires that a
+# generator trained once can be *reused* across campaigns that redraw their own
+# 12-feature map from a pre-defined bounded dictionary, redraw ``beta*``, and
+# redraw a subset of candidate pair panels.  ``feature_fn_from_dictionary``
+# materializes any such draw as an opaque ``x -> R^r`` callable so the whole
+# downstream tilt / information machinery can accept ``feature_fn`` uniformly.
+# ---------------------------------------------------------------------------
+
+UNARY_FEATURE = "unary"
+PAIR_FEATURE = "pair"
+
+
+def make_feature_dictionary(dimension: int = 16) -> tuple[tuple[str, tuple[int, ...]], ...]:
+    """Bounded unary/pairwise dictionary (PDF 7.3) over all coordinate pairs."""
+    dim = int(dimension)
+    unary = [(UNARY_FEATURE, (j,)) for j in range(dim)]
+    pairs = [(PAIR_FEATURE, (i, j)) for i in range(dim) for j in range(i + 1, dim)]
+    return tuple(unary + pairs)
+
+
+def sample_feature_draw(dictionary, seed: int, r: int = 12):
+    """Draw ``r`` features without replacement from the dictionary."""
+    rng = np.random.default_rng(seed)
+    idx = rng.choice(len(dictionary), size=r, replace=False)
+    return [dictionary[i] for i in idx]
+
+
+def feature_fn_from_dictionary(features, scale: np.ndarray | None = None):
+    """Build an ``x -> R^r`` callable for a list of (kind, coords) features."""
+    scale = np.ones(16) if scale is None else np.asarray(scale, dtype=float)
+
+    def fn(x: np.ndarray) -> np.ndarray:
+        x = np.asarray(x, dtype=float)
+        x_tilde = x / scale
+        cols = []
+        for kind, coords in features:
+            if kind == UNARY_FEATURE:
+                cols.append(np.tanh(x_tilde[..., coords[0]]))
+            else:  # PAIR_FEATURE
+                i, j = coords
+                cols.append(np.tanh(x_tilde[..., i] * x_tilde[..., j]))
+        return np.stack(cols, axis=-1)
+
+    return fn
+
+
 def reference_scale(mixture: FrozenMixture, n: int = 6000, seed: int = 2026) -> np.ndarray:
     """Estimate the frozen per-coordinate Q0 reference scale from an independent pool."""
     if n <= 1:
@@ -271,15 +324,19 @@ def reference_scale(mixture: FrozenMixture, n: int = 6000, seed: int = 2026) -> 
     return scale
 
 
-def log_partition(beta: np.ndarray, reference_samples: np.ndarray, scale: np.ndarray | None = None) -> float:
+def log_partition(beta: np.ndarray, reference_samples: np.ndarray, scale: np.ndarray | None = None,
+                  feature_fn=None) -> float:
     from numpy import logaddexp
     beta = np.asarray(beta)
-    values = feature_map(reference_samples, scale) @ beta
+    fn = feature_map if feature_fn is None else feature_fn
+    values = fn(reference_samples) @ beta
     return float(logaddexp.reduce(values) - np.log(values.size))
 
 
-def tilted_moments(beta: np.ndarray, reference_samples: np.ndarray, scale: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
-    features = feature_map(reference_samples, scale)
+def tilted_moments(beta: np.ndarray, reference_samples: np.ndarray, scale: np.ndarray | None = None,
+                   feature_fn=None) -> tuple[np.ndarray, np.ndarray]:
+    fn = feature_map if feature_fn is None else feature_fn
+    features = fn(reference_samples)
     logits = features @ np.asarray(beta)
     weights = np.exp(logits - logits.max())
     weights /= weights.sum()
@@ -289,35 +346,42 @@ def tilted_moments(beta: np.ndarray, reference_samples: np.ndarray, scale: np.nd
     return mean, fisher
 
 
-def tilted_sample_from_reference(beta: np.ndarray, reference_samples: np.ndarray, n: int, seed: int = 0, scale: np.ndarray | None = None) -> np.ndarray:
+def tilted_sample_from_reference(beta: np.ndarray, reference_samples: np.ndarray, n: int, seed: int = 0,
+                                 scale: np.ndarray | None = None, feature_fn=None) -> np.ndarray:
     """Sample Q_beta by exact importance resampling from an independent Q0 pool."""
     rng = np.random.default_rng(seed)
-    features = feature_map(reference_samples, scale)
+    fn = feature_map if feature_fn is None else feature_fn
+    features = fn(reference_samples)
     logits = features @ np.asarray(beta)
     weights = np.exp(logits - logits.max())
     weights /= weights.sum()
     return np.asarray(reference_samples)[rng.choice(len(reference_samples), size=n, replace=True, p=weights)]
 
 
-def tilted_full_sample(mixture: FrozenMixture, beta: np.ndarray, n: int, seed: int = 0, scale: np.ndarray | None = None) -> np.ndarray:
+def tilted_full_sample(mixture: FrozenMixture, beta: np.ndarray, n: int, seed: int = 0,
+                       scale: np.ndarray | None = None, feature_fn=None) -> np.ndarray:
     """Exact accept-reject samples from Q_beta relative to Q0."""
     rng = np.random.default_rng(seed)
+    fn = feature_map if feature_fn is None else feature_fn
     envelope = float(np.sum(np.abs(np.asarray(beta))))
     accepted = []
     while len(accepted) < n:
         proposal = sample_full(mixture, max(256, min(4096, 4 * (n - len(accepted)))), int(rng.integers(2**31 - 1)))
-        logits = feature_map(proposal, scale) @ beta
+        logits = fn(proposal) @ beta
         keep = rng.random(len(proposal)) < np.exp(logits - envelope)
         accepted.extend(proposal[keep])
     return np.asarray(accepted[:n])
 
 
-def beta_direction_and_scale(reference_samples: np.ndarray, seed: int = 2026, target_ess_fraction: float = 0.5, scale: np.ndarray | None = None) -> np.ndarray:
+def beta_direction_and_scale(reference_samples: np.ndarray, seed: int = 2026, target_ess_fraction: float = 0.5,
+                             scale: np.ndarray | None = None, feature_fn=None) -> np.ndarray:
     """Freeze a nonzero direction and choose its magnitude by ESS/N bisection."""
     rng = np.random.default_rng(seed)
-    direction = rng.normal(size=12)
+    fn = feature_map if feature_fn is None else feature_fn
+    phi = fn(reference_samples)
+    r = phi.shape[-1]
+    direction = rng.normal(size=r)
     direction /= np.linalg.norm(direction)
-    phi = feature_map(reference_samples, scale)
     target = target_ess_fraction * len(phi)
     lo, hi = 0.0, 8.0
     for _ in range(60):
@@ -332,6 +396,9 @@ def beta_direction_and_scale(reference_samples: np.ndarray, seed: int = 2026, ta
     return ((lo + hi) / 2) * direction
 
 
-def full_target_kl(beta_true: np.ndarray, beta_est: np.ndarray, reference_samples: np.ndarray, scale: np.ndarray | None = None) -> float:
-    mean_true, _ = tilted_moments(beta_true, reference_samples, scale)
-    return float((np.asarray(beta_true) - np.asarray(beta_est)) @ mean_true - log_partition(beta_true, reference_samples, scale) + log_partition(beta_est, reference_samples, scale))
+def full_target_kl(beta_true: np.ndarray, beta_est: np.ndarray, reference_samples: np.ndarray,
+                   scale: np.ndarray | None = None, feature_fn=None) -> float:
+    mean_true, _ = tilted_moments(beta_true, reference_samples, scale, feature_fn=feature_fn)
+    return float((np.asarray(beta_true) - np.asarray(beta_est)) @ mean_true
+                 - log_partition(beta_true, reference_samples, scale, feature_fn=feature_fn)
+                 + log_partition(beta_est, reference_samples, scale, feature_fn=feature_fn))

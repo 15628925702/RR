@@ -9,17 +9,19 @@ from .discriminative import MaskedScoreMLP, masked_input, masked_pool, score_inf
 from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, log_partition, sample_conditional, sample_conditional_batch, sample_full, tilted_conditional_sample, tilted_conditional_batch, tilted_full_sample, tilted_moments, tilted_sample_from_reference
 
 
-def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilted=256, n_conditional=64, seed=0):
+def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilted=256, n_conditional=64, seed=0,
+                            feature_fn=None):
     rng = np.random.default_rng(seed)
-    tilted = tilted_full_sample(mixture, beta, n_tilted, int(rng.integers(2**31 - 1)), scale)
-    phi = feature_map(tilted, scale)
+    fn = feature_map if feature_fn is None else feature_fn
+    tilted = tilted_full_sample(mixture, beta, n_tilted, int(rng.integers(2**31 - 1)), scale, feature_fn=fn)
+    phi = fn(tilted)
     mu = phi.mean(0)
     fisher = np.cov(phi, rowvar=False)
     infos = []
     for panel in panels:
         observed = tilted[:, list(panel)]
-        projected_a = feature_map(tilted_conditional_batch(mixture, beta, observed, panel, n_conditional, int(rng.integers(2**31 - 1)), scale), scale).mean(axis=1) - mu
-        projected_b = feature_map(tilted_conditional_batch(mixture, beta, observed, panel, n_conditional, int(rng.integers(2**31 - 1)), scale), scale).mean(axis=1) - mu
+        projected_a = fn(tilted_conditional_batch(mixture, beta, observed, panel, n_conditional, int(rng.integers(2**31 - 1)), scale, feature_fn=fn)).mean(axis=1) - mu
+        projected_b = fn(tilted_conditional_batch(mixture, beta, observed, panel, n_conditional, int(rng.integers(2**31 - 1)), scale, feature_fn=fn)).mean(axis=1) - mu
         a = np.asarray(projected_a); b = np.asarray(projected_b)
         a = a - a.mean(0); b = b - b.mean(0)
         info = (a.T @ b + b.T @ a) / max(2 * (len(a) - 1), 1)
@@ -61,7 +63,7 @@ def policy_designs(reference, panels, fisher, oracle_information):
 
 
 def discriminative_design(reference_train, validation, beta, panels, scale, seed=0,
-                          hidden=64, steps=200, lr=0.01, fw_tolerance=1e-4):
+                          hidden=64, steps=200, lr=0.01, fw_tolerance=1e-4, feature_fn=None):
     """PDF P5 Discriminative Score OED design.
 
     Trains a mask-conditioned MLP on tilt-weighted score labels
@@ -72,23 +74,25 @@ def discriminative_design(reference_train, validation, beta, panels, scale, seed
     minimizes ``tr(F_hat M(p)^-1)`` with the tilted reference Fisher ``F_hat``.
     """
     rng = np.random.default_rng(seed)
+    fn = feature_map if feature_fn is None else feature_fn
     n = len(reference_train)
     dim = reference_train.shape[-1]
+    r = fn(reference_train[:1]).shape[-1]
     mask_matrix = np.zeros((n, dim), dtype=float)
     for i in range(n):
         mask_matrix[i, list(panels[int(rng.integers(len(panels)))])] = 1.0
-    phi_train = feature_map(reference_train, scale)
-    mu_beta, _ = tilted_moments(beta, reference_train, scale)
+    phi_train = fn(reference_train)
+    mu_beta, _ = tilted_moments(beta, reference_train, scale, feature_fn=fn)
     labels = phi_train - mu_beta
     logits = phi_train @ beta
     w = np.exp(logits - logits.max())
-    model = MaskedScoreMLP(2 * dim, 12, hidden=hidden, seed=seed)
+    model = MaskedScoreMLP(2 * dim, r, hidden=hidden, seed=seed)
     model.fit(masked_pool(reference_train, mask_matrix), labels, weights=w,
               steps=steps, lr=lr)
-    phi_val = feature_map(validation, scale)
+    phi_val = fn(validation)
     w_val = np.exp(phi_val @ beta)
     infos = score_information(model, validation, panels, w_val)
-    _, fisher_hat = tilted_moments(beta, validation, scale)
+    _, fisher_hat = tilted_moments(beta, validation, scale, feature_fn=fn)
     costs = np.ones(len(panels))
     uniform = uniform_probabilities(len(panels))
     p, _, _ = frank_wolfe(fisher_hat, infos, costs, uniform, tolerance=fw_tolerance, max_iter=300)
@@ -155,16 +159,17 @@ def solve_pilot_beta(mu_pil, reference, scale, theta_bound=4.0, steps=20, norm_c
     return beta
 
 
-def prepare_s1_oracle(mixture, scale, panels, seed=2026, reference_size=50000, information_samples=256, conditional_samples=32, large_reference_size=200000):
+def prepare_s1_oracle(mixture, scale, panels, seed=2026, reference_size=50000, information_samples=256, conditional_samples=32, large_reference_size=200000,
+                      feature_fn=None):
     reference = sample_full(mixture, reference_size, seed)
     reference_large = sample_full(mixture, large_reference_size, seed + 12345)
-    beta_true = beta_direction_and_scale(reference, 2026, 0.5, scale)
-    fisher, oracle_information = exact_panel_information(mixture, beta_true, panels, reference, scale, information_samples, conditional_samples, seed + 1)
+    beta_true = beta_direction_and_scale(reference, 2026, 0.5, scale, feature_fn=feature_fn)
+    fisher, oracle_information = exact_panel_information(mixture, beta_true, panels, reference, scale, information_samples, conditional_samples, seed + 1, feature_fn=feature_fn)
     designs = policy_designs(reference, panels, fisher, oracle_information)
     return {"reference": reference, "reference_large": reference_large, "beta_true": beta_true, "fisher": fisher, "information": oracle_information, "designs": designs}
 
 
-def imp_conditional_mean(mixture, beta, batch, panel, n, seed, scale):
+def imp_conditional_mean(mixture, beta, batch, panel, n, seed, scale, feature_fn=None):
     """E_{Q_beta}[phi(X)|X_S] by importance weighting on exact Q0 conditional samples.
 
     Vectorized: returns (n_rows, r).  This replaces accept-reject tilting of the
@@ -172,13 +177,14 @@ def imp_conditional_mean(mixture, beta, batch, panel, n, seed, scale):
     importance proposals from Q0; cross-completion removes the self-normalized bias).
     """
     rng = np.random.default_rng(seed)
+    fn = feature_map if feature_fn is None else feature_fn
     completions = sample_conditional_batch(mixture, batch, panel, n, int(rng.integers(2**31 - 1)))
-    phi = feature_map(completions, scale)
+    phi = fn(completions)
     w = np.exp(phi @ np.asarray(beta))
     return np.einsum("onr,on->or", phi, w) / w.sum(axis=1, keepdims=True)
 
 
-def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n_cond, seed):
+def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n_cond, seed, feature_fn=None):
     """Cross-completion panel information estimator (PDF Eq. 9) with PSD projection.
 
     Uses importance-weighted conditional completions (not accept-reject), so it is
@@ -187,7 +193,8 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
     tilted ``mu`` estimate has negligible variance.
     """
     rng = np.random.default_rng(seed)
-    features = feature_map(reference, scale)
+    fn = feature_map if feature_fn is None else feature_fn
+    features = fn(reference)
     logits = features @ np.asarray(beta)
     w = np.exp(logits - logits.max())
     w /= w.sum()
@@ -197,8 +204,8 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
     infos = []
     for panel in panels:
         observed = tilted[:, list(panel)]
-        a = imp_conditional_mean(mixture, beta, observed, panel, n_cond, seed + 1, scale) - mu
-        b = imp_conditional_mean(mixture, beta, observed, panel, n_cond, seed + 2, scale) - mu
+        a = imp_conditional_mean(mixture, beta, observed, panel, n_cond, seed + 1, scale, feature_fn=fn) - mu
+        b = imp_conditional_mean(mixture, beta, observed, panel, n_cond, seed + 2, scale, feature_fn=fn) - mu
         a = a - a.mean(0)
         b = b - b.mean(0)
         info_hat = (a.T @ b + b.T @ a) / max(2 * (len(a) - 1), 1)
@@ -209,7 +216,7 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
 
 def final_rr_estimator(mixture, beta_start, observations, panels, reference, scale, lu, seed,
                        theta_bound=4.0, h_tilted=128, h_cond=32, step_size=1.0, norm_cap=None,
-                       mu_samples=10000, mu_direct=False, oracle_information=None):
+                       mu_samples=10000, mu_direct=False, oracle_information=None, feature_fn=None):
     """One Fisher-scoring update following PDF Algorithm 2 step 6.
 
     Re-estimates ``I_S(beta^(j))`` by cross-completion at the current beta, builds
@@ -219,23 +226,24 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
     bounded for extreme baseline allocations).
     """
     rng = np.random.default_rng(seed)
+    fn = feature_map if feature_fn is None else feature_fn
     grouped = {}
     for panel, obs in observations:
         grouped.setdefault(panel, []).append(obs)
-    infos = panel_information_cross(mixture, beta_start, panels, reference, scale, h_tilted, h_cond, seed + 7) if oracle_information is None else oracle_information
-    H = np.zeros((12, 12))
+    infos = panel_information_cross(mixture, beta_start, panels, reference, scale, h_tilted, h_cond, seed + 7, feature_fn=fn) if oracle_information is None else oracle_information
+    H = np.zeros((beta_start.shape[0], beta_start.shape[0]))
     projected = []
     for panel, rows in grouped.items():
         H += len(rows) * infos[panels.index(panel)]
-        projected.append(imp_conditional_mean(mixture, beta_start, np.asarray(rows), panel, lu, int(rng.integers(2**31 - 1)), scale))
+        projected.append(imp_conditional_mean(mixture, beta_start, np.asarray(rows), panel, lu, int(rng.integers(2**31 - 1)), scale, feature_fn=fn))
     projected = np.concatenate(projected, axis=0)
     if mu_direct:
-        mu_beta = feature_map(tilted_full_sample(mixture, beta_start, mu_samples, seed + 99, scale), scale).mean(0)
+        mu_beta = fn(tilted_full_sample(mixture, beta_start, mu_samples, seed + 99, scale, feature_fn=fn)).mean(0)
     else:
-        mu_beta, _ = tilted_moments(beta_start, reference, scale)
+        mu_beta, _ = tilted_moments(beta_start, reference, scale, feature_fn=fn)
     U = np.sum(projected - mu_beta, axis=0)
     H = (H + H.T) / 2
-    step = np.linalg.solve(H + 1e-2 * np.eye(12), U)
+    step = np.linalg.solve(H + 1e-2 * np.eye(beta_start.shape[0]), U)
     updated = np.asarray(beta_start) + step_size * step
     updated = np.clip(updated, -theta_bound, theta_bound)
     if norm_cap is not None:
@@ -250,25 +258,27 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
                     scoring_steps=2, theta_norm_cap=None, policies=None, mu_direct=False, mu_samples=10000,
                     kl_mu_direct=True, use_oracle_H=False, validation_size=10000,
                     mlp_hidden=64, mlp_steps=200, generator=None,
-                    gen_info_tilted=256, gen_info_cond=32, disc_reference_size=None):
-    prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed)
+                    gen_info_tilted=256, gen_info_cond=32, disc_reference_size=None,
+                    feature_fn=None):
+    prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed, feature_fn=feature_fn)
     reference = prepared["reference"]
     ref_large = prepared["reference_large"]
     beta_true = prepared["beta_true"]
     fisher = prepared["fisher"]
     oracle_information = prepared["information"]
     designs = prepared["designs"]
+    fn = feature_map if feature_fn is None else feature_fn
     target_reference = sample_full(mixture, max(4000, budget * 2), seed + 2)
-    target_full = tilted_full_sample(mixture, beta_true, budget, seed + 3, scale)
+    target_full = tilted_full_sample(mixture, beta_true, budget, seed + 3, scale, feature_fn=fn)
     rows = []
     pilot_budget = int(np.ceil(10.0 * budget ** (1.0 / 3.0)))
     pilot_budget = min(pilot_budget, budget)
     remaining_budget = budget - pilot_budget
     rr_phi = float(np.trace(fisher @ np.linalg.pinv(np.tensordot(designs["oracle RR-GID"], oracle_information, axes=(0, 0)))))
     if kl_mu_direct:
-        mu_bt = feature_map(tilted_full_sample(mixture, beta_true, kl_samples, seed + 90, scale), scale).mean(0)
+        mu_bt = fn(tilted_full_sample(mixture, beta_true, kl_samples, seed + 90, scale, feature_fn=fn)).mean(0)
     else:
-        mu_bt = tilted_moments(beta_true, target_reference, scale)[0]
+        mu_bt = tilted_moments(beta_true, target_reference, scale, feature_fn=fn)[0]
     policy_names = policies if policies is not None else list(designs)
     for name in policy_names:
         pilot_counts = balanced_pilot_counts(panels, pilot_budget)
@@ -285,7 +295,8 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
             validation = sample_full(mixture, validation_size, seed + 555)
             disc_ref = reference if disc_reference_size is None else reference[:disc_reference_size]
             probabilities = discriminative_design(disc_ref, validation, beta_hat, panels, scale,
-                                                  seed + 11, hidden=mlp_hidden, steps=mlp_steps)
+                                                  seed + 11, hidden=mlp_hidden, steps=mlp_steps,
+                                                  feature_fn=feature_fn)
         elif name == "learned RR-GID":
             # PDF P6 generator-aware design: cross-completion I_hat_S from the
             # frozen VAEAC generator, cost-aware Frank-Wolfe design.
@@ -317,9 +328,9 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
         update_diagnostics = [{"step": "pilot", "pilot_budget": int(pilot_counts.sum()), "beta_norm": float(np.linalg.norm(beta_hat)), "rho_min": float(np.min(pilot_rho[pilot_rho > 0])) if np.any(pilot_rho > 0) else 0.0}]
         norm_cap_val = theta_norm_cap if theta_norm_cap is not None else pilot_norm_cap * 1.25
         for update in range(scoring_steps):
-            beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=1.0, norm_cap=norm_cap_val, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None)
+            beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=1.0, norm_cap=norm_cap_val, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn)
             update_diagnostics.append({"step": update, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": int(pilot_counts.sum())})
             beta_hat = beta_next
-        kl = max(0.0, float((beta_true - beta_hat) @ mu_bt - log_partition(beta_true, target_reference, scale) + log_partition(beta_hat, target_reference, scale)))
+        kl = max(0.0, float((beta_true - beta_hat) @ mu_bt - log_partition(beta_true, target_reference, scale, feature_fn=fn) + log_partition(beta_hat, target_reference, scale, feature_fn=fn)))
         rows.append({"policy": name, "budget": budget, "allocated_observations": int(counts.sum() + pilot_counts.sum()), "pilot_budget": int(pilot_counts.sum()), "seed": seed, "beta_true_norm": float(np.linalg.norm(beta_true)), "beta_hat_norm": float(np.linalg.norm(beta_hat)), "kl": kl, "B_kl": budget * kl, "design_ratio": float(kl / max(rr_phi / (2 * budget), 1e-12)), "target_draw_seed": seed + 3, "beta_hat": beta_hat.tolist(), "update_diagnostics": update_diagnostics})
     return rows
