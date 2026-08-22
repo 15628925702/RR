@@ -96,11 +96,15 @@ def calibrate_beta(phi, seed=2026, target_ess=0.5):
 
 
 def empirical_full_kl(beta_true, beta_est, ref_x, phi):
-    """KL(Q_beta* || Q_beta_hat) relative to the empirical base (exact sum)."""
+    """KL(Q_beta* || Q_beta_hat) relative to the empirical base (exact sum).
+
+    ``KL = E_{Q_beta*}[log dQ_beta*/dQ_beta_hat]`` with both laws normalized
+    against the same empirical Q0 reference pool (PDF 8.2's full-law KL).
+    """
     log_weights_true = phi @ beta_true
     log_weights_est = phi @ beta_est
-    log_true = log_weights_true - np.log(np.exp(log_weights_true - log_weights_true.max()).sum())
-    log_est = log_weights_est - np.log(np.exp(log_weights_est - log_weights_est.max()).sum())
+    log_true = log_weights_true - np.logaddexp.reduce(log_weights_true)
+    log_est = log_weights_est - np.logaddexp.reduce(log_weights_est)
     return float(np.sum(np.exp(log_true) * (log_true - log_est)))
 
 
@@ -173,8 +177,13 @@ def gas_pilot_ht_moment(phi_val, pilot_obs, pilot_counts, coord_panels):
     return values, rho
 
 
-def solve_pilot_beta_empirical(mu_pil, phi_val, steps=30, theta_bound=4.0):
-    """Moment-matching beta for the empirical exponential family (minimizes A-P)."""
+def solve_pilot_beta_empirical(mu_pil, phi_val, steps=30, theta_bound=4.0, norm_cap=2.0):
+    """Moment-matching beta for the empirical exponential family (minimizes A-P).
+
+    ``norm_cap`` keeps the tilt overlap bounded so the generator accept-reject
+    sampler in ``learned_information`` does not collapse (PDF 7.1 flags low
+    overlap runs explicitly).
+    """
     beta = np.zeros(16)
     features = phi_val
     target = np.asarray(mu_pil, dtype=float)
@@ -191,6 +200,10 @@ def solve_pilot_beta_empirical(mu_pil, phi_val, steps=30, theta_bound=4.0):
         step = 1.0
         while step > 1e-5:
             candidate = np.clip(beta + step * direction, -theta_bound, theta_bound)
+            if norm_cap is not None:
+                nrm = np.linalg.norm(candidate)
+                if nrm > norm_cap:
+                    candidate = candidate * (norm_cap / nrm)
             zc = features @ candidate
             lc = zc - zc.max()
             A_c = np.log(np.exp(lc).sum()) - np.log(len(features))
@@ -293,12 +306,18 @@ def run_gas_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, budget, se
                 U += (cm - mu_beta_j).sum(0)
                 H += len(obs_batch) * infos[pidx]
             step = np.linalg.solve(H, U)
+            # cap the scoring step norm so the update does not diverge to the
+            # Theta boundary in one shot (PDF Alg.2 step 6 keeps overlap bounded).
+            step_norm = np.linalg.norm(step)
+            if step_norm > 2.0:
+                step = step * (2.0 / step_norm)
             beta_hat_final = np.clip(beta_hat_final + step, -4.0, 4.0)
         kl = empirical_full_kl(beta_true, beta_hat_final, ref_val, phi_val)
         rows.append({"policy": name, "budget": budget, "seed": seed, "kl": kl,
                      "B_kl": budget * kl, "design_ratio": float(kl / max(phi_star / (2 * budget), 1e-12)),
                      "pilot_budget": int(b_pilot)})
-        print(f"[rep {seed} t+{_t.time()-t0:.1f}s policy {name} done]", flush=True)
+        print(f"[rep {seed} t+{_t.time()-t0:.1f}s policy {name} done "
+              f"beta_norm={np.linalg.norm(beta_hat_final):.3f} kl={kl:.4f}", flush=True)
     return rows
 
 
