@@ -249,7 +249,8 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
                     lu=128, h_tilted=128, h_cond=32, pilot_norm_cap=2.0, kl_samples=20000,
                     scoring_steps=2, theta_norm_cap=None, policies=None, mu_direct=False, mu_samples=10000,
                     kl_mu_direct=True, use_oracle_H=False, validation_size=10000,
-                    mlp_hidden=64, mlp_steps=200):
+                    mlp_hidden=64, mlp_steps=200, generator=None,
+                    gen_info_tilted=256, gen_info_cond=32):
     prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed)
     reference = prepared["reference"]
     ref_large = prepared["reference_large"]
@@ -284,6 +285,16 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
             validation = sample_full(mixture, validation_size, seed + 555)
             probabilities = discriminative_design(reference, validation, beta_hat, panels, scale,
                                                   seed + 11, hidden=mlp_hidden, steps=mlp_steps)
+        elif name == "learned RR-GID":
+            # PDF P6 generator-aware design: cross-completion I_hat_S from the
+            # frozen VAEAC generator, cost-aware Frank-Wolfe design.
+            from .vaeac import learned_information
+            fisher_hat, infos = learned_information(generator, beta_hat, panels,
+                                                    n_tilted=gen_info_tilted,
+                                                    n_conditional=gen_info_cond, seed=seed + 17)
+            costs = np.ones(len(panels))
+            probabilities, _, _ = frank_wolfe(fisher_hat, infos, costs, uniform_probabilities(len(panels)),
+                                              tolerance=1e-4, max_iter=300)
         else:
             probabilities = designs[name]
         expected = remaining_budget * probabilities
