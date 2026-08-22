@@ -13,6 +13,16 @@ def masked_input(x: np.ndarray, panel: tuple[int, ...]) -> tuple[np.ndarray, np.
     return np.concatenate([masked, np.broadcast_to(mask, x.shape[:-1] + mask.shape)], axis=-1), mask
 
 
+def masked_pool(x: np.ndarray, mask_matrix: np.ndarray) -> np.ndarray:
+    """Batch masked encodings ``[x * m_i, m_i]`` for a per-row mask matrix.
+
+    ``x`` has shape ``(n, d)`` and ``mask_matrix`` has shape ``(n, d)``. Returns
+    the ``(n, 2d)`` encoding used as MLP input (the PDF's uniform random mask
+    draws over the candidate panel family).
+    """
+    return np.concatenate([x * mask_matrix, mask_matrix], axis=-1)
+
+
 def weighted_mse(y_true: np.ndarray, y_pred: np.ndarray, weights: np.ndarray) -> float:
     """Weighted MSE averaged over samples and output dims.
 

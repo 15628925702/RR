@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from .policies import frank_wolfe, uniform_probabilities
-from .discriminative import MaskedScoreMLP, masked_input, score_information
+from .discriminative import MaskedScoreMLP, masked_input, masked_pool, score_information
 from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, log_partition, sample_conditional, sample_conditional_batch, sample_full, tilted_conditional_sample, tilted_conditional_batch, tilted_full_sample, tilted_moments, tilted_sample_from_reference
 
 
@@ -65,26 +65,26 @@ def discriminative_design(reference_train, validation, beta, panels, scale, seed
     """PDF P5 Discriminative Score OED design.
 
     Trains a mask-conditioned MLP on tilt-weighted score labels
-    ``s_beta(X) = phi(X) - mu_beta`` pooled over all candidate panels, then
+    ``s_beta(X) = phi(X) - mu_beta`` with each reference row receiving a uniform
+    random mask drawn from the candidate panel family (PDF Sec. 6), then
     estimates ``I_hat_S = Cov_w(g(X_S))`` on an independent validation set with
-    tilt weights ``w prop exp(beta^T phi)`` (PDF Sec. 6). The cost-aware
-    Frank-Wolfe solver minimizes ``tr(F_hat M(p)^-1)`` with the tilted reference
-    Fisher ``F_hat``.
+    tilt weights ``w prop exp(beta^T phi)``. The cost-aware Frank-Wolfe solver
+    minimizes ``tr(F_hat M(p)^-1)`` with the tilted reference Fisher ``F_hat``.
     """
+    rng = np.random.default_rng(seed)
+    n = len(reference_train)
+    dim = reference_train.shape[-1]
+    mask_matrix = np.zeros((n, dim), dtype=float)
+    for i in range(n):
+        mask_matrix[i, list(panels[int(rng.integers(len(panels)))])] = 1.0
     phi_train = feature_map(reference_train, scale)
     mu_beta, _ = tilted_moments(beta, reference_train, scale)
     labels = phi_train - mu_beta
     logits = phi_train @ beta
     w = np.exp(logits - logits.max())
-    X_pool, Y_pool, W_pool = [], [], []
-    for panel in panels:
-        enc, _ = masked_input(reference_train, panel)
-        X_pool.append(enc)
-        Y_pool.append(labels)
-        W_pool.append(w)
-    model = MaskedScoreMLP(X_pool[0].shape[1], 12, hidden=hidden, seed=seed)
-    model.fit(np.concatenate(X_pool), np.concatenate(Y_pool),
-              weights=np.concatenate(W_pool), steps=steps, lr=lr)
+    model = MaskedScoreMLP(2 * dim, 12, hidden=hidden, seed=seed)
+    model.fit(masked_pool(reference_train, mask_matrix), labels, weights=w,
+              steps=steps, lr=lr)
     phi_val = feature_map(validation, scale)
     w_val = np.exp(phi_val @ beta)
     infos = score_information(model, validation, panels, w_val)
