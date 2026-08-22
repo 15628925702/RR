@@ -1,0 +1,18 @@
+{
+  "information_min_eigenvalue": -1.6558577465053904e-17,
+  "information_shape": [
+    8,
+    12,
+    12
+  ],
+  "paired_target_seed": 2026,
+  "panels": 8,
+  "policies": [
+    "Uniform SQD",
+    "A-OSQD",
+    "Discriminative Score OED",
+    "RR-GID"
+  ],
+  "stage": "P5",
+  "summary_sha256": "73e5f7ddaf736ce022de34b96c8e3b04f9edf17f84e94c8c09fe7c121610ec63"
+}

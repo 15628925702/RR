@@ -1,0 +1,38 @@
+{
+  "alpha_sweep": [
+    {
+      "alpha": 0.0,
+      "design_ratio_A-OSQD": 1.7747897019891101,
+      "design_ratio_Uniform SQD": 1.7431900576964616,
+      "design_ratio_learned RR-GID": 1.5742288625565468,
+      "design_ratio_oracle RR-GID": 1.0,
+      "max_operator_error_learned": 0.9009940217805434
+    },
+    {
+      "alpha": 0.5,
+      "design_ratio_A-OSQD": 1.6879150509393732,
+      "design_ratio_Uniform SQD": 1.6550147470305125,
+      "design_ratio_learned RR-GID": 1.523249379880399,
+      "design_ratio_oracle RR-GID": 1.0,
+      "max_operator_error_learned": 0.619822583486663
+    },
+    {
+      "alpha": 1.0,
+      "design_ratio_A-OSQD": 2.4936794436280527,
+      "design_ratio_Uniform SQD": 1.882528830888434,
+      "design_ratio_learned RR-GID": 1.899191881967854,
+      "design_ratio_oracle RR-GID": 1.0,
+      "max_operator_error_learned": 0.38961258956770184
+    },
+    {
+      "alpha": 1.5,
+      "design_ratio_A-OSQD": 5.395307310832565,
+      "design_ratio_Uniform SQD": 2.5271827570051055,
+      "design_ratio_learned RR-GID": 2.735836550671601,
+      "design_ratio_oracle RR-GID": 1.0,
+      "max_operator_error_learned": 0.22862053389956058
+    }
+  ],
+  "budget_smoke": 800,
+  "stage": "P7"
+}

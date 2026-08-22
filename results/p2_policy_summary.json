@@ -1,0 +1,24 @@
+{
+  "A_OSQD_information_shape": [
+    6,
+    2,
+    2
+  ],
+  "budget": 100,
+  "counts": [
+    10,
+    17,
+    21,
+    15,
+    4,
+    33
+  ],
+  "feature_fisher_min_eigenvalue": 0.018752393600662765,
+  "fw_iterations": 500,
+  "oracle_fw_gap": 0.10849067942800161,
+  "oracle_objective": 77.11711982030923,
+  "panel_count": 6,
+  "spent": 100,
+  "stage": "P2",
+  "summary_sha256": "570c296c708813701e23d21ea389527b23a377bd066f7c90b419e38afedd1831"
+}
