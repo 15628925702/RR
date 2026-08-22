@@ -87,12 +87,61 @@ class MaskedScoreMLP:
         h2 = np.tanh(h1 @ self.W2 + self.b2)
         return h2 @ self.W3 + self.b3
 
+    def _fit_torch(self, x: np.ndarray, y: np.ndarray, w: np.ndarray,
+                   steps: int, lr: float, ridge: float) -> None:
+        """GPU (float64) weighted-MSE training matching the numpy path's math.
+
+        Mirrors :meth:`fit` step-for-step (same loss, same per-step L2 ridge
+        gradient ``2*ridge*W``, same linear learning-rate decay) so switching to
+        the torch backend is numerically transparent on any CUDA machine.
+        """
+        import torch
+        n = len(x)
+        dev = "cuda"
+        Xt = torch.as_tensor(x, dtype=torch.float64, device=dev)
+        Yt = torch.as_tensor(y, dtype=torch.float64, device=dev)
+        wt = torch.as_tensor(w, dtype=torch.float64, device=dev)
+        W1 = torch.tensor(self.W1, dtype=torch.float64, device=dev, requires_grad=True)
+        b1 = torch.tensor(self.b1, dtype=torch.float64, device=dev, requires_grad=True)
+        W2 = torch.tensor(self.W2, dtype=torch.float64, device=dev, requires_grad=True)
+        b2 = torch.tensor(self.b2, dtype=torch.float64, device=dev, requires_grad=True)
+        W3 = torch.tensor(self.W3, dtype=torch.float64, device=dev, requires_grad=True)
+        b3 = torch.tensor(self.b3, dtype=torch.float64, device=dev, requires_grad=True)
+        ridge_t = float(ridge)
+        self.loss_history = []
+        for step in range(int(steps)):
+            h1 = torch.tanh(Xt @ W1 + b1)
+            h2 = torch.tanh(h1 @ W2 + b2)
+            out = h2 @ W3 + b3
+            mse = torch.mean(wt[:, None] * (out - Yt) ** 2)
+            self.loss_history.append(float(mse.item()))
+            loss = mse + ridge_t * (W1.pow(2).sum() + W2.pow(2).sum() + W3.pow(2).sum())
+            loss.backward()
+            step_lr = lr * (1.0 - step / steps)
+            with torch.no_grad():
+                W1 -= step_lr * W1.grad
+                b1 -= step_lr * b1.grad
+                W2 -= step_lr * W2.grad
+                b2 -= step_lr * b2.grad
+                W3 -= step_lr * W3.grad
+                b3 -= step_lr * b3.grad
+                for p in (W1, b1, W2, b2, W3, b3):
+                    p.grad = None
+        self.W1 = W1.detach().cpu().numpy()
+        self.b1 = b1.detach().cpu().numpy()
+        self.W2 = W2.detach().cpu().numpy()
+        self.b2 = b2.detach().cpu().numpy()
+        self.W3 = W3.detach().cpu().numpy()
+        self.b3 = b3.detach().cpu().numpy()
+
     def fit(self, x: np.ndarray, y: np.ndarray, weights: np.ndarray | None = None,
             steps: int = 200, lr: float = 1e-2, ridge: float = 1e-4) -> MaskedScoreMLP:
         """Weighted-MSE gradient descent with linear learning-rate decay.
 
         ``weights`` are per-sample tilt weights, normalized to ``w/w.sum()*n``
-        (all ones when ``None``). Returns ``self``.
+        (all ones when ``None``). On a CUDA machine the heavy loop runs in
+        float64 on the GPU (numerically identical math); otherwise it falls back
+        to the pure-numpy path. Returns ``self``.
         """
         x = np.asarray(x, dtype=float)
         y = np.asarray(y, dtype=float)
@@ -103,6 +152,13 @@ class MaskedScoreMLP:
             w = np.asarray(weights, dtype=float)
             w_sum = w.sum()
             w = np.ones(n) if w_sum == 0 else w / w_sum * n
+        try:
+            import torch
+            if torch.cuda.is_available() and n >= 2000:
+                self._fit_torch(x, y, w, int(steps), float(lr), float(ridge))
+                return self
+        except (ImportError, RuntimeError, ValueError):
+            pass
         self.loss_history = []
         for step in range(int(steps)):
             h1 = np.tanh(x @ self.W1 + self.b1)
