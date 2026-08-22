@@ -1,0 +1,163 @@
+{
+  "files": {
+    "results/_j0.json": {
+      "bytes": 771,
+      "sha256_prefix": "4a79ff3ee852805a"
+    },
+    "results/_t.json": {
+      "bytes": 773,
+      "sha256_prefix": "94d96241358d6fbe"
+    },
+    "results/p10_r2_batch10_1600.jsonl": {
+      "bytes": 77953,
+      "sha256_prefix": "0dea0f6b609b119d"
+    },
+    "results/p10_r2_batch10_3200.jsonl": {
+      "bytes": 77787,
+      "sha256_prefix": "890b5b2a3becee60"
+    },
+    "results/p10_r2_batch10_400.jsonl": {
+      "bytes": 77774,
+      "sha256_prefix": "7cda87929fa91d48"
+    },
+    "results/p10_r2_batch10_800.jsonl": {
+      "bytes": 77239,
+      "sha256_prefix": "a5667aa4cee48b7e"
+    },
+    "results/p10_r2_batch7_1600.jsonl": {
+      "bytes": 77631,
+      "sha256_prefix": "e66d9b1603332998"
+    },
+    "results/p10_r2_batch7_3200.jsonl": {
+      "bytes": 77690,
+      "sha256_prefix": "14e7184c123d53a7"
+    },
+    "results/p10_r2_batch7_400.jsonl": {
+      "bytes": 77267,
+      "sha256_prefix": "b2d3ba0214151ab6"
+    },
+    "results/p10_r2_batch7_800.jsonl": {
+      "bytes": 76817,
+      "sha256_prefix": "8bd5c6cb01a108d6"
+    },
+    "results/p10_r2_batches89_1600.jsonl": {
+      "bytes": 79717,
+      "sha256_prefix": "73c637c7ed318677"
+    },
+    "results/p10_r2_batches89_3200.jsonl": {
+      "bytes": 79797,
+      "sha256_prefix": "3f36d2b04f7c3933"
+    },
+    "results/p10_r2_batches89_400.jsonl": {
+      "bytes": 79964,
+      "sha256_prefix": "230fc42669dcf1ef"
+    },
+    "results/p10_r2_batches89_800.jsonl": {
+      "bytes": 80075,
+      "sha256_prefix": "aa377a0577e894d3"
+    },
+    "results/p10_r2_summary.json": {
+      "bytes": 59435,
+      "sha256_prefix": "d28e48ae42d32a1e"
+    },
+    "results/p1_oracle_summary.json": {
+      "bytes": 707,
+      "sha256_prefix": "cf2e1be0e00f13b0"
+    },
+    "results/p2_policy_summary.json": {
+      "bytes": 469,
+      "sha256_prefix": "4ea7b8f1a16e490b"
+    },
+    "results/p3_rrgid_summary.json": {
+      "bytes": 1042,
+      "sha256_prefix": "bc8f9dd1fbeabf08"
+    },
+    "results/p4_formal_16000.jsonl": {
+      "bytes": 310997,
+      "sha256_prefix": "3e85d63928f0c3a5"
+    },
+    "results/p4_formal_2000.jsonl": {
+      "bytes": 310106,
+      "sha256_prefix": "784ecf16b3c96435"
+    },
+    "results/p4_formal_32000.jsonl": {
+      "bytes": 311219,
+      "sha256_prefix": "c267112b26035b97"
+    },
+    "results/p4_formal_4000.jsonl": {
+      "bytes": 309902,
+      "sha256_prefix": "92ef7a6f94ec2a10"
+    },
+    "results/p4_formal_8000.jsonl": {
+      "bytes": 309829,
+      "sha256_prefix": "d963bb00756f11c9"
+    },
+    "results/p4_formal_summary.json": {
+      "bytes": 3845,
+      "sha256_prefix": "15fdc88082edb136"
+    },
+    "results/p5_four_16000.jsonl": {
+      "bytes": 358829,
+      "sha256_prefix": "60ee807693715128"
+    },
+    "results/p5_four_2000.jsonl": {
+      "bytes": 356156,
+      "sha256_prefix": "aaf3c32f7ec92e47"
+    },
+    "results/p5_four_32000.jsonl": {
+      "bytes": 360847,
+      "sha256_prefix": "9e333e19b2923292"
+    },
+    "results/p5_four_4000.jsonl": {
+      "bytes": 357508,
+      "sha256_prefix": "40d4a76b84be5db3"
+    },
+    "results/p5_four_8000.jsonl": {
+      "bytes": 352192,
+      "sha256_prefix": "9a2edadd9ca5cf91"
+    },
+    "results/p5_four_policy_summary.json": {
+      "bytes": 379,
+      "sha256_prefix": "ba6a66002c78b9c9"
+    },
+    "results/p6_vaeac_summary.json": {
+      "bytes": 314,
+      "sha256_prefix": "cc6fb6879a69c321"
+    },
+    "results/p7_s2_summary.json": {
+      "bytes": 2942,
+      "sha256_prefix": "bc019997ec80b902"
+    },
+    "results/p8_gas_preprocess_summary.json": {
+      "bytes": 351,
+      "sha256_prefix": "53e3ac60a2edc566"
+    },
+    "results/p9_r1_1600.jsonl": {
+      "bytes": 152058,
+      "sha256_prefix": "5739633ac78e2bf9"
+    },
+    "results/p9_r1_3200.jsonl": {
+      "bytes": 152205,
+      "sha256_prefix": "e04882d098bdd265"
+    },
+    "results/p9_r1_400.jsonl": {
+      "bytes": 151267,
+      "sha256_prefix": "d0f09186ba9687a3"
+    },
+    "results/p9_r1_800.jsonl": {
+      "bytes": 150939,
+      "sha256_prefix": "4165b0e62ef2cb6b"
+    },
+    "results/p9_r1_summary.json": {
+      "bytes": 193,
+      "sha256_prefix": "a3de5259f5c210ab"
+    },
+    "results/p9_test_400.jsonl": {
+      "bytes": 0,
+      "sha256_prefix": "e3b0c44298fc1c14"
+    }
+  },
+  "freeze_commit": "f36c802",
+  "generated_by": "P12 freeze",
+  "project": "RR-GID_CN"
+}
