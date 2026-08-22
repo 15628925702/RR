@@ -250,7 +250,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
                     scoring_steps=2, theta_norm_cap=None, policies=None, mu_direct=False, mu_samples=10000,
                     kl_mu_direct=True, use_oracle_H=False, validation_size=10000,
                     mlp_hidden=64, mlp_steps=200, generator=None,
-                    gen_info_tilted=256, gen_info_cond=32):
+                    gen_info_tilted=256, gen_info_cond=32, disc_reference_size=None):
     prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed)
     reference = prepared["reference"]
     ref_large = prepared["reference_large"]
@@ -283,7 +283,8 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
         if name == "Discriminative Score OED":
             # PDF P5: each campaign retrains the mask-conditioned MLP and redesigns.
             validation = sample_full(mixture, validation_size, seed + 555)
-            probabilities = discriminative_design(reference, validation, beta_hat, panels, scale,
+            disc_ref = reference if disc_reference_size is None else reference[:disc_reference_size]
+            probabilities = discriminative_design(disc_ref, validation, beta_hat, panels, scale,
                                                   seed + 11, hidden=mlp_hidden, steps=mlp_steps)
         elif name == "learned RR-GID":
             # PDF P6 generator-aware design: cross-completion I_hat_S from the
