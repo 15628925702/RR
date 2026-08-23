@@ -160,6 +160,9 @@ def train_vaeac(model: VAEAC, reference: np.ndarray, panels, scale: np.ndarray |
                     mask[j, list(panel)] = 1.0
             recon, mu, logvar = model(xb, mask)
             recon_loss = ((recon - xb) ** 2 * (1.0 - mask)).sum(-1).mean()
+            # Conditional panels are the operational VAEAC interface; give
+            # their missing-coordinate reconstruction a separate weight.
+            cond_loss = ((recon - xb) ** 2 * (1.0 - mask)).mean()
             # The unconditional generator samples from the fitted GMM prior,
             # whereas the ELBO reconstruction path samples q(z|x,mask). Keep
             # both latent paths on the same decoder map by reconstructing the
@@ -179,7 +182,7 @@ def train_vaeac(model: VAEAC, reference: np.ndarray, panels, scale: np.ndarray |
             prior_recon_loss = prior_recon_loss + 0.1 * ((prior_recon.T @ prior_recon / len(xb)) -
                                                         (xb.T @ xb / len(xb))).pow(2).mean()
             kl = model.kl_divergence(mu, logvar, free_bits=free_bits).mean()
-            loss = recon_loss + 2.0 * prior_recon_loss + beta * kl
+            loss = recon_loss + 2.0 * prior_recon_loss + 2.0 * cond_loss + beta * kl
             opt.zero_grad()
             loss.backward()
             opt.step()
