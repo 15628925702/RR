@@ -101,7 +101,11 @@ def train_vaeac(model: VAEAC, reference: np.ndarray, panels, scale: np.ndarray |
     ``scale`` is kept only for the feature-map interface.
     """
     model = model.to(device)
-    opt = torch.optim.Adam(model.parameters(), lr=lr)
+    # Keep the empirical four-component prior fixed after initialization. This
+    # prevents ELBO optimization from collapsing the multimodal reference law.
+    trainable = [p for name, p in model.named_parameters()
+                 if not (model.gmm_prior and name.startswith(("prior_mu", "prior_logvar", "log_pi")))]
+    opt = torch.optim.Adam(trainable, lr=lr)
     z = inverse_warp(np.asarray(reference, dtype=float), alpha)
     if z_normalize:
         z_std = z.std(axis=0, ddof=1)
