@@ -249,6 +249,10 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
     step = np.linalg.pinv(H, rcond=1e-10) @ U
     updated = np.asarray(beta_start) + step_size * step
     updated = np.clip(updated, -theta_bound, theta_bound)
+    if norm_cap is not None:
+        norm = float(np.linalg.norm(updated))
+        if norm > float(norm_cap):
+            updated = updated * (float(norm_cap) / norm)
     return updated
 
 
@@ -325,7 +329,11 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
             main_cursor += count
         observations = pilot_observations + main_observations
         update_diagnostics = [{"step": "pilot", "pilot_budget": int(pilot_counts.sum()), "beta_norm": float(np.linalg.norm(beta_hat)), "rho_min": float(np.min(pilot_rho[pilot_rho > 0])) if np.any(pilot_rho > 0) else 0.0}]
-        norm_cap_val = None
+        # PDF Algorithm 2 projects every Fisher-scoring iterate onto the
+        # compact parameter set Theta.  theta_norm_cap is the configured
+        # Euclidean radius for that set; previously the argument existed but
+        # was silently ignored, allowing overlap collapse in exact TiltCond.
+        norm_cap_val = theta_norm_cap
         for update in range(scoring_steps):
             beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=1.0, norm_cap=norm_cap_val, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn)
             update_diagnostics.append({"step": update, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": int(pilot_counts.sum())})

@@ -25,6 +25,10 @@ p4:
   h_cond: 32
   kl_samples: 20000
   theta_bound: 4.0
+  # Compact Theta projection required by PDF Algorithm 2.  The radius is an
+  # engineering parameter (PDF leaves the numeric boundary open) and is
+  # frozen here before formal replications.
+  theta_norm_cap: 2.0
   ridge: null
   large_reference_size: 200000
   fw_tolerance: 1.0e-6
