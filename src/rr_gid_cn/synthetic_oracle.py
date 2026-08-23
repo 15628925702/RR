@@ -230,7 +230,11 @@ def tilted_conditional_batch(
     batch_floor = int(max(8, 2 * n))
     # Bound temporary proposal memory when many rows are active.  The cap is
     # on the whole call (roughly 32 MiB at float64, dimension 16), not per row.
-    max_batch_total = 262_144
+    # Large formal budgets have hundreds of observed rows per panel.  A
+    # 4,194,304-proposal cap (~512 MiB at float64, d=16) keeps exact
+    # rejection vectorized even when acceptance is near the declared
+    # low-overlap boundary, without changing the proposal law.
+    max_batch_total = 4_194_304
     max_rounds = 20000
     while np.any(filled < n):
         rounds += 1
