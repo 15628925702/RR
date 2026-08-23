@@ -26,6 +26,40 @@ conditional / batch-conditional sampling and tilted accept-reject. Optional lear
   interface but not oracle-accurate.
 - Importance ESS/N at beta=0 = 1.0 (interface correct).
 
+## Canonical VAEAC revalidation (commit f712f2e)
+
+The prior implementation was rejected because it used an external GMM prior,
+one encoder, a deterministic MSE decoder, and did not implement the VAEAC
+conditional-prior path. It has been replaced by canonical VAEAC:
+
+```text
+q_phi(z | x, mask), p_psi(z | x_observed, mask),
+p_theta(x_missing | z, x_observed, mask)
+```
+
+The Synthetic run uses the PDF reference train/validation sizes 50,000/10,000,
+one frozen checkpoint, and the 120 pair masks. Reference standardization is
+stored in the checkpoint and reversed by the sampler. The independent exact
+GMM conditional is used only for validation.
+
+Predeclared engineering gates (the PDF does not prescribe numerical cutoffs):
+standardized full and conditional mean/std RMSE <= 0.5, nonzero tilt
+acceptance >= 0.1, ESS/N >= 0.5, and PSD eigenvalue >= -1e-8.
+
+Validation results:
+
+- Four panels conditional mean RMSE: 0.104, 0.107, 0.138, 0.155.
+- Four panels conditional std RMSE: 0.183, 0.247, 0.253, 0.298.
+- Full standardized mean error: 0.048; std error: 0.243.
+- Nonzero tilt full acceptance/ESS: 0.334 / 0.954.
+- Nonzero tilt conditional acceptance/ESS: 0.314 / 0.956.
+- Cross-completion information minimum eigenvalue: `1.0e-10`.
+
+All gates pass. The canonical checkpoint is frozen at
+`experiments/p6_vaeac_synthetic.pt`; SHA256 and the full training log are
+recorded in the run manifest. Previous failed checkpoints remain separate
+diagnostic artifacts and are not used by P7 or later stages.
+
 ## Acceptance
 
 - mask full / empty / arbitrary pair conditioning: PASS (interface)
