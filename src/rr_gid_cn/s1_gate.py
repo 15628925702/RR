@@ -214,7 +214,8 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
 
 def final_rr_estimator(mixture, beta_start, observations, panels, reference, scale, lu, seed,
                        theta_bound=4.0, h_tilted=128, h_cond=32, step_size=1.0, norm_cap=None,
-                       l1_cap=None, mu_samples=10000, mu_direct=False, oracle_information=None, feature_fn=None):
+                       l1_cap=None, mu_samples=10000, mu_direct=False, oracle_information=None,
+                       feature_fn=None, max_step_norm=None):
     """One Fisher-scoring update following PDF Algorithm 2 step 6.
 
     Re-estimates ``I_S(beta^(j))`` by cross-completion at the current beta, builds
@@ -247,7 +248,18 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
     U = np.sum(projected - mu_beta, axis=0)
     H = (H + H.T) / 2
     step = np.linalg.pinv(H, rcond=1e-10) @ U
-    updated = np.asarray(beta_start) + step_size * step
+    # Algorithm 2 specifies a full Fisher-scoring step.  A finite Monte Carlo
+    # information estimate can occasionally produce a very large Newton step
+    # when one eigen-direction of H is weak.  Use a trust-region only as a
+    # numerical safeguard; the bound is inactive once the pilot is in the
+    # local asymptotic regime, so consistency is retained (unlike a fixed
+    # damping factor, which leaves an O(b_B^-1/2) pilot bias at every B).
+    scaled_step = float(step_size) * step
+    if max_step_norm is not None:
+        step_norm = float(np.linalg.norm(scaled_step))
+        if step_norm > float(max_step_norm) > 0.0:
+            scaled_step *= float(max_step_norm) / step_norm
+    updated = np.asarray(beta_start) + scaled_step
     updated = np.clip(updated, -theta_bound, theta_bound)
     if norm_cap is not None:
         norm = float(np.linalg.norm(updated))
@@ -266,7 +278,8 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
                     kl_mu_direct=True, use_oracle_H=False, validation_size=10000,
                     mlp_hidden=64, mlp_steps=200, generator=None,
                     gen_info_tilted=256, gen_info_cond=32, disc_reference_size=None,
-                    feature_fn=None, scoring_step_size=1.0, theta_l1_cap=None):
+                    feature_fn=None, scoring_step_size=1.0, theta_l1_cap=None,
+                    scoring_max_step_norm=None):
     prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed, feature_fn=feature_fn)
     reference = prepared["reference"]
     ref_large = prepared["reference_large"]
@@ -347,7 +360,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
         # was silently ignored, allowing overlap collapse in exact TiltCond.
         norm_cap_val = theta_norm_cap
         for update in range(scoring_steps):
-            beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=scoring_step_size, norm_cap=norm_cap_val, l1_cap=theta_l1_cap, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn)
+            beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=scoring_step_size, norm_cap=norm_cap_val, l1_cap=theta_l1_cap, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn, max_step_norm=scoring_max_step_norm)
             update_diagnostics.append({"step": update, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": int(pilot_counts.sum())})
             beta_hat = beta_next
         kl = max(0.0, float((beta_true - beta_hat) @ mu_bt - log_partition(beta_true, target_reference, scale, feature_fn=fn) + log_partition(beta_hat, target_reference, scale, feature_fn=fn)))

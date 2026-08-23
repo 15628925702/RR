@@ -72,7 +72,8 @@ def main() -> None:
                   scoring_steps=steps,
                   theta_norm_cap=p4.get("theta_norm_cap"),
                   theta_l1_cap=p4.get("theta_l1_cap"),
-                  scoring_step_size=p4.get("scoring_step_size", 1.0) if args.scoring_step_size is None else args.scoring_step_size)
+                  scoring_step_size=p4.get("scoring_step_size", 1.0) if args.scoring_step_size is None else args.scoring_step_size,
+                  scoring_max_step_norm=p4.get("scoring_max_step_norm"))
     for budget in budgets:
         fp = out / f"{args.out_prefix}_{budget}{suffix}.jsonl"
         with fp.open("a", encoding="utf-8") as stream:
