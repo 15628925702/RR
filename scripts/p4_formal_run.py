@@ -70,6 +70,7 @@ def main() -> None:
     kwargs = dict(lu=p4["lu"], h_tilted=p4["h_tilted"], h_cond=p4["h_cond"],
                   pilot_norm_cap=p4["pilot_norm_cap"], kl_samples=p4["kl_samples"],
                   scoring_steps=steps,
+                  use_oracle_H=bool(p4.get("use_oracle_H", False)),
                   theta_norm_cap=p4.get("theta_norm_cap"),
                   theta_l1_cap=p4.get("theta_l1_cap"),
                   scoring_step_size=p4.get("scoring_step_size", 1.0) if args.scoring_step_size is None else args.scoring_step_size,

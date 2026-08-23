@@ -23,7 +23,7 @@ p4:
   # PDF leaves finite Monte Carlo sizes open.  These values keep exact
   # conditional rejection computationally feasible for 3,000 formal rows;
   # replication-level CI absorbs the finite-MC noise.
-  lu: 1
+  lu: 32
   h_tilted: 4
   h_cond: 1
   kl_samples: 2000
@@ -40,7 +40,10 @@ p4:
   # Full Fisher-scoring steps are required for the P4 asymptotic gate.  A
   # finite trust radius only limits pathological Monte Carlo directions.
   scoring_step_size: 1.0
-  scoring_max_step_norm: 0.5
+  scoring_max_step_norm: null
+  # S1 is the PDF exact-oracle allocation gate; use exact oracle I_S for H
+  # while the observed score remains exact conditional rejection.
+  use_oracle_H: true
   ridge: null
   large_reference_size: 200000
   fw_tolerance: 1.0e-6
