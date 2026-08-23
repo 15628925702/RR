@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from rr_gid_cn.synthetic_oracle import make_frozen_mixture, sample_full, sample_conditional_batch
-from rr_gid_cn.vaeac import VAEAC, VAEACGenerator
+from rr_gid_cn.vaeac import VAEAC, VAEACGenerator, learned_information
 
 mix = make_frozen_mixture(seed=2026, alpha=1.0)
 val = sample_full(mix, 2000, 2027)
@@ -21,3 +21,10 @@ for panel in [(0, 1), (0, 6), (3, 9), (10, 15)]:
 full = gen.sample_full(10000, 13)
 print("full_mean_z", float(np.max(np.abs((full.mean(0) - val.mean(0)) / scales))))
 print("full_std_z", float(np.max(np.abs((full.std(0) - val.std(0)) / scales))))
+beta = np.full(12, 0.1)
+_, full_acc, full_ess = gen.tilted_full_diagnostics(beta, 128, 17)
+_, cond_acc, cond_ess = gen.tilted_conditional_diagnostics(beta, val[0, list((0, 6))], (0, 6), 64, 18)
+print("tilt_full_acceptance", round(full_acc, 4), "ess", round(full_ess, 4))
+print("tilt_cond_acceptance", round(cond_acc, 4), "ess", round(cond_ess, 4))
+_, infos = learned_information(gen, beta, [(0, 1), (0, 6)], n_tilted=64, n_conditional=8, seed=19)
+print("information_lambda_min", float(np.min([np.linalg.eigvalsh(x).min() for x in infos])))

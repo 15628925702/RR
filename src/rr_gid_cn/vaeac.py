@@ -168,6 +168,25 @@ class VAEACGenerator:
             accepted.extend(proposal[rng.random(len(proposal)) < np.exp(self.feature_fn(proposal) @ beta - envelope)])
         return np.asarray(accepted[:n])
 
+    def tilted_full_diagnostics(self, beta, n, seed=0):
+        rng, accepted, proposals = np.random.default_rng(seed), [], 0
+        envelope = float(np.sum(np.abs(np.asarray(beta))))
+        while len(accepted) < n:
+            proposal = self.sample_full(max(256, 4 * (n - len(accepted))), int(rng.integers(2**31 - 1)))
+            keep = rng.random(len(proposal)) < np.exp(self.feature_fn(proposal) @ beta - envelope)
+            proposals += len(proposal); accepted.extend(proposal[keep])
+        return np.asarray(accepted[:n]), float(len(accepted) / proposals), self.importance_ess(beta, np.asarray(accepted[:n]))
+
+    def tilted_conditional_diagnostics(self, beta, observed, panel, n, seed=0):
+        rng, accepted, proposals = np.random.default_rng(seed), [], 0
+        envelope = float(np.sum(np.abs(np.asarray(beta))))
+        while len(accepted) < n:
+            proposal = self.sample_conditional(observed, panel, max(32, 2 * (n - len(accepted))), int(rng.integers(2**31 - 1)))
+            keep = rng.random(len(proposal)) < np.exp(self.feature_fn(proposal) @ beta - envelope)
+            proposals += len(proposal); accepted.extend(proposal[keep])
+        out = np.asarray(accepted[:n])
+        return out, float(len(accepted) / proposals), self.importance_ess(beta, out)
+
     def tilted_conditional_sample(self, beta, observed, panel, n, seed=0):
         rng, accepted = np.random.default_rng(seed), []
         envelope = float(np.sum(np.abs(np.asarray(beta))))
