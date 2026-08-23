@@ -8,6 +8,28 @@ from pathlib import Path
 
 import numpy as np
 
+_CONDITIONAL_PARAMETER_CACHE = {}
+
+
+def _conditional_parameters(mixture: FrozenMixture, panel: tuple[int, ...]):
+    key = (id(mixture), tuple(panel))
+    cached = _CONDITIONAL_PARAMETER_CACHE.get(key)
+    if cached is not None:
+        return cached
+    complement = tuple(i for i in range(mixture.dimension) if i not in panel)
+    params = []
+    for mean, cov in zip(mixture.means, mixture.covariances):
+        sigma_ss = cov[np.ix_(panel, panel)]
+        inv_ss = np.linalg.inv(sigma_ss)
+        gain = cov[np.ix_(complement, panel)] @ inv_ss
+        cond_cov = cov[np.ix_(complement, complement)] - gain @ cov[np.ix_(panel, complement)]
+        sign, logdet = np.linalg.slogdet(sigma_ss)
+        if sign <= 0:
+            raise ValueError("mixture covariance is not positive definite")
+        params.append((mean[list(complement)], mean[list(panel)], inv_ss, gain, cond_cov, logdet))
+    _CONDITIONAL_PARAMETER_CACHE[key] = (complement, tuple(params))
+    return _CONDITIONAL_PARAMETER_CACHE[key]
+
 
 @dataclass(frozen=True)
 class FrozenMixture:
@@ -102,6 +124,7 @@ def sample_conditional(mixture: FrozenMixture, x_s: np.ndarray, panel: tuple[int
 
 def sample_conditional_batch(
     mixture: FrozenMixture, x_s: np.ndarray, panel: tuple[int, ...], n: int, seed: int | None = None
+    , _parameters=None
 ) -> np.ndarray:
     """Independent exact GMM conditional completions for a batch of panels.
 
@@ -118,27 +141,23 @@ def sample_conditional_batch(
     complement = tuple(i for i in range(mixture.dimension) if i not in panel)
     z_s = inverse_warp(observed, mixture.alpha)
     log_probs = np.empty((rows, len(mixture.weights)))
-    parameters = []
+    if _parameters is None:
+        complement, parameters = _conditional_parameters(mixture, panel)
+    else:
+        parameters = _parameters
     for k, (weight, mean, cov) in enumerate(zip(mixture.weights, mixture.means, mixture.covariances)):
-        sigma_ss = cov[np.ix_(panel, panel)]
-        inv_ss = np.linalg.inv(sigma_ss)
+        _mean_c, mean_s, inv_ss, _gain, _cond_cov, logdet = parameters[k]
         delta = z_s - mean[list(panel)]
-        sign, logdet = np.linalg.slogdet(sigma_ss)
-        if sign <= 0:
-            raise ValueError("mixture covariance is not positive definite")
         log_probs[:, k] = np.log(weight) - 0.5 * (
             len(panel) * np.log(2 * np.pi) + logdet + np.einsum("ni,ij,nj->n", delta, inv_ss, delta)
         )
-        gain = cov[np.ix_(complement, panel)] @ inv_ss
-        cond_cov = cov[np.ix_(complement, complement)] - gain @ cov[np.ix_(panel, complement)]
-        parameters.append((mean[list(complement)], mean[list(panel)], gain, cond_cov))
     probs = np.exp(log_probs - log_probs.max(axis=1, keepdims=True))
     probs /= probs.sum(axis=1, keepdims=True)
     uniforms = rng.random((rows, n))
     components = (uniforms[:, :, None] > np.cumsum(probs, axis=1)[:, None, :]).sum(axis=2)
     z = np.empty((rows, n, mixture.dimension))
     z[:, :, list(panel)] = z_s[:, None, :]
-    for k, (mean_c, mean_s, gain, cond_cov) in enumerate(parameters):
+    for k, (mean_c, mean_s, _inv_ss, gain, cond_cov, _logdet) in enumerate(parameters):
         row_idx, sample_idx = np.nonzero(components == k)
         if row_idx.size:
             conditional_mean = mean_c + (z_s[row_idx] - mean_s) @ gain.T
@@ -165,7 +184,7 @@ def tilted_conditional_sample(
     has no self-normalized importance bias.
     """
     rng = np.random.default_rng(seed)
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     beta = np.asarray(beta, dtype=float)
     panel_set = set(panel)
     fixed = np.zeros(beta.shape[0], dtype=bool)
@@ -195,7 +214,7 @@ def tilted_conditional_batch(
     feature_fn=None,
 ) -> np.ndarray:
     rng = np.random.default_rng(seed)
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     rows = np.atleast_2d(np.asarray(x_s))
     out = np.empty((len(rows), n, mixture.dimension))
     panel_set = set(panel)
@@ -364,14 +383,14 @@ def log_partition(beta: np.ndarray, reference_samples: np.ndarray, scale: np.nda
                   feature_fn=None) -> float:
     from numpy import logaddexp
     beta = np.asarray(beta)
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     values = fn(reference_samples) @ beta
     return float(logaddexp.reduce(values) - np.log(values.size))
 
 
 def tilted_moments(beta: np.ndarray, reference_samples: np.ndarray, scale: np.ndarray | None = None,
                    feature_fn=None) -> tuple[np.ndarray, np.ndarray]:
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     features = fn(reference_samples)
     logits = features @ np.asarray(beta)
     weights = np.exp(logits - logits.max())
@@ -386,7 +405,7 @@ def tilted_sample_from_reference(beta: np.ndarray, reference_samples: np.ndarray
                                  scale: np.ndarray | None = None, feature_fn=None) -> np.ndarray:
     """Sample Q_beta by exact importance resampling from an independent Q0 pool."""
     rng = np.random.default_rng(seed)
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     features = fn(reference_samples)
     logits = features @ np.asarray(beta)
     weights = np.exp(logits - logits.max())
@@ -398,7 +417,7 @@ def tilted_full_sample(mixture: FrozenMixture, beta: np.ndarray, n: int, seed: i
                        scale: np.ndarray | None = None, feature_fn=None) -> np.ndarray:
     """Exact accept-reject samples from Q_beta relative to Q0."""
     rng = np.random.default_rng(seed)
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     envelope = float(np.sum(np.abs(np.asarray(beta))))
     accepted = []
     while len(accepted) < n:
@@ -413,7 +432,7 @@ def beta_direction_and_scale(reference_samples: np.ndarray, seed: int = 2026, ta
                              scale: np.ndarray | None = None, feature_fn=None) -> np.ndarray:
     """Freeze a nonzero direction and choose its magnitude by ESS/N bisection."""
     rng = np.random.default_rng(seed)
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     phi = fn(reference_samples)
     r = phi.shape[-1]
     direction = rng.normal(size=r)

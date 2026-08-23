@@ -12,7 +12,7 @@ from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target
 def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilted=256, n_conditional=64, seed=0,
                             feature_fn=None):
     rng = np.random.default_rng(seed)
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     tilted = tilted_full_sample(mixture, beta, n_tilted, int(rng.integers(2**31 - 1)), scale, feature_fn=fn)
     phi = fn(tilted)
     mu = phi.mean(0)
@@ -74,7 +74,7 @@ def discriminative_design(reference_train, validation, beta, panels, scale, seed
     minimizes ``tr(F_hat M(p)^-1)`` with the tilted reference Fisher ``F_hat``.
     """
     rng = np.random.default_rng(seed)
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     n = len(reference_train)
     dim = reference_train.shape[-1]
     r = fn(reference_train[:1]).shape[-1]
@@ -173,7 +173,7 @@ def imp_conditional_mean(mixture, beta, batch, panel, n, seed, scale, feature_fn
     importance proposals from Q0; cross-completion removes the self-normalized bias).
     """
     rng = np.random.default_rng(seed)
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     completions = sample_conditional_batch(mixture, batch, panel, n, int(rng.integers(2**31 - 1)))
     phi = fn(completions)
     w = np.exp(phi @ np.asarray(beta))
@@ -189,7 +189,7 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
     tilted ``mu`` estimate has negligible variance.
     """
     rng = np.random.default_rng(seed)
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     features = fn(reference)
     logits = features @ np.asarray(beta)
     w = np.exp(logits - logits.max())
@@ -224,7 +224,7 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
     bounded for extreme baseline allocations).
     """
     rng = np.random.default_rng(seed)
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     grouped = {}
     for panel, obs in observations:
         grouped.setdefault(panel, []).append(obs)
@@ -266,7 +266,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
     fisher = prepared["fisher"]
     oracle_information = prepared["information"]
     designs = prepared["designs"]
-    fn = feature_map if feature_fn is None else feature_fn
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     target_reference = ref_large
     target_full = tilted_full_sample(mixture, beta_true, budget, seed + 3, scale, feature_fn=fn)
     rows = []
