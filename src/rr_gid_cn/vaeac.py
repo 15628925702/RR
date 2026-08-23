@@ -150,7 +150,7 @@ class VAEACGenerator:
             out[:, list(panel)] = np.asarray(observed); return out
         center, spread = np.asarray(self.model.data_mean), np.asarray(self.model.data_std)
         obs = torch.zeros(1, self.dimension, device=self.device); mask = torch.zeros_like(obs)
-        obs[:, list(panel)] = torch.as_tensor((np.asarray(observed) - center[list(panel)]) / spread[list(panel)], device=self.device)
+        obs[:, list(panel)] = torch.as_tensor((np.asarray(observed) - center[list(panel)]) / spread[list(panel)], dtype=torch.float32, device=self.device)
         mask[:, list(panel)] = 1.0
         with torch.no_grad():
             out = self._from_model_space(self._prior_sample(obs, mask, n, seed).cpu().numpy())
