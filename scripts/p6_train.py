@@ -16,7 +16,7 @@ def main() -> None:
     # The synthetic reference is a four-mode warped GMM; a learned mixture
     # prior is required for VAEAC's unconditional sampler to retain modes.
     model = VAEAC(dim=16, latent=16, hidden=512, seed=0, k_prior=4, gmm_prior=True)
-    model, hist = train_vaeac(model, reference, panels, scale, alpha=1.0, epochs=400,
+    model, hist = train_vaeac(model, reference, panels, scale, alpha=1.0, epochs=800,
                               batch=512, lr=1e-3, device="cuda", seed=0, beta=0.0)
     print(f"trained in {time.time()-t0:.0f}s; loss {hist[0]:.2f} -> {hist[-1]:.2f}", flush=True)
     gen = VAEACGenerator(model, scale, alpha=1.0)

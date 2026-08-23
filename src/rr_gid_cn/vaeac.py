@@ -151,9 +151,9 @@ def train_vaeac(model: VAEAC, reference: np.ndarray, panels, scale: np.ndarray |
             mask = torch.zeros(len(idx), dim, device=device)
             for j in range(len(idx)):
                 r = rng.random()
-                if r < 0.3:
+                if r < 0.1:
                     pass  # unconditional mask (all zeros)
-                elif r < 0.6:
+                elif r < 0.2:
                     mask[j] = 1.0  # full-observation mask
                 else:
                     panel = panels[int(rng.integers(len(panels)))]
@@ -182,7 +182,7 @@ def train_vaeac(model: VAEAC, reference: np.ndarray, panels, scale: np.ndarray |
             prior_recon_loss = prior_recon_loss + 0.1 * ((prior_recon.T @ prior_recon / len(xb)) -
                                                         (xb.T @ xb / len(xb))).pow(2).mean()
             kl = model.kl_divergence(mu, logvar, free_bits=free_bits).mean()
-            loss = recon_loss + 2.0 * prior_recon_loss + 2.0 * cond_loss + beta * kl
+            loss = recon_loss + 2.0 * prior_recon_loss + 8.0 * cond_loss + beta * kl
             opt.zero_grad()
             loss.backward()
             opt.step()
