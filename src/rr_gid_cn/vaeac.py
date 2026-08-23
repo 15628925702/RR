@@ -157,8 +157,24 @@ def train_vaeac(model: VAEAC, reference: np.ndarray, panels, scale: np.ndarray |
                     mask[j, list(panel)] = 1.0
             recon, mu, logvar = model(xb, mask)
             recon_loss = ((recon - xb) ** 2 * (1.0 - mask)).sum(-1).mean()
+            # The unconditional generator samples from the fitted GMM prior,
+            # whereas the ELBO reconstruction path samples q(z|x,mask). Keep
+            # both latent paths on the same decoder map by reconstructing the
+            # normalized inverse-warped reference under the zero mask.
+            zero_mask = torch.zeros_like(mask)
+            if model.gmm_prior:
+                pi = torch.softmax(model.log_pi.detach(), 0)
+                comp = torch.multinomial(pi, len(xb), replacement=True)
+                p_mu = model.prior_mu.detach()[comp]
+                p_sd = torch.exp(0.5 * model.prior_logvar.detach()[comp])
+                prior_z = p_mu + p_sd * torch.randn_like(p_mu)
+            else:
+                prior_z = torch.randn(len(xb), model.latent, device=device)
+            prior_recon = model.decode(prior_z, zero_mask)
+            prior_recon_loss = ((prior_recon.mean(0) - xb.mean(0)) ** 2).mean()
+            prior_recon_loss = prior_recon_loss + ((prior_recon.std(0) - xb.std(0)) ** 2).mean()
             kl = model.kl_divergence(mu, logvar, free_bits=free_bits).mean()
-            loss = recon_loss + beta * kl
+            loss = recon_loss + 0.5 * prior_recon_loss + beta * kl
             opt.zero_grad()
             loss.backward()
             opt.step()
