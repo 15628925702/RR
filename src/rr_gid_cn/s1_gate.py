@@ -214,7 +214,7 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
 
 def final_rr_estimator(mixture, beta_start, observations, panels, reference, scale, lu, seed,
                        theta_bound=4.0, h_tilted=128, h_cond=32, step_size=1.0, norm_cap=None,
-                       mu_samples=10000, mu_direct=False, oracle_information=None, feature_fn=None):
+                       l1_cap=None, mu_samples=10000, mu_direct=False, oracle_information=None, feature_fn=None):
     """One Fisher-scoring update following PDF Algorithm 2 step 6.
 
     Re-estimates ``I_S(beta^(j))`` by cross-completion at the current beta, builds
@@ -253,6 +253,10 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
         norm = float(np.linalg.norm(updated))
         if norm > float(norm_cap):
             updated = updated * (float(norm_cap) / norm)
+    if l1_cap is not None:
+        l1_norm = float(np.abs(updated).sum())
+        if l1_norm > float(l1_cap):
+            updated = updated * (float(l1_cap) / l1_norm)
     return updated
 
 
@@ -262,7 +266,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
                     kl_mu_direct=True, use_oracle_H=False, validation_size=10000,
                     mlp_hidden=64, mlp_steps=200, generator=None,
                     gen_info_tilted=256, gen_info_cond=32, disc_reference_size=None,
-                    feature_fn=None, scoring_step_size=1.0):
+                    feature_fn=None, scoring_step_size=1.0, theta_l1_cap=None):
     prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed, feature_fn=feature_fn)
     reference = prepared["reference"]
     ref_large = prepared["reference_large"]
@@ -297,6 +301,10 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
             pilot_norm = float(np.linalg.norm(beta_hat))
             if pilot_norm > float(theta_norm_cap):
                 beta_hat = beta_hat * (float(theta_norm_cap) / pilot_norm)
+        if theta_l1_cap is not None:
+            pilot_l1 = float(np.abs(beta_hat).sum())
+            if pilot_l1 > float(theta_l1_cap):
+                beta_hat = beta_hat * (float(theta_l1_cap) / pilot_l1)
         if name == "Discriminative Score OED":
             # PDF P5: each campaign retrains the mask-conditioned MLP and redesigns.
             validation = sample_full(mixture, validation_size, seed + 555)
@@ -339,7 +347,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
         # was silently ignored, allowing overlap collapse in exact TiltCond.
         norm_cap_val = theta_norm_cap
         for update in range(scoring_steps):
-            beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=scoring_step_size, norm_cap=norm_cap_val, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn)
+            beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=scoring_step_size, norm_cap=norm_cap_val, l1_cap=theta_l1_cap, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn)
             update_diagnostics.append({"step": update, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": int(pilot_counts.sum())})
             beta_hat = beta_next
         kl = max(0.0, float((beta_true - beta_hat) @ mu_bt - log_partition(beta_true, target_reference, scale, feature_fn=fn) + log_partition(beta_hat, target_reference, scale, feature_fn=fn)))
