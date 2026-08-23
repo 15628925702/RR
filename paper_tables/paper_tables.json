@@ -1,0 +1,476 @@
+{
+  "Table 1 (S1)": [
+    {
+      "B_kl_mean": 322.741,
+      "B_kl_se": 3.47,
+      "budget": 2000,
+      "n": 200,
+      "policy": "Uniform SQD"
+    },
+    {
+      "B_kl_mean": 631.622,
+      "B_kl_se": 6.286,
+      "budget": 4000,
+      "n": 200,
+      "policy": "Uniform SQD"
+    },
+    {
+      "B_kl_mean": 1233.799,
+      "B_kl_se": 7.675,
+      "budget": 8000,
+      "n": 200,
+      "policy": "Uniform SQD"
+    },
+    {
+      "B_kl_mean": 2471.476,
+      "B_kl_se": 11.7,
+      "budget": 16000,
+      "n": 200,
+      "policy": "Uniform SQD"
+    },
+    {
+      "B_kl_mean": 4866.318,
+      "B_kl_se": 16.712,
+      "budget": 32000,
+      "n": 200,
+      "policy": "Uniform SQD"
+    },
+    {
+      "B_kl_mean": 1121.874,
+      "B_kl_se": 8.07,
+      "budget": 2000,
+      "n": 200,
+      "policy": "A-OSQD"
+    },
+    {
+      "B_kl_mean": 2225.207,
+      "B_kl_se": 11.037,
+      "budget": 4000,
+      "n": 200,
+      "policy": "A-OSQD"
+    },
+    {
+      "B_kl_mean": 4462.815,
+      "B_kl_se": 14.76,
+      "budget": 8000,
+      "n": 200,
+      "policy": "A-OSQD"
+    },
+    {
+      "B_kl_mean": 8850.559,
+      "B_kl_se": 20.733,
+      "budget": 16000,
+      "n": 200,
+      "policy": "A-OSQD"
+    },
+    {
+      "B_kl_mean": 17767.851,
+      "B_kl_se": 31.095,
+      "budget": 32000,
+      "n": 200,
+      "policy": "A-OSQD"
+    },
+    {
+      "B_kl_mean": 89.185,
+      "B_kl_se": 3.617,
+      "budget": 2000,
+      "n": 200,
+      "policy": "Discriminative Score OED"
+    },
+    {
+      "B_kl_mean": 122.273,
+      "B_kl_se": 4.967,
+      "budget": 4000,
+      "n": 200,
+      "policy": "Discriminative Score OED"
+    },
+    {
+      "B_kl_mean": 187.664,
+      "B_kl_se": 9.5,
+      "budget": 8000,
+      "n": 200,
+      "policy": "Discriminative Score OED"
+    },
+    {
+      "B_kl_mean": 264.862,
+      "B_kl_se": 11.614,
+      "budget": 16000,
+      "n": 200,
+      "policy": "Discriminative Score OED"
+    },
+    {
+      "B_kl_mean": 3435.414,
+      "B_kl_se": 276.441,
+      "budget": 32000,
+      "n": 200,
+      "policy": "Discriminative Score OED"
+    },
+    {
+      "B_kl_mean": 83.107,
+      "B_kl_se": 3.45,
+      "budget": 2000,
+      "n": 200,
+      "policy": "learned RR-GID"
+    },
+    {
+      "B_kl_mean": 110.787,
+      "B_kl_se": 4.318,
+      "budget": 4000,
+      "n": 200,
+      "policy": "learned RR-GID"
+    },
+    {
+      "B_kl_mean": 180.152,
+      "B_kl_se": 11.739,
+      "budget": 8000,
+      "n": 200,
+      "policy": "learned RR-GID"
+    },
+    {
+      "B_kl_mean": 264.501,
+      "B_kl_se": 18.859,
+      "budget": 16000,
+      "n": 200,
+      "policy": "learned RR-GID"
+    },
+    {
+      "B_kl_mean": 3107.037,
+      "B_kl_se": 310.918,
+      "budget": 32000,
+      "n": 200,
+      "policy": "learned RR-GID"
+    }
+  ],
+  "Table 2 (S2 alpha)": [
+    {
+      "alpha": 0.0,
+      "design_ratio_AOSQD": 2.018,
+      "design_ratio_Disc": 2.371,
+      "design_ratio_RRGID": 2.127,
+      "design_ratio_Uniform": 1.977,
+      "op_error_learned": 1.033
+    },
+    {
+      "alpha": 0.5,
+      "design_ratio_AOSQD": 2.256,
+      "design_ratio_Disc": 2.54,
+      "design_ratio_RRGID": 2.26,
+      "design_ratio_Uniform": 2.06,
+      "op_error_learned": 1.121
+    },
+    {
+      "alpha": 1.0,
+      "design_ratio_AOSQD": 3.358,
+      "design_ratio_Disc": 2.289,
+      "design_ratio_RRGID": 2.662,
+      "design_ratio_Uniform": 2.064,
+      "op_error_learned": 1.238
+    },
+    {
+      "alpha": 1.5,
+      "design_ratio_AOSQD": 5.604,
+      "design_ratio_Disc": 2.086,
+      "design_ratio_RRGID": 3.1,
+      "design_ratio_Uniform": 2.035,
+      "op_error_learned": 1.271
+    }
+  ],
+  "Table 3 (S2 reuse)": [
+    {
+      "campaigns": 1,
+      "compute_Disc_s": 196.6,
+      "compute_RRGID_s": 11.9,
+      "regret_AOSQD": 2.825,
+      "regret_Disc": 2.161,
+      "regret_RRGID": 1.693,
+      "regret_Uniform": 1.756
+    },
+    {
+      "campaigns": 5,
+      "compute_Disc_s": 125.7,
+      "compute_RRGID_s": 3.6,
+      "regret_AOSQD": 2.95,
+      "regret_Disc": 2.208,
+      "regret_RRGID": 1.805,
+      "regret_Uniform": 1.743
+    },
+    {
+      "campaigns": 20,
+      "compute_Disc_s": 118.5,
+      "compute_RRGID_s": 3.3,
+      "regret_AOSQD": 2.571,
+      "regret_Disc": 2.193,
+      "regret_RRGID": 1.734,
+      "regret_Uniform": 1.68
+    },
+    {
+      "campaigns": 50,
+      "compute_Disc_s": 192.2,
+      "compute_RRGID_s": 8.7,
+      "regret_AOSQD": 2.685,
+      "regret_Disc": 2.195,
+      "regret_RRGID": 1.825,
+      "regret_Uniform": 1.788
+    }
+  ],
+  "Table 4 (R1)": [
+    {
+      "B_kl_mean": 159.749,
+      "B_kl_se": 3.697,
+      "budget": 400,
+      "n": 200,
+      "policy": "Uniform SQD"
+    },
+    {
+      "B_kl_mean": 315.718,
+      "B_kl_se": 5.684,
+      "budget": 800,
+      "n": 200,
+      "policy": "Uniform SQD"
+    },
+    {
+      "B_kl_mean": 623.281,
+      "B_kl_se": 13.272,
+      "budget": 1600,
+      "n": 200,
+      "policy": "Uniform SQD"
+    },
+    {
+      "B_kl_mean": 1332.377,
+      "B_kl_se": 25.386,
+      "budget": 3200,
+      "n": 200,
+      "policy": "Uniform SQD"
+    },
+    {
+      "B_kl_mean": 159.815,
+      "B_kl_se": 3.747,
+      "budget": 400,
+      "n": 200,
+      "policy": "A-OSQD"
+    },
+    {
+      "B_kl_mean": 313.602,
+      "B_kl_se": 5.679,
+      "budget": 800,
+      "n": 200,
+      "policy": "A-OSQD"
+    },
+    {
+      "B_kl_mean": 623.832,
+      "B_kl_se": 13.185,
+      "budget": 1600,
+      "n": 200,
+      "policy": "A-OSQD"
+    },
+    {
+      "B_kl_mean": 1326.318,
+      "B_kl_se": 25.452,
+      "budget": 3200,
+      "n": 200,
+      "policy": "A-OSQD"
+    },
+    {
+      "B_kl_mean": 159.626,
+      "B_kl_se": 3.716,
+      "budget": 400,
+      "n": 200,
+      "policy": "Discriminative Score OED"
+    },
+    {
+      "B_kl_mean": 318.255,
+      "B_kl_se": 5.754,
+      "budget": 800,
+      "n": 200,
+      "policy": "Discriminative Score OED"
+    },
+    {
+      "B_kl_mean": 629.396,
+      "B_kl_se": 13.311,
+      "budget": 1600,
+      "n": 200,
+      "policy": "Discriminative Score OED"
+    },
+    {
+      "B_kl_mean": 1345.185,
+      "B_kl_se": 25.498,
+      "budget": 3200,
+      "n": 200,
+      "policy": "Discriminative Score OED"
+    },
+    {
+      "B_kl_mean": 161.23,
+      "B_kl_se": 3.771,
+      "budget": 400,
+      "n": 200,
+      "policy": "RR-GID"
+    },
+    {
+      "B_kl_mean": 317.695,
+      "B_kl_se": 5.728,
+      "budget": 800,
+      "n": 200,
+      "policy": "RR-GID"
+    },
+    {
+      "B_kl_mean": 630.469,
+      "B_kl_se": 13.33,
+      "budget": 1600,
+      "n": 200,
+      "policy": "RR-GID"
+    },
+    {
+      "B_kl_mean": 1343.859,
+      "B_kl_se": 25.575,
+      "budget": 3200,
+      "n": 200,
+      "policy": "RR-GID"
+    }
+  ],
+  "Table 5 (R2)": [
+    {
+      "c2st_auc_mean": 1.0,
+      "c2st_auc_se": 0.0,
+      "campaign": "batch7",
+      "ess_mean": 0.611,
+      "ess_se": 0.002,
+      "heldout_mean_rmse_mean": 0.28,
+      "heldout_mean_rmse_se": 0.0,
+      "policy": "Uniform SQD",
+      "projection_loss_mean": -0.527,
+      "projection_loss_se": 0.003
+    },
+    {
+      "c2st_auc_mean": 1.0,
+      "c2st_auc_se": 0.0,
+      "campaign": "batch7",
+      "ess_mean": 0.311,
+      "ess_se": 0.001,
+      "heldout_mean_rmse_mean": 0.28,
+      "heldout_mean_rmse_se": 0.0,
+      "policy": "A-OSQD",
+      "projection_loss_mean": -0.527,
+      "projection_loss_se": 0.003
+    },
+    {
+      "c2st_auc_mean": 1.0,
+      "c2st_auc_se": 0.0,
+      "campaign": "batch7",
+      "ess_mean": 0.608,
+      "ess_se": 0.002,
+      "heldout_mean_rmse_mean": 0.28,
+      "heldout_mean_rmse_se": 0.0,
+      "policy": "Discriminative Score OED",
+      "projection_loss_mean": -0.527,
+      "projection_loss_se": 0.003
+    },
+    {
+      "c2st_auc_mean": 1.0,
+      "c2st_auc_se": 0.0,
+      "campaign": "batch7",
+      "ess_mean": 0.85,
+      "ess_se": 0.001,
+      "heldout_mean_rmse_mean": 0.28,
+      "heldout_mean_rmse_se": 0.0,
+      "policy": "RR-GID",
+      "projection_loss_mean": -0.527,
+      "projection_loss_se": 0.003
+    },
+    {
+      "c2st_auc_mean": 1.0,
+      "c2st_auc_se": 0.0,
+      "campaign": "batches89",
+      "ess_mean": 0.938,
+      "ess_se": 0.001,
+      "heldout_mean_rmse_mean": 0.648,
+      "heldout_mean_rmse_se": 0.001,
+      "policy": "Uniform SQD",
+      "projection_loss_mean": -0.419,
+      "projection_loss_se": 0.001
+    },
+    {
+      "c2st_auc_mean": 1.0,
+      "c2st_auc_se": 0.0,
+      "campaign": "batches89",
+      "ess_mean": 0.674,
+      "ess_se": 0.003,
+      "heldout_mean_rmse_mean": 0.648,
+      "heldout_mean_rmse_se": 0.001,
+      "policy": "A-OSQD",
+      "projection_loss_mean": -0.419,
+      "projection_loss_se": 0.001
+    },
+    {
+      "c2st_auc_mean": 1.0,
+      "c2st_auc_se": 0.0,
+      "campaign": "batches89",
+      "ess_mean": 0.931,
+      "ess_se": 0.001,
+      "heldout_mean_rmse_mean": 0.648,
+      "heldout_mean_rmse_se": 0.001,
+      "policy": "Discriminative Score OED",
+      "projection_loss_mean": -0.419,
+      "projection_loss_se": 0.001
+    },
+    {
+      "c2st_auc_mean": 1.0,
+      "c2st_auc_se": 0.0,
+      "campaign": "batches89",
+      "ess_mean": 0.962,
+      "ess_se": 0.001,
+      "heldout_mean_rmse_mean": 0.648,
+      "heldout_mean_rmse_se": 0.001,
+      "policy": "RR-GID",
+      "projection_loss_mean": -0.419,
+      "projection_loss_se": 0.001
+    },
+    {
+      "c2st_auc_mean": 1.0,
+      "c2st_auc_se": 0.0,
+      "campaign": "batch10",
+      "ess_mean": 0.829,
+      "ess_se": 0.001,
+      "heldout_mean_rmse_mean": 0.328,
+      "heldout_mean_rmse_se": 0.0,
+      "policy": "Uniform SQD",
+      "projection_loss_mean": -0.544,
+      "projection_loss_se": 0.001
+    },
+    {
+      "c2st_auc_mean": 1.0,
+      "c2st_auc_se": 0.0,
+      "campaign": "batch10",
+      "ess_mean": 0.767,
+      "ess_se": 0.001,
+      "heldout_mean_rmse_mean": 0.328,
+      "heldout_mean_rmse_se": 0.0,
+      "policy": "A-OSQD",
+      "projection_loss_mean": -0.544,
+      "projection_loss_se": 0.001
+    },
+    {
+      "c2st_auc_mean": 1.0,
+      "c2st_auc_se": 0.0,
+      "campaign": "batch10",
+      "ess_mean": 0.83,
+      "ess_se": 0.001,
+      "heldout_mean_rmse_mean": 0.328,
+      "heldout_mean_rmse_se": 0.0,
+      "policy": "Discriminative Score OED",
+      "projection_loss_mean": -0.544,
+      "projection_loss_se": 0.001
+    },
+    {
+      "c2st_auc_mean": 1.0,
+      "c2st_auc_se": 0.0,
+      "campaign": "batch10",
+      "ess_mean": 0.737,
+      "ess_se": 0.001,
+      "heldout_mean_rmse_mean": 0.328,
+      "heldout_mean_rmse_se": 0.0,
+      "policy": "RR-GID",
+      "projection_loss_mean": -0.544,
+      "projection_loss_se": 0.001
+    }
+  ]
+}
