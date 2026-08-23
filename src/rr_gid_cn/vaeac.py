@@ -117,8 +117,12 @@ def train_vaeac(model: VAEAC, reference: np.ndarray, panels, scale: np.ndarray |
         k = model.prior_mu.shape[0]
         km = KMeans(n_clusters=k, random_state=seed, n_init=10).fit(z)
         labels = km.labels_
-        means = np.stack([z[labels == j].mean(0) for j in range(k)])
-        vars_ = np.stack([z[labels == j].var(0) + 1e-3 for j in range(k)])
+        means16 = np.stack([z[labels == j].mean(0) for j in range(k)])
+        vars16 = np.stack([z[labels == j].var(0) + 1e-3 for j in range(k)])
+        means = np.zeros((k, model.latent), dtype=float)
+        vars_ = np.ones((k, model.latent), dtype=float)
+        means[:, :z.shape[1]] = means16
+        vars_[:, :z.shape[1]] = vars16
         counts = np.bincount(labels, minlength=k).astype(float)
         with torch.no_grad():
             model.prior_mu.copy_(torch.as_tensor(means, dtype=torch.float32, device=device))
