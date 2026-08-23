@@ -293,6 +293,10 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
             pilot_cursor += count
         pilot_mu, pilot_rho = pilot_ht_moment(pilot_observations, pilot_counts, panels, scale, reference)
         beta_hat = solve_pilot_beta(pilot_mu, reference, scale, norm_cap=pilot_norm_cap)
+        if theta_norm_cap is not None:
+            pilot_norm = float(np.linalg.norm(beta_hat))
+            if pilot_norm > float(theta_norm_cap):
+                beta_hat = beta_hat * (float(theta_norm_cap) / pilot_norm)
         if name == "Discriminative Score OED":
             # PDF P5: each campaign retrains the mask-conditioned MLP and redesigns.
             validation = sample_full(mixture, validation_size, seed + 555)
