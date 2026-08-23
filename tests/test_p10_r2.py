@@ -1,6 +1,29 @@
 from pathlib import Path
 
+import numpy as np
+
+from scripts.p10_r2_formal import bregman_projection_loss, heldout_function_values
+
 
 def test_p10_config_exists():
     assert Path("configs/p10_smoke.yaml").exists()
 
+
+def test_projection_loss_is_bregman_and_nonnegative():
+    rng = np.random.default_rng(4)
+    phi = rng.normal(size=(400, 16))
+    beta_dag = rng.normal(size=16) * 0.1
+    beta_hat = beta_dag + rng.normal(size=16) * 0.2
+    loss = bregman_projection_loss(phi, beta_hat, beta_dag)
+    assert loss >= 0.0
+    assert bregman_projection_loss(phi, beta_dag, beta_dag) == 0.0
+
+
+def test_heldout_function_dictionary_has_fixed_32_functions():
+    rng = np.random.default_rng(5)
+    x = rng.normal(size=(9, 128))
+    mean, std = np.zeros(128), np.ones(128)
+    pcs2 = np.zeros((16, 8)); pcs2[:, 1] = 1.0
+    values = heldout_function_values(x, mean, std, pcs2)
+    assert values.shape == (9, 32)
+    assert np.all(np.abs(values) <= 1.0)

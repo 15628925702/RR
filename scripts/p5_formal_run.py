@@ -41,7 +41,7 @@ if str(_src) not in sys.path:
 
 from rr_gid_cn.s1_gate import run_replication
 from rr_gid_cn.synthetic_oracle import all_pairs, make_frozen_mixture, reference_scale, sample_full
-from rr_gid_cn.vaeac import VAEAC, VAEACGenerator
+from rr_gid_cn.vaeac import VAEACGenerator, load_vaeac_checkpoint
 
 
 def main() -> None:
@@ -73,17 +73,17 @@ def main() -> None:
     if "reference_large" not in prepared:
         prepared["reference_large"] = sample_full(mixture, cfg["large_reference_size"], 2026 + 12345)
 
-    ckpt = torch.load(args.gen_ckpt, map_location="cuda", weights_only=False)
-    model = VAEAC(dim=16, latent=128, hidden=512, seed=0).to("cuda")
-    model.load_state_dict(ckpt["model"])
-    model.z_std = ckpt["z_std"]
-    gen = VAEACGenerator(model, scale, alpha=1.0)
+    model, ckpt = load_vaeac_checkpoint(args.gen_ckpt, device="cuda", expected_dim=16)
+    gen = VAEACGenerator(model, ckpt.get("scale", scale),
+                         alpha=float(ckpt.get("alpha", 1.0)), device="cuda")
 
     policies = ["Discriminative Score OED", "learned RR-GID"]
     kwargs = dict(
         lu=cfg["lu"], h_tilted=cfg["h_tilted"], h_cond=cfg["h_cond"],
         pilot_norm_cap=cfg["pilot_norm_cap"], kl_samples=cfg["kl_samples"],
         scoring_steps=int(cfg["scoring_steps"]), generator=gen,
+        theta_norm_cap=cfg.get("theta_norm_cap"), theta_l1_cap=cfg.get("theta_l1_cap"),
+        scoring_step_size=cfg.get("scoring_step_size", 1.0),
         gen_info_tilted=args.gen_info_tilted or int(cfg.get("gen_info_tilted", 256)),
         gen_info_cond=args.gen_info_cond or int(cfg.get("gen_info_cond", 32)),
         mlp_hidden=args.mlp_hidden or 64, mlp_steps=args.mlp_steps or 200,

@@ -30,7 +30,8 @@ if str(_src) not in sys.path:
 from rr_gid_cn.gas_preprocess import fit_scaler_pca, panel_library, transform_features
 from rr_gid_cn.policies import frank_wolfe, uniform_probabilities
 from rr_gid_cn.s1_gate import a_optimal_information, discriminative_design
-from rr_gid_cn.vaeac import VAEAC, VAEACGenerator, learned_information
+from rr_gid_cn.vaeac import (VAEACGenerator, imp_conditional_mean_from_generator,
+                             learned_information, load_vaeac_checkpoint)
 
 
 def gas_a_optimal_information(phi_ref, sensor_pairs):
@@ -302,7 +303,13 @@ def run_gas_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, budget, se
                 grouped_rows.setdefault(coord_panels.index(panel), []).append(np.asarray(obs_row))
             for pidx, rows_list in grouped_rows.items():
                 obs_batch = np.asarray(rows_list)
-                cm = empirical_conditional_mean(phi_val, ref_val, obs_batch, coord_panels[pidx])
+                # Final RR estimator uses the frozen Gas VAEAC conditional
+                # interface.  The empirical kernel remains only the
+                # reference/oracle diagnostic and is not a hidden fallback.
+                cm = imp_conditional_mean_from_generator(
+                    gen, beta_hat_final, obs_batch, coord_panels[pidx],
+                    n=32, seed=seed + 7000 + 100 * _ + pidx,
+                    feature_fn=gas_transform)
                 U += (cm - mu_beta_j).sum(0)
                 H += len(obs_batch) * infos[pidx]
             step = np.linalg.solve(H, U)
@@ -342,14 +349,12 @@ def main() -> None:
     coord_panels = tuple(
         tuple(j for s in pair for j in range(s * 8, (s + 1) * 8)) for pair in sensor_pairs
     )
-    ckpt = torch.load(cfg["generator_ckpt"], map_location="cuda", weights_only=False)
-    model = VAEAC(dim=128, latent=64, hidden=256, seed=0).to("cuda")
-    model.load_state_dict(ckpt["model"])
-    model.z_std = ckpt["z_std"]
     gas_fn = lambda x: transform_features(x, mean, std, pcs)
     global gas_transform
     gas_transform = gas_fn
-    gen = VAEACGenerator(model, np.ones(128), alpha=0.0, feature_fn=gas_fn)
+    model, ckpt = load_vaeac_checkpoint(cfg["generator_ckpt"], device="cuda", expected_dim=128)
+    gen = VAEACGenerator(model, ckpt.get("scale", np.ones(128)), alpha=0.0,
+                         device="cuda", feature_fn=gas_fn)
 
     # Precompute the empirical-kernel oracle panel information once (PDF 8.2).
     # It is defined on the reference-validation pool, independent of the target

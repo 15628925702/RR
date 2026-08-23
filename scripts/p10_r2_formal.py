@@ -31,7 +31,7 @@ if str(_src) not in sys.path:
 from rr_gid_cn.gas_preprocess import fit_scaler_pca, panel_library, transform_features
 from rr_gid_cn.policies import frank_wolfe, uniform_probabilities
 from rr_gid_cn.s1_gate import a_optimal_information, discriminative_design
-from rr_gid_cn.vaeac import VAEAC, VAEACGenerator, learned_information
+from rr_gid_cn.vaeac import VAEACGenerator, learned_information, load_vaeac_checkpoint
 
 CAMPAIGNS = {
     "batch7": ("x_batch7", "phi_batch7"),
@@ -95,6 +95,68 @@ def log_partition_emp(phi, beta):
     return float(np.logaddexp.reduce(logits) - np.log(phi.shape[0]))
 
 
+def bregman_projection_loss(phi_pool, beta_hat, beta_dag):
+    """Eq. (17): ``D_Ahat(beta_hat, beta_dag)`` for the frozen family.
+
+    The gradient is evaluated at ``beta_dag`` from the same fixed full-sample
+    pool.  Using ``A(beta_hat)-beta_dag^T mu_t`` alone is the objective value,
+    not the Bregman projection loss, and can be negative when the numerical
+    projection has not reached its unconstrained optimum.
+    """
+    phi_pool = np.asarray(phi_pool, dtype=float)
+    beta_hat, beta_dag = np.asarray(beta_hat, dtype=float), np.asarray(beta_dag, dtype=float)
+    logits = phi_pool @ beta_dag
+    logits -= np.max(logits)
+    w = np.exp(logits); w /= np.sum(w)
+    grad_dag = w @ phi_pool
+    raw = (log_partition_emp(phi_pool, beta_hat)
+           - log_partition_emp(phi_pool, beta_dag)
+           - float(grad_dag @ (beta_hat - beta_dag)))
+    # log-sum-exp is convex; only roundoff at machine precision is clipped.
+    if raw < -1e-8:
+        raise FloatingPointError(f"negative Bregman divergence {raw:.6g}")
+    return float(max(raw, 0.0))
+
+
+def fit_pc2(reference_train, mean, std):
+    """Freeze the second within-sensor PC used by the 32 held-out functions."""
+    z = (np.asarray(reference_train, dtype=float) - mean) / np.maximum(std, 1e-12)
+    pcs2 = []
+    for sensor in range(16):
+        _, _, vh = np.linalg.svd(z[:, sensor * 8:(sensor + 1) * 8], full_matrices=False)
+        vec = vh[1]
+        if vec[np.argmax(np.abs(vec))] < 0:
+            vec = -vec
+        pcs2.append(vec)
+    return np.asarray(pcs2)
+
+
+def heldout_function_values(x, mean, std, pcs2):
+    """The fixed 32 held-out functions: 16 PC2 unary + 16 interactions."""
+    z = (np.asarray(x, dtype=float) - mean) / np.maximum(std, 1e-12)
+    scores = np.stack([
+        np.einsum("...i,i->...", z[..., s * 8:(s + 1) * 8], pcs2[s])
+        for s in range(16)
+    ], axis=-1)
+    unary = np.tanh(scores)
+    interaction = np.tanh(scores * np.roll(scores, -1, axis=-1))
+    return np.concatenate([unary, interaction], axis=-1)
+
+
+def conditional_acceptance_diagnostic(generator, beta, observations, panels, n=8, seed=0):
+    """Measure exact conditional tilt acceptance on a fixed diagnostic subset."""
+    total_accept, total_proposals, ess = 0.0, 0.0, []
+    for i, (obs, panel) in enumerate(zip(observations, panels)):
+        _, acc, e = generator.tilted_conditional_diagnostics(
+            beta, obs, panel, n, seed=seed + i)
+        total_accept += float(acc) * n
+        total_proposals += n
+        ess.append(float(e))
+    if not ess:
+        return float("nan"), float("nan")
+    return float(total_accept / max(total_proposals, 1.0)), float(np.mean(ess))
+
+
 def gas_a_optimal_information(phi_ref, sensor_pairs):
     """A-OSQD panel Fisher info in the 16-dim phi space (PDF Sec. 6 / 8.1)."""
     x = np.asarray(phi_ref, dtype=float)
@@ -154,17 +216,15 @@ def c2st_auc(gen_samples, test_pool, rng_seed=0, folds=5, max_iter=5000):
     return float(np.mean(aucs))
 
 
-def heldout_moment_rmse(gen_samples, test_x, mean, std):
-    g_mean = gen_samples.mean(0)
-    t_mean = test_x.mean(0)
-    mean_err = float(np.sqrt(np.mean(((g_mean - t_mean) / np.maximum(std, 1e-9)) ** 2)))
-    g_std = gen_samples.std(0)
-    t_std = test_x.std(0)
-    std_err = float(np.sqrt(np.mean(((g_std - t_std) / np.maximum(std, 1e-9)) ** 2)))
+def heldout_moment_rmse(gen_samples, test_x, mean, std, pcs2):
+    g = heldout_function_values(gen_samples, mean, std, pcs2)
+    t = heldout_function_values(test_x, mean, std, pcs2)
+    mean_err = float(np.sqrt(np.mean((g.mean(0) - t.mean(0)) ** 2)))
+    std_err = float(np.sqrt(np.mean((g.std(0) - t.std(0)) ** 2)))
     return mean_err, std_err
 
 
-def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x, campaign_phi,
+def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, pcs2, gen, campaign_x, campaign_phi,
                        coord_panels, sensor_pairs, budget, seed, full_pool_x, mlp_steps=200,
                        emp_infos=None, gas_ao_infos=None, phi_ref=None):
     import time as _t
@@ -198,13 +258,11 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
         beta_dag = beta_dag * (2.0 / np.linalg.norm(beta_dag))
 
     print(f"[rep {seed} t+{_t.time()-t0:.1f}s beta_dag done norm={np.linalg.norm(beta_dag):.2f}", flush=True)
-    # target draw from the campaign pool under beta_dag
-    logits = pool_phi @ beta_dag
-    w = np.exp(logits - logits.max()); w /= w.sum()
-    target_idx = rng.choice(len(pool_x), size=budget, p=w)
+    # Natural-drift records are the acquisition target.  The full-test split
+    # and beta_dag are evaluation-only and must not influence acquisition.
+    target_idx = rng.choice(len(pool_x), size=budget, replace=True)
     target = pool_x[target_idx]
 
-    proj_loss = float(log_partition_emp(full_pool_phi, beta_dag) - beta_dag @ mu_t)
     b_pilot = min(int(np.ceil(0.2 * budget)), int(np.ceil(10.0 * budget ** (1.0 / 3.0))))
     b_pilot = min(b_pilot, budget)
 
@@ -249,7 +307,7 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
         if remainder:
             counts[np.argsort(rem * probs - counts)[-remainder:]] += 1
         # final beta via J=2 Fisher scoring on the empirical base
-        beta_hat_final = beta_dag.copy()
+        beta_hat_final = np.zeros(16, dtype=float)
         main_obs = []
         cursor = b_pilot
         for panel, count in zip(coord_panels, counts):
@@ -284,14 +342,23 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen, campaign_x,
         info_for_M = policy_infos if policy_infos is not None else emp_infos
         M_hat = np.tensordot(probs, info_for_M, axes=(0, 0))
         lambda_min_M = float(np.linalg.eigvalsh((np.asarray(M_hat) + np.asarray(M_hat).T) / 2).min())
-        gen_samples = gen.sample_full(cfg["c2st_samples"], seed + 33)
-        mean_rmse, std_rmse = heldout_moment_rmse(gen_samples, test_x, mean, std)
+        gen_samples, uncond_acceptance, gen_ess = gen.tilted_full_diagnostics(
+            beta_hat_final, cfg["c2st_samples"], seed + 33)
+        mean_rmse, std_rmse = heldout_moment_rmse(gen_samples, test_x, mean, std, pcs2)
         auc = c2st_auc(gen_samples, test_x, rng_seed=seed % 10000)
+        diagnostic_obs = [obs for _, obs in pilot_obs[:8]]
+        diagnostic_panels = [panel for panel, _ in pilot_obs[:8]]
+        cond_acceptance, cond_ess = conditional_acceptance_diagnostic(
+            gen, beta_hat_final, diagnostic_obs, diagnostic_panels, n=8, seed=seed + 100)
+        projection_loss = bregman_projection_loss(full_pool_phi, beta_hat_final, beta_dag)
         print(f"[rep {seed} t+{_t.time()-t0:.1f}s policy {name} done", flush=True)
         rows.append({"policy": name, "budget": budget, "seed": seed,
-                     "projection_loss": proj_loss, "heldout_mean_rmse": mean_rmse,
+                     "projection_loss": projection_loss, "heldout_mean_rmse": mean_rmse,
                      "heldout_std_rmse": std_rmse, "c2st_auc": auc, "ess": ess,
-                     "conditional_acceptance": 1.0, "fw_gap": fw_gap, "lambda_min_M": lambda_min_M,
+                     "conditional_acceptance": cond_acceptance,
+                     "unconditional_acceptance": uncond_acceptance,
+                     "generator_ess": gen_ess, "conditional_ess": cond_ess,
+                     "fw_gap": fw_gap, "lambda_min_M": lambda_min_M,
                      "beta_dag_norm": float(np.linalg.norm(beta_dag))})
     return rows
 
@@ -315,14 +382,13 @@ def main() -> None:
     data = np.load("data/gas/processed/gas_processed.npz")
     ref_train, ref_val = data["ref_train"], data["ref_val"]
     mean, std, pcs = fit_scaler_pca(ref_train)
+    pcs2 = fit_pc2(ref_train, mean, std)
     sensor_pairs = panel_library()
     coord_panels = tuple(tuple(j for s in pair for j in range(s * 8, (s + 1) * 8)) for pair in sensor_pairs)
-    ckpt = torch.load(cfg["generator_ckpt"], map_location="cuda", weights_only=False)
-    model = VAEAC(dim=128, latent=64, hidden=256, seed=0).to("cuda")
-    model.load_state_dict(ckpt["model"])
-    model.z_std = ckpt["z_std"]
     gas_fn = lambda x: transform_features(x, mean, std, pcs)
-    gen = VAEACGenerator(model, np.ones(128), alpha=0.0, feature_fn=gas_fn)
+    model, ckpt = load_vaeac_checkpoint(cfg["generator_ckpt"], device="cuda", expected_dim=128)
+    gen = VAEACGenerator(model, ckpt.get("scale", np.ones(128)), alpha=0.0,
+                         device="cuda", feature_fn=gas_fn)
     # frozen large full-sample pool for A_hat (PDF 8.3)
     full_pool_x = gen.sample_full(cfg["full_pool_size"], seed=42)
     # empirical kernel panel infos + A-OSQD infos, computed once on ref pool
@@ -349,7 +415,7 @@ def main() -> None:
                     if all((rep, pol) in done for pol in ("Uniform SQD", "A-OSQD", "Discriminative Score OED", "RR-GID")):
                         continue
                     seed = camp_seeds[camp] + budget * 1000 + rep
-                    rows = run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, gen,
+                    rows = run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, pcs2, gen,
                                               campaign_x, campaign_phi, coord_panels, sensor_pairs,
                                               budget, seed, full_pool_x, mlp_steps=args.mlp_steps,
                                               emp_infos=emp_infos, gas_ao_infos=gas_ao_infos,

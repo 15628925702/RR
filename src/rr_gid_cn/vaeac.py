@@ -8,6 +8,42 @@ import torch.nn as nn
 from .synthetic_oracle import feature_map
 
 
+def load_vaeac_checkpoint(path, device="cpu", expected_dim=None):
+    """Load a canonical VAEAC checkpoint and reconstruct its exact network.
+
+    Formal stages must not silently load the pre-canonical empirical-generator
+    checkpoints.  Canonical checkpoints contain proposal, conditional_prior and
+    decoder parameters plus the training standardisation statistics.
+    """
+    checkpoint = torch.load(path, map_location=device, weights_only=False)
+    if not isinstance(checkpoint, dict) or "model" not in checkpoint:
+        raise ValueError(f"{path}: missing VAEAC model state")
+    state = checkpoint["model"]
+    required = ("proposal.0.weight", "conditional_prior.0.weight", "decoder.0.weight")
+    if any(k not in state for k in required):
+        raise ValueError(
+            f"{path}: non-canonical checkpoint; expected VAEAC proposal/conditional_prior/decoder"
+        )
+    proposal_in = int(state["proposal.0.weight"].shape[1])
+    hidden = int(state["proposal.0.weight"].shape[0])
+    dim = proposal_in // 2
+    latent = int(state["proposal.4.weight"].shape[0] // 2)
+    if proposal_in != 2 * dim or (expected_dim is not None and dim != int(expected_dim)):
+        raise ValueError(f"{path}: inconsistent VAEAC dimension {dim!r}")
+    model = VAEAC(dim=dim, latent=latent, hidden=hidden, seed=0).to(device)
+    model.load_state_dict(state, strict=True)
+    if "data_mean" not in checkpoint or "data_std" not in checkpoint:
+        raise ValueError(f"{path}: canonical checkpoint is missing data_mean/data_std")
+    data_mean = checkpoint["data_mean"]
+    data_std = checkpoint["data_std"]
+    if np.asarray(data_mean).shape != (dim,) or np.asarray(data_std).shape != (dim,):
+        raise ValueError(f"{path}: invalid VAEAC standardisation statistics")
+    model.data_mean = np.asarray(data_mean, dtype=np.float64)
+    model.data_std = np.where(np.asarray(data_std, dtype=np.float64) < 1e-12, 1.0, data_std)
+    model.eval()
+    return model, checkpoint
+
+
 class VAEAC(nn.Module):
     """VAEAC with proposal q, conditional prior p and Gaussian decoder."""
     def __init__(self, dim=16, latent=16, hidden=128, seed=0, k_prior=4, gmm_prior=False):
