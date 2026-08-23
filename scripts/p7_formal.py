@@ -36,7 +36,7 @@ from rr_gid_cn.s1_gate import a_optimal_information, discriminative_design, exac
 from rr_gid_cn.synthetic_oracle import (all_pairs, beta_direction_and_scale, feature_fn_from_dictionary,
                                         make_feature_dictionary, make_frozen_mixture, reference_scale,
                                         sample_feature_draw, sample_full)
-from rr_gid_cn.vaeac import VAEAC, VAEACGenerator, learned_information
+from rr_gid_cn.vaeac import VAEACGenerator, learned_information, load_vaeac_checkpoint
 
 
 def phi_value(p, fisher, infos):
@@ -52,11 +52,7 @@ def a_optimal_design(reference, panels):
 
 
 def load_generator(ckpt_path: str):
-    ckpt = torch.load(ckpt_path, map_location="cuda", weights_only=False)
-    base_model = VAEAC(dim=16, latent=16, hidden=256, seed=0).to("cuda")
-    base_model.load_state_dict(ckpt["model"])
-    base_model.data_mean = ckpt["data_mean"]
-    base_model.data_std = ckpt["data_std"]
+    base_model, _ = load_vaeac_checkpoint(ckpt_path, device="cuda", expected_dim=16)
     return base_model
 
 
