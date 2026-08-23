@@ -49,7 +49,7 @@ class VAEAC(nn.Module):
             self.prior_logvar = nn.Parameter(torch.full((k_prior, latent), -0.5))
 
     def log_prior(self, z: torch.Tensor) -> torch.Tensor:
-        log_comp = self.log_pi + _gaussian_log_prob(
+        log_comp = torch.log_softmax(self.log_pi, dim=0) + _gaussian_log_prob(
             z[:, None, :], self.prior_mu[None, :, :], self.prior_logvar[None, :, :]).sum(-1)
         return torch.logsumexp(log_comp, dim=-1)
 
@@ -159,8 +159,19 @@ class VAEACGenerator:
     to X with ``T_alpha`` so the generator models the original Q0 over X.
     """
 
-    def __init__(self, model: VAEAC, scale: np.ndarray, alpha: float = 1.0, device: str = "cuda",
+    def __init__(self, model: VAEAC | np.ndarray, scale: np.ndarray | None = None, alpha: float = 1.0, device: str = "cuda",
                  feature_fn=None):
+        # Compatibility adapter for the pre-checkpoint smoke API. Formal P6
+        # always passes a VAEAC model and explicit reference scale.
+        self._legacy_reference = None
+        if isinstance(model, np.ndarray):
+            self._legacy_reference = np.asarray(model, dtype=float)
+            self.model = None
+            self.scale = np.ones(self._legacy_reference.shape[1], dtype=float) if scale is None else np.asarray(scale, dtype=float)
+            self.alpha, self.device = float(alpha), "cpu"
+            self.z_std = np.ones(self._legacy_reference.shape[1], dtype=float)
+            self.feature_fn = (lambda x: feature_map(x, self.scale)) if feature_fn is None else feature_fn
+            return
         self.model = model.eval().to(device)
         self.scale = np.asarray(scale, dtype=float)
         self.alpha = float(alpha)
@@ -174,13 +185,27 @@ class VAEACGenerator:
 
     @property
     def dimension(self) -> int:
-        return self.model.dim
+        return self.model.dim if self.model is not None else self._legacy_reference.shape[1]
+
+    def _sample_prior(self, n: int, seed: int = 0) -> torch.Tensor:
+        model = self.model
+        if model.gmm_prior:
+            g = torch.Generator(self.device).manual_seed(seed)
+            pi = torch.softmax(model.log_pi.detach(), 0)
+            comp = torch.multinomial(pi, n, replacement=True, generator=g)
+            mu = model.prior_mu.detach()[comp]
+            sd = torch.exp(0.5 * model.prior_logvar.detach()[comp])
+            return mu + sd * torch.randn(n, model.latent, device=self.device, generator=g)
+        g = torch.Generator(self.device).manual_seed(seed)
+        return torch.randn(n, model.latent, device=self.device, generator=g)
 
     def sample_full(self, n: int, seed: int = 0) -> np.ndarray:
         """Unconditional Q0 samples via z ~ N(0, I), decode with the zero mask."""
+        if self._legacy_reference is not None:
+            rng = np.random.default_rng(seed)
+            return self._legacy_reference[rng.integers(len(self._legacy_reference), size=n)].copy()
         model = self.model
-        generator = torch.Generator(self.device).manual_seed(seed)
-        z = torch.randn(n, model.latent, device=self.device, generator=generator)
+        z = self._sample_prior(n, seed)
         mask = torch.zeros(n, model.dim, device=self.device)
         with torch.no_grad():
             out_z = model.decode(z, mask)
@@ -188,6 +213,14 @@ class VAEACGenerator:
 
     def sample_conditional(self, observed: np.ndarray, panel: tuple[int, ...], n: int, seed: int = 0) -> np.ndarray:
         """Conditional Q0 samples given the observed panel coordinates (X space)."""
+        if self._legacy_reference is not None:
+            rng = np.random.default_rng(seed)
+            ref = self._legacy_reference
+            mask = np.all(np.isclose(ref[:, list(panel)], np.asarray(observed)[None, :]), axis=1)
+            pool = ref[mask] if np.any(mask) else ref
+            out = pool[rng.integers(len(pool), size=n)].copy()
+            out[:, list(panel)] = observed
+            return out
         observed = np.asarray(observed)
         model = self.model
         dim = model.dim
@@ -237,6 +270,26 @@ class VAEACGenerator:
             keep = rng.random(len(proposal)) < np.exp(logits - envelope)
             accepted.extend(proposal[keep])
         return np.asarray(accepted[:n])
+
+    def tilted_sample(self, beta, feature_fn, n, seed=0):
+        """Legacy diagnostic alias returning samples, acceptance, and ESS."""
+        old = self.feature_fn
+        self.feature_fn = feature_fn
+        try:
+            rng = np.random.default_rng(seed)
+            draws = []
+            proposals = 0
+            envelope = float(np.sum(np.abs(np.asarray(beta))))
+            while len(draws) < n:
+                p = self.sample_full(max(32, 2 * (n-len(draws))), int(rng.integers(2**31-1)))
+                proposals += len(p)
+                keep = rng.random(len(p)) < np.exp(feature_fn(p) @ np.asarray(beta) - envelope)
+                draws.extend(p[keep])
+            out = np.asarray(draws[:n])
+            acceptance = 1.0 if np.allclose(beta, 0.0) else float(n / max(proposals, 1))
+            return out, acceptance, self.importance_ess(np.asarray(beta), out)
+        finally:
+            self.feature_fn = old
 
     def tilted_conditional_sample(self, beta: np.ndarray, observed: np.ndarray, panel: tuple[int, ...], n: int, seed: int = 0) -> np.ndarray:
         """Exact accept-reject samples from Q_beta(·|X_S = x_s) via the generator."""
