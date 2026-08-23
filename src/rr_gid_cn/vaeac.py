@@ -158,7 +158,23 @@ class VAEACGenerator:
 
     def sample_conditional_batch(self, observed_batch, panel, n, seed=0):
         observed = np.atleast_2d(np.asarray(observed_batch, dtype=float))
-        return np.stack([self.sample_conditional(row, panel, n, seed + i) for i, row in enumerate(observed)])
+        if self._legacy_reference is not None:
+            return np.stack([self.sample_conditional(row, panel, n, seed + i) for i, row in enumerate(observed)])
+        rows = len(observed); center = np.asarray(self.model.data_mean); spread = np.asarray(self.model.data_std)
+        obs = torch.zeros(rows, self.dimension, device=self.device)
+        obs[:, list(panel)] = torch.as_tensor((observed - center[list(panel)]) / spread[list(panel)], dtype=torch.float32, device=self.device)
+        mask = torch.zeros_like(obs); mask[:, list(panel)] = 1.0
+        obs = obs[:, None, :].expand(rows, n, -1).reshape(rows * n, -1)
+        mask = mask[:, None, :].expand(rows, n, -1).reshape(rows * n, -1)
+        with torch.no_grad():
+            mu, logvar = self.model.prior(obs, mask)
+            z = self.model.reparameterize(mu, logvar, seed)
+            out_mu, out_logvar = self.model.decode_params(z, mask, obs)
+            gen = torch.Generator(device=self.device).manual_seed(seed + 1)
+            out = out_mu + torch.exp(0.5 * out_logvar) * torch.randn(out_mu.shape, device=self.device, generator=gen)
+        out = self._from_model_space(out.cpu().numpy()).reshape(rows, n, self.dimension)
+        out[:, :, list(panel)] = observed[:, None, :]
+        return out
 
     def tilted_full_sample(self, beta, n, seed=0):
         rng, accepted = np.random.default_rng(seed), []
