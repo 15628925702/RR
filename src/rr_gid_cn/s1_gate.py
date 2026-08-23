@@ -412,7 +412,10 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
                 main_observations.append((panel, row[list(panel)]))
             main_cursor += count
         observations = pilot_observations + main_observations
-        update_diagnostics = [{"step": "pilot", "pilot_budget": int(pilot_counts.sum()), "beta_norm": float(np.linalg.norm(beta_hat)), "rho_min": float(np.min(pilot_rho[pilot_rho > 0])) if np.any(pilot_rho > 0) else 0.0}]
+        pilot_mu_true, _ = tilted_moments(beta_true, reference, scale, feature_fn=fn)
+        update_diagnostics = [{"step": "pilot", "pilot_budget": int(pilot_counts.sum()), "beta_norm": float(np.linalg.norm(beta_hat)), "rho_min": float(np.min(pilot_rho[pilot_rho > 0])) if np.any(pilot_rho > 0) else 0.0,
+                              "pilot_mu_residual_norm": float(np.linalg.norm(pilot_mu - pilot_mu_true)),
+                              "pilot_beta_error_norm": float(np.linalg.norm(beta_hat - beta_true))}]
         # PDF Algorithm 2 projects every Fisher-scoring iterate onto the
         # compact parameter set Theta.  theta_norm_cap is the configured
         # Euclidean radius for that set; previously the argument existed but
