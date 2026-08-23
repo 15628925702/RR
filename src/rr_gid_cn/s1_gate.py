@@ -132,7 +132,27 @@ def pilot_ht_moment(observations, pilot_counts, panels, scale, reference):
     return values, np.asarray([sum(c for c, panel in zip(pilot_counts, panels) if set(s).issubset(panel)) / n0 for s in supports])
 
 
-def solve_pilot_beta(mu_pil, reference, scale, theta_bound=4.0, steps=20, norm_cap=None):
+def _project_theta(beta, theta_bound=4.0, norm_cap=None, l1_cap=None):
+    """Project a pilot iterate into the frozen compact parameter set.
+
+    The PDF leaves the numerical shape of ``Theta`` open; our formal config
+    uses coordinate, Euclidean and L1 bounds to keep the exact tilt overlap
+    finite.  Radial projection onto each active bound is deterministic and
+    preserves the target interior while avoiding unconstrained pilot blow-up.
+    """
+    x = np.clip(np.asarray(beta, dtype=float), -float(theta_bound), float(theta_bound))
+    if norm_cap is not None:
+        nrm = float(np.linalg.norm(x))
+        if nrm > float(norm_cap) > 0.0:
+            x *= float(norm_cap) / nrm
+    if l1_cap is not None:
+        l1 = float(np.abs(x).sum())
+        if l1 > float(l1_cap) > 0.0:
+            x *= float(l1_cap) / l1
+    return x
+
+
+def solve_pilot_beta(mu_pil, reference, scale, theta_bound=4.0, steps=20, norm_cap=None, l1_cap=None):
     beta = np.zeros(12)
     features = feature_map(reference, scale)
     target = np.asarray(mu_pil)
@@ -145,14 +165,14 @@ def solve_pilot_beta(mu_pil, reference, scale, theta_bound=4.0, steps=20, norm_c
         current = objective(beta)
         step = 1.0
         while step > 1e-5:
-            candidate = np.clip(beta + step * direction, -theta_bound, theta_bound)
+            candidate = _project_theta(beta + step * direction, theta_bound, norm_cap, l1_cap)
             if objective(candidate) <= current + 1e-9:
                 break
             step *= 0.5
         if step <= 1e-5 or np.linalg.norm(candidate - beta) < 1e-7:
             break
         beta = candidate
-    return beta
+    return _project_theta(beta, theta_bound, norm_cap, l1_cap)
 
 
 def prepare_s1_oracle(mixture, scale, panels, seed=2026, reference_size=50000, information_samples=256, conditional_samples=32, large_reference_size=200000,
@@ -212,6 +232,25 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
     return np.asarray(infos)
 
 
+def active_panel_information_cross(mixture, beta, active_panels, reference, scale,
+                                   n_tilted, n_cond, seed, feature_fn=None):
+    """Estimate current-step information only for panels present in ``D_B``.
+
+    Algorithm 2 step 6 requires re-estimation for every *active* panel.  The
+    design-stage library can contain 120 candidates, while rounding often
+    leaves only a much smaller subset active.  Sharing the same tilted full
+    draws across that subset preserves Equation (9) and avoids estimating
+    matrices that never enter ``H_j``.
+    """
+    if not active_panels:
+        return {}
+    estimates = panel_information_cross(
+        mixture, beta, tuple(active_panels), reference, scale,
+        n_tilted, n_cond, seed, feature_fn=feature_fn,
+    )
+    return dict(zip(active_panels, estimates))
+
+
 def final_rr_estimator(mixture, beta_start, observations, panels, reference, scale, lu, seed,
                        theta_bound=4.0, h_tilted=128, h_cond=32, step_size=1.0, norm_cap=None,
                        l1_cap=None, mu_samples=10000, mu_direct=False, oracle_information=None,
@@ -229,11 +268,18 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
     grouped = {}
     for panel, obs in observations:
         grouped.setdefault(panel, []).append(obs)
-    infos = panel_information_cross(mixture, beta_start, panels, reference, scale, h_tilted, h_cond, seed + 7, feature_fn=fn) if oracle_information is None else oracle_information
+    active_panels = tuple(grouped)
+    if oracle_information is None:
+        active_infos = active_panel_information_cross(
+            mixture, beta_start, active_panels, reference, scale,
+            h_tilted, h_cond, seed + 7, feature_fn=fn,
+        )
+    else:
+        active_infos = {panel: oracle_information[panels.index(panel)] for panel in active_panels}
     H = np.zeros((beta_start.shape[0], beta_start.shape[0]))
     projected = []
     for panel, rows in grouped.items():
-        H += len(rows) * infos[panels.index(panel)]
+        H += len(rows) * active_infos[panel]
         # S1 uses the exact conditional oracle for the observed score. The
         # finite-LU importance proposal is reserved for learned-generator
         # experiments, not the oracle gate.
@@ -316,7 +362,13 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
                 pilot_observations.append((panel, row[list(panel)]))
             pilot_cursor += count
         pilot_mu, pilot_rho = pilot_ht_moment(pilot_observations, pilot_counts, panels, scale, reference)
-        beta_hat = solve_pilot_beta(pilot_mu, reference, scale, norm_cap=pilot_norm_cap)
+        beta_hat = solve_pilot_beta(
+            pilot_mu,
+            reference,
+            scale,
+            norm_cap=theta_norm_cap if theta_norm_cap is not None else pilot_norm_cap,
+            l1_cap=theta_l1_cap,
+        )
         if theta_norm_cap is not None:
             pilot_norm = float(np.linalg.norm(beta_hat))
             if pilot_norm > float(theta_norm_cap):

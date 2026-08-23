@@ -1,4 +1,6 @@
-from rr_gid_cn.s1_gate import prepare_s1_oracle, run_replication
+import numpy as np
+
+from rr_gid_cn.s1_gate import active_panel_information_cross, prepare_s1_oracle, run_replication
 from rr_gid_cn.synthetic_oracle import all_pairs, make_frozen_mixture, reference_scale
 
 
@@ -25,3 +27,16 @@ def test_paired_gate_rows():
     # paired target draws across the three policies
     seeds = {row["target_draw_seed"] for row in rows}
     assert len(seeds) == 1
+
+
+def test_update_information_is_limited_to_active_panels():
+    mix = make_frozen_mixture()
+    scale = reference_scale(mix, 200, 1)
+    reference = np.zeros((200, 16))
+    active = ((0, 6), (1, 7))
+    estimates = active_panel_information_cross(
+        mix, np.zeros(12), active, reference, scale,
+        n_tilted=16, n_cond=2, seed=9,
+    )
+    assert tuple(estimates) == active
+    assert all(value.shape == (12, 12) for value in estimates.values())
