@@ -27,6 +27,10 @@ def main() -> None:
     ap.add_argument("--info-tilted", type=int, default=None)
     ap.add_argument("--info-cond", type=int, default=None)
     ap.add_argument("--scoring-step-size", type=float, default=None)
+    ap.add_argument("--lu", type=int, default=None, help="override update-stage conditional completions")
+    ap.add_argument("--h-tilted", type=int, default=None, help="override update-stage tilted samples")
+    ap.add_argument("--h-cond", type=int, default=None, help="override cross-completion samples")
+    ap.add_argument("--kl-samples", type=int, default=None, help="override KL diagnostic samples")
     args = ap.parse_args()
     with args.config.open(encoding="utf-8") as stream:
         cfg = yaml.safe_load(stream)
@@ -67,8 +71,11 @@ def main() -> None:
         )
         with prepared_path.open("wb") as stream:
             pickle.dump(prepared, stream, protocol=5)
-    kwargs = dict(lu=p4["lu"], h_tilted=p4["h_tilted"], h_cond=p4["h_cond"],
-                  pilot_norm_cap=p4["pilot_norm_cap"], kl_samples=p4["kl_samples"],
+    kwargs = dict(lu=p4["lu"] if args.lu is None else args.lu,
+                  h_tilted=p4["h_tilted"] if args.h_tilted is None else args.h_tilted,
+                  h_cond=p4["h_cond"] if args.h_cond is None else args.h_cond,
+                  kl_samples=p4["kl_samples"] if args.kl_samples is None else args.kl_samples,
+                  pilot_norm_cap=p4["pilot_norm_cap"],
                   scoring_steps=steps,
                   use_oracle_H=bool(p4.get("use_oracle_H", False)),
                   kl_mu_direct=bool(p4.get("kl_mu_direct", False)),
