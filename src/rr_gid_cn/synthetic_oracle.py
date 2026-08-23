@@ -207,22 +207,37 @@ def tilted_conditional_batch(
     envelope = fixed_features + np.sum(np.abs(beta[~fixed]))
     filled = np.zeros(len(rows), dtype=int)
     rounds = 0
+    attempted = 0
     max_rounds = 20000
     while np.any(filled < n):
         rounds += 1
         if rounds > max_rounds:
-            acceptance = filled / max(rounds * proposal_n, 1)
-            raise RuntimeError(f"conditional exact tilt did not reach requested samples; acceptance={acceptance.tolist()}")
+            acceptance = filled / max(attempted, 1)
+            raise RuntimeError(
+                "conditional exact tilt did not reach requested samples; "
+                f"panel={panel}, rounds={rounds - 1}, acceptance={acceptance.tolist()}"
+            )
         need = np.maximum(n - filled, 0)
-        proposal_n = int(max(64, min(2048, 4 * int(need.max()))))
-        observed_rep = np.repeat(rows, proposal_n, axis=0)
-        proposals = sample_conditional_batch(mixture, observed_rep, panel, 1, int(rng.integers(2**31 - 1)))[:, 0]
-        feats = fn(proposals)
-        logits = feats @ beta
-        row_ids = np.repeat(np.arange(len(rows)), proposal_n)
-        keep = rng.random(len(proposals)) < np.exp(logits - envelope[row_ids])
-        for row_id in np.flatnonzero(need):
-            selected = proposals[(row_ids == row_id) & keep]
+        active = np.flatnonzero(need)
+        # Generate a batch directly for each active observation.  The previous
+        # implementation repeated every row proposal_n times and then called
+        # sample_conditional_batch(..., n=1), rebuilding the same conditional
+        # Gaussian parameters for every proposal.  Sampling n=proposal_n in one
+        # call is mathematically identical (independent Q0 proposals) and keeps
+        # exact rejection sampling while avoiding that O(rows * proposal_n)
+        # parameter/setup overhead.  A modest batch size is sufficient because
+        # the envelope acceptance is typically 0.2--0.4; rows are retried until
+        # their requested count is filled, so this does not alter the law.
+        proposal_n = int(max(8, min(2048, 2 * int(need.max()))))
+        proposals = sample_conditional_batch(
+            mixture, rows[active], panel, proposal_n, int(rng.integers(2**31 - 1))
+        )
+        attempted += int(len(active) * proposal_n)
+        feats = fn(proposals.reshape(-1, mixture.dimension)).reshape(len(active), proposal_n, -1)
+        logits = np.einsum("abr,r->ab", feats, beta)
+        keep = rng.random((len(active), proposal_n)) < np.exp(logits - envelope[active, None])
+        for local, row_id in enumerate(active):
+            selected = proposals[local][keep[local]]
             take = min(len(selected), n - filled[row_id])
             if take:
                 out[row_id, filled[row_id]:filled[row_id] + take] = selected[:take]
