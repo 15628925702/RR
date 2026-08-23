@@ -90,6 +90,36 @@ def gas_balanced_pilot_counts(coord_panels, budget):
     return counts
 
 
+def solve_acquisition_beta(pool_x, pool_phi, pilot_obs, steps=12):
+    """Estimate beta from campaign-pool pilot observations only.
+
+    This is deliberately independent of the full-test split and beta-dagger;
+    it is the beta_e available to acquisition policies in natural drift.
+    """
+    mu_terms = []
+    for panel, observed in pilot_obs:
+        cm = empirical_kernel_cm(pool_x, pool_phi, np.asarray(observed)[None, :], panel, k=60)
+        mu_terms.append(cm[0])
+    if not mu_terms:
+        return np.zeros(pool_phi.shape[1], dtype=float)
+    target = np.mean(mu_terms, axis=0)
+    beta = np.zeros(pool_phi.shape[1], dtype=float)
+    for _ in range(max(steps, 1)):
+        logits = pool_phi @ beta
+        logits -= logits.max()
+        w = np.exp(logits); w /= w.sum()
+        mu = w @ pool_phi
+        fisher = np.cov(pool_phi, rowvar=False, aweights=w) + 1e-3 * np.eye(pool_phi.shape[1])
+        step = np.linalg.pinv(fisher) @ (target - mu)
+        if np.linalg.norm(step) > 1.0:
+            step *= 1.0 / np.linalg.norm(step)
+        candidate = np.clip(beta + step, -4.0, 4.0)
+        if np.linalg.norm(candidate - beta) < 1e-7:
+            break
+        beta = candidate
+    return beta
+
+
 def log_partition_emp(phi, beta):
     logits = phi @ beta
     return float(np.logaddexp.reduce(logits) - np.log(phi.shape[0]))
@@ -276,6 +306,7 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, pcs2, gen, campa
         for row in target[cursor:cursor + count]:
             pilot_obs.append((panel, row[list(panel)]))
         cursor += count
+    beta_acq = solve_acquisition_beta(pool_x, pool_phi, pilot_obs)
 
     rows = []
     for name in ("Uniform SQD", "A-OSQD", "Discriminative Score OED", "RR-GID"):
@@ -289,12 +320,12 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, pcs2, gen, campa
                                            uniform_probabilities(len(coord_panels)), tolerance=1e-4, max_iter=300)
             policy_infos = a_info
         elif name == "Discriminative Score OED":
-            probs = discriminative_design(ref_train, ref_val, beta_dag, coord_panels, np.ones(128),
+            probs = discriminative_design(ref_train, ref_val, beta_acq, coord_panels, np.ones(128),
                                           seed=seed + 11, hidden=64, steps=mlp_steps, feature_fn=gas_fn)
             fw_gap = 0.0
             policy_infos = None
         else:  # RR-GID
-            _, learned_infos = learned_information(gen, beta_dag, coord_panels,
+            _, learned_infos = learned_information(gen, beta_acq, coord_panels,
                                                    n_tilted=cfg["gen_info_tilted"],
                                                    n_conditional=cfg["gen_info_cond"], seed=seed + 17,
                                                    feature_fn=gas_fn)
@@ -307,7 +338,7 @@ def run_r2_replication(cfg, ref_train, ref_val, mean, std, pcs, pcs2, gen, campa
         if remainder:
             counts[np.argsort(rem * probs - counts)[-remainder:]] += 1
         # final beta via J=2 Fisher scoring on the empirical base
-        beta_hat_final = np.zeros(16, dtype=float)
+        beta_hat_final = beta_acq.copy()
         main_obs = []
         cursor = b_pilot
         for panel, count in zip(coord_panels, counts):

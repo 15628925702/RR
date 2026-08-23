@@ -2,7 +2,8 @@ from pathlib import Path
 
 import numpy as np
 
-from scripts.p10_r2_formal import bregman_projection_loss, heldout_function_values
+from scripts.p10_r2_formal import (bregman_projection_loss, heldout_function_values,
+                                   solve_acquisition_beta)
 
 
 def test_p10_config_exists():
@@ -27,3 +28,12 @@ def test_heldout_function_dictionary_has_fixed_32_functions():
     values = heldout_function_values(x, mean, std, pcs2)
     assert values.shape == (9, 32)
     assert np.all(np.abs(values) <= 1.0)
+
+
+def test_acquisition_beta_uses_only_campaign_pool_observations():
+    rng = np.random.default_rng(6)
+    pool_x = rng.normal(size=(80, 4))
+    pool_phi = np.tanh(pool_x)
+    beta = solve_acquisition_beta(pool_x, pool_phi, [(tuple([0, 1]), pool_x[0, [0, 1]])])
+    assert beta.shape == (4,)
+    assert np.all(np.isfinite(beta))
