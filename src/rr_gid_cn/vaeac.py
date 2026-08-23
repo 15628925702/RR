@@ -110,6 +110,20 @@ def train_vaeac(model: VAEAC, reference: np.ndarray, panels, scale: np.ndarray |
         model.z_std = z_std.astype(np.float64)
     else:
         model.z_std = np.ones(model.dim, dtype=np.float64)
+    if model.gmm_prior:
+        # Initialize the learned prior from the actual latent mixture before
+        # ELBO optimization; a random prior collapses the four synthetic modes.
+        from sklearn.cluster import KMeans
+        k = model.prior_mu.shape[0]
+        km = KMeans(n_clusters=k, random_state=seed, n_init=10).fit(z)
+        labels = km.labels_
+        means = np.stack([z[labels == j].mean(0) for j in range(k)])
+        vars_ = np.stack([z[labels == j].var(0) + 1e-3 for j in range(k)])
+        counts = np.bincount(labels, minlength=k).astype(float)
+        with torch.no_grad():
+            model.prior_mu.copy_(torch.as_tensor(means, dtype=torch.float32, device=device))
+            model.prior_logvar.copy_(torch.log(torch.as_tensor(vars_, dtype=torch.float32, device=device)))
+            model.log_pi.copy_(torch.log(torch.as_tensor(counts / counts.sum(), dtype=torch.float32, device=device)))
     x = torch.as_tensor(z, dtype=torch.float32, device=device)
     rng = np.random.default_rng(seed)
     n = len(x)
