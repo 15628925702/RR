@@ -42,7 +42,9 @@ def main() -> None:
                 continue
             errs.append(abs(float(cond[:, c].mean()) - float(test_x[i, c])) / float(max(rs[c], 1e-9)))
     print("conditional mean abs err (median, std units):", round(float(np.median(errs)), 3), flush=True)
-    torch.save({"model": model.state_dict(), "z_std": model.z_std, "alpha": 0.0},
+    torch.save({"model": model.state_dict(), "data_mean": model.data_mean,
+                "data_std": model.data_std, "alpha": 0.0,
+                "reference_n": len(ref_train), "validation_n": len(ref_val)},
                "experiments/p9_gas_vaeac.pt")
     print("saved experiments/p9_gas_vaeac.pt", flush=True)
 
