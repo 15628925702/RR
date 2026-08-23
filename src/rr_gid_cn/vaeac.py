@@ -78,7 +78,10 @@ class VAEAC(nn.Module):
         return mu + torch.exp(0.5 * logvar) * eps
 
     def decode(self, z: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
-        return self.decoder(torch.cat([z, mask], dim=-1))
+        out = self.decoder(torch.cat([z, mask], dim=-1))
+        if z.shape[-1] == self.dim:
+            return z + out
+        return out
 
     def forward(self, x: torch.Tensor, mask: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         x_masked = x * mask
