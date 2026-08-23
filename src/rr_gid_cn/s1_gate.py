@@ -262,7 +262,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
                     kl_mu_direct=True, use_oracle_H=False, validation_size=10000,
                     mlp_hidden=64, mlp_steps=200, generator=None,
                     gen_info_tilted=256, gen_info_cond=32, disc_reference_size=None,
-                    feature_fn=None):
+                    feature_fn=None, scoring_step_size=1.0):
     prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed, feature_fn=feature_fn)
     reference = prepared["reference"]
     ref_large = prepared["reference_large"]
@@ -339,7 +339,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
         # was silently ignored, allowing overlap collapse in exact TiltCond.
         norm_cap_val = theta_norm_cap
         for update in range(scoring_steps):
-            beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=1.0, norm_cap=norm_cap_val, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn)
+            beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=scoring_step_size, norm_cap=norm_cap_val, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn)
             update_diagnostics.append({"step": update, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": int(pilot_counts.sum())})
             beta_hat = beta_next
         kl = max(0.0, float((beta_true - beta_hat) @ mu_bt - log_partition(beta_true, target_reference, scale, feature_fn=fn) + log_partition(beta_hat, target_reference, scale, feature_fn=fn)))

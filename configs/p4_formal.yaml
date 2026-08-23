@@ -29,6 +29,9 @@ p4:
   # engineering parameter (PDF leaves the numeric boundary open) and is
   # frozen here before formal replications.
   theta_norm_cap: 2.0
+  # Fixed damping for finite-sample Fisher scoring; the PDF leaves numerical
+  # line-search details open, while the update target remains Eq. (Algorithm 2).
+  scoring_step_size: 0.25
   ridge: null
   large_reference_size: 200000
   fw_tolerance: 1.0e-6

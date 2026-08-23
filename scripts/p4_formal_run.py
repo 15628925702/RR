@@ -26,6 +26,7 @@ def main() -> None:
     ap.add_argument("--large-reference-size", type=int, default=None)
     ap.add_argument("--info-tilted", type=int, default=None)
     ap.add_argument("--info-cond", type=int, default=None)
+    ap.add_argument("--scoring-step-size", type=float, default=None)
     args = ap.parse_args()
     with args.config.open(encoding="utf-8") as stream:
         cfg = yaml.safe_load(stream)
@@ -68,7 +69,9 @@ def main() -> None:
             pickle.dump(prepared, stream, protocol=5)
     kwargs = dict(lu=p4["lu"], h_tilted=p4["h_tilted"], h_cond=p4["h_cond"],
                   pilot_norm_cap=p4["pilot_norm_cap"], kl_samples=p4["kl_samples"],
-                  scoring_steps=steps)
+                  scoring_steps=steps,
+                  theta_norm_cap=p4.get("theta_norm_cap"),
+                  scoring_step_size=p4.get("scoring_step_size", 1.0) if args.scoring_step_size is None else args.scoring_step_size)
     for budget in budgets:
         fp = out / f"{args.out_prefix}_{budget}{suffix}.jsonl"
         with fp.open("a", encoding="utf-8") as stream:
