@@ -77,6 +77,11 @@ def main() -> None:
                   kl_samples=p4["kl_samples"] if args.kl_samples is None else args.kl_samples,
                   pilot_norm_cap=p4["pilot_norm_cap"],
                   scoring_steps=steps,
+                  # Synthetic S1 has an independent large Q0 pool; evaluate
+                  # KL with deterministic reference moments rather than a
+                  # second small TiltFull Monte Carlo sample.  Otherwise the
+                  # primary B*KL metric inherits O(B/sqrt(KL)) noise.
+                  kl_mu_direct=False,
                   use_oracle_H=bool(p4.get("use_oracle_H", False)),
                   kl_mu_direct=bool(p4.get("kl_mu_direct", False)),
                   theta_norm_cap=p4.get("theta_norm_cap"),
