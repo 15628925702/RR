@@ -215,7 +215,11 @@ class VAEACGenerator:
     def tilted_full_sample(self, beta, n, seed=0):
         rng, accepted = np.random.default_rng(seed), []
         envelope = float(np.sum(np.abs(np.asarray(beta))))
+        rounds = 0
         while len(accepted) < n:
+            rounds += 1
+            if rounds > 10000:
+                raise RuntimeError("VAEAC full tilt acceptance collapsed; run is anomalous")
             proposal = self.sample_full(max(256, 4 * (n - len(accepted))), int(rng.integers(2**31 - 1)))
             accepted.extend(proposal[rng.random(len(proposal)) < np.exp(self.feature_fn(proposal) @ beta - envelope)])
         return np.asarray(accepted[:n])
@@ -223,7 +227,11 @@ class VAEACGenerator:
     def tilted_full_diagnostics(self, beta, n, seed=0):
         rng, accepted, proposals = np.random.default_rng(seed), [], 0
         envelope = float(np.sum(np.abs(np.asarray(beta))))
+        rounds = 0
         while len(accepted) < n:
+            rounds += 1
+            if rounds > 10000:
+                raise RuntimeError("VAEAC full tilt acceptance collapsed; run is anomalous")
             proposal = self.sample_full(max(256, 4 * (n - len(accepted))), int(rng.integers(2**31 - 1)))
             keep = rng.random(len(proposal)) < np.exp(self.feature_fn(proposal) @ beta - envelope)
             proposals += len(proposal); accepted.extend(proposal[keep])
@@ -232,7 +240,11 @@ class VAEACGenerator:
     def tilted_conditional_diagnostics(self, beta, observed, panel, n, seed=0):
         rng, accepted, proposals = np.random.default_rng(seed), [], 0
         envelope = float(np.sum(np.abs(np.asarray(beta))))
+        rounds = 0
         while len(accepted) < n:
+            rounds += 1
+            if rounds > 10000:
+                raise RuntimeError("VAEAC conditional tilt acceptance collapsed; run is anomalous")
             proposal = self.sample_conditional(observed, panel, max(32, 2 * (n - len(accepted))), int(rng.integers(2**31 - 1)))
             keep = rng.random(len(proposal)) < np.exp(self.feature_fn(proposal) @ beta - envelope)
             proposals += len(proposal); accepted.extend(proposal[keep])
@@ -242,7 +254,11 @@ class VAEACGenerator:
     def tilted_conditional_sample(self, beta, observed, panel, n, seed=0):
         rng, accepted = np.random.default_rng(seed), []
         envelope = float(np.sum(np.abs(np.asarray(beta))))
+        rounds = 0
         while len(accepted) < n:
+            rounds += 1
+            if rounds > 10000:
+                raise RuntimeError("VAEAC conditional tilt acceptance collapsed; run is anomalous")
             proposal = self.sample_conditional(observed, panel, max(32, 2 * (n - len(accepted))), int(rng.integers(2**31 - 1)))
             accepted.extend(proposal[rng.random(len(proposal)) < np.exp(self.feature_fn(proposal) @ beta - envelope)])
         return np.asarray(accepted[:n])
