@@ -20,6 +20,12 @@ def main() -> None:
     ap.add_argument("--max-replications", type=int, default=None, help="limit replications per budget (for smoke runs)")
     ap.add_argument("--scoring-steps", type=int, default=None, help="J Fisher-scoring steps (default from config, 2; J ablation passes 0/1/2 explicitly)")
     ap.add_argument("--rep-range", type=int, nargs=2, default=None, help="[start, end) replication range for sharding a budget across processes")
+    ap.add_argument("--prepared", type=Path, default=Path("experiments/p4_prepared_oracle_fix1.pkl"))
+    ap.add_argument("--out-prefix", default="p4_exact_fix1")
+    ap.add_argument("--reference-size", type=int, default=50000)
+    ap.add_argument("--large-reference-size", type=int, default=None)
+    ap.add_argument("--info-tilted", type=int, default=None)
+    ap.add_argument("--info-cond", type=int, default=None)
     args = ap.parse_args()
     with args.config.open(encoding="utf-8") as stream:
         cfg = yaml.safe_load(stream)
@@ -33,7 +39,7 @@ def main() -> None:
     out = Path("results")
     done: dict[int, set] = {b: set() for b in budgets}
     for b in budgets:
-        fp = out / f"p4_exact_{b}{suffix}.jsonl"
+        fp = out / f"{args.out_prefix}_{b}{suffix}.jsonl"
         if fp.exists():
             for line in fp.read_text(encoding="utf-8").splitlines():
                 if line.strip():
@@ -42,7 +48,7 @@ def main() -> None:
     mixture = make_frozen_mixture(seed=2026, alpha=1.0)
     scale = reference_scale(mixture, 6000, 2026)
     panels = all_pairs()
-    prepared_path = Path("experiments/p4_prepared_oracle.pkl")
+    prepared_path = args.prepared
     if prepared_path.exists():
         with prepared_path.open("rb") as stream:
             prepared = pickle.load(stream)
@@ -53,10 +59,10 @@ def main() -> None:
     else:
         prepared = prepare_s1_oracle(
             mixture, scale, panels, seed=2026,
-            reference_size=50000,
-            information_samples=p4["information_tilted_samples"],
-            conditional_samples=p4["information_conditional_samples"],
-            large_reference_size=p4["large_reference_size"],
+            reference_size=args.reference_size,
+            information_samples=args.info_tilted or p4["information_tilted_samples"],
+            conditional_samples=args.info_cond or p4["information_conditional_samples"],
+            large_reference_size=args.large_reference_size or p4["large_reference_size"],
         )
         with prepared_path.open("wb") as stream:
             pickle.dump(prepared, stream, protocol=5)
@@ -64,7 +70,7 @@ def main() -> None:
                   pilot_norm_cap=p4["pilot_norm_cap"], kl_samples=p4["kl_samples"],
                   scoring_steps=steps)
     for budget in budgets:
-        fp = out / f"p4_exact_{budget}{suffix}.jsonl"
+        fp = out / f"{args.out_prefix}_{budget}{suffix}.jsonl"
         with fp.open("a", encoding="utf-8") as stream:
             start, end = args.rep_range if args.rep_range else (0, replications)
             for replication in range(start, min(end, replications)):

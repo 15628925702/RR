@@ -53,12 +53,12 @@ def a_optimal_information(reference: np.ndarray, panels: tuple[tuple[int, int], 
     return np.asarray(infos)
 
 
-def policy_designs(reference, panels, fisher, oracle_information):
+def policy_designs(reference, panels, fisher, oracle_information, fw_tolerance=1e-6):
     costs = np.ones(len(panels))
     uniform = uniform_probabilities(len(panels))
     a_info = a_optimal_information(reference, panels)
     a_p, _, _ = frank_wolfe(np.eye(16), a_info, costs, uniform, tolerance=1e-4, max_iter=500)
-    rr_p, _, _ = frank_wolfe(fisher, oracle_information, costs, uniform, tolerance=0.2, max_iter=300)
+    rr_p, _, _ = frank_wolfe(fisher, oracle_information, costs, uniform, tolerance=fw_tolerance, max_iter=300)
     return {"Uniform SQD": uniform, "A-OSQD": a_p, "oracle RR-GID": rr_p}
 
 
@@ -141,15 +141,11 @@ def solve_pilot_beta(mu_pil, reference, scale, theta_bound=4.0, steps=20, norm_c
         return float(np.logaddexp.reduce(z) - np.log(len(z)) - x @ target)
     for _ in range(max(steps, 100)):
         mu, fisher = tilted_moments(beta, reference, scale)
-        direction = np.linalg.solve(fisher + 1e-3 * np.eye(12), target - mu)
+        direction = np.linalg.pinv(fisher, rcond=1e-10) @ (target - mu)
         current = objective(beta)
         step = 1.0
         while step > 1e-5:
             candidate = np.clip(beta + step * direction, -theta_bound, theta_bound)
-            if norm_cap is not None:
-                nrm = np.linalg.norm(candidate)
-                if nrm > norm_cap:
-                    candidate = candidate * (norm_cap / nrm)
             if objective(candidate) <= current + 1e-9:
                 break
             step *= 0.5
@@ -204,8 +200,10 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
     infos = []
     for panel in panels:
         observed = tilted[:, list(panel)]
-        a = imp_conditional_mean(mixture, beta, observed, panel, n_cond, seed + 1, scale, feature_fn=fn) - mu
-        b = imp_conditional_mean(mixture, beta, observed, panel, n_cond, seed + 2, scale, feature_fn=fn) - mu
+        ca = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 1, scale, feature_fn=fn)
+        cb = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 2, scale, feature_fn=fn)
+        a = fn(ca).mean(axis=1) - mu
+        b = fn(cb).mean(axis=1) - mu
         a = a - a.mean(0)
         b = b - b.mean(0)
         info_hat = (a.T @ b + b.T @ a) / max(2 * (len(a) - 1), 1)
@@ -235,7 +233,12 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
     projected = []
     for panel, rows in grouped.items():
         H += len(rows) * infos[panels.index(panel)]
-        projected.append(imp_conditional_mean(mixture, beta_start, np.asarray(rows), panel, lu, int(rng.integers(2**31 - 1)), scale, feature_fn=fn))
+        # S1 uses the exact conditional oracle for the observed score. The
+        # finite-LU importance proposal is reserved for learned-generator
+        # experiments, not the oracle gate.
+        completions = tilted_conditional_batch(mixture, beta_start, np.asarray(rows), panel, lu,
+                                                int(rng.integers(2**31 - 1)), scale, feature_fn=fn)
+        projected.append(fn(completions).mean(axis=1))
     projected = np.concatenate(projected, axis=0)
     if mu_direct:
         mu_beta = fn(tilted_full_sample(mixture, beta_start, mu_samples, seed + 99, scale, feature_fn=fn)).mean(0)
@@ -243,13 +246,9 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
         mu_beta, _ = tilted_moments(beta_start, reference, scale, feature_fn=fn)
     U = np.sum(projected - mu_beta, axis=0)
     H = (H + H.T) / 2
-    step = np.linalg.solve(H + 1e-2 * np.eye(beta_start.shape[0]), U)
+    step = np.linalg.pinv(H, rcond=1e-10) @ U
     updated = np.asarray(beta_start) + step_size * step
     updated = np.clip(updated, -theta_bound, theta_bound)
-    if norm_cap is not None:
-        nrm = np.linalg.norm(updated)
-        if nrm > norm_cap:
-            updated = updated * (norm_cap / nrm)
     return updated
 
 
@@ -268,7 +267,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
     oracle_information = prepared["information"]
     designs = prepared["designs"]
     fn = feature_map if feature_fn is None else feature_fn
-    target_reference = sample_full(mixture, max(4000, budget * 2), seed + 2)
+    target_reference = ref_large
     target_full = tilted_full_sample(mixture, beta_true, budget, seed + 3, scale, feature_fn=fn)
     rows = []
     pilot_budget = int(np.ceil(10.0 * budget ** (1.0 / 3.0)))
@@ -326,7 +325,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
             main_cursor += count
         observations = pilot_observations + main_observations
         update_diagnostics = [{"step": "pilot", "pilot_budget": int(pilot_counts.sum()), "beta_norm": float(np.linalg.norm(beta_hat)), "rho_min": float(np.min(pilot_rho[pilot_rho > 0])) if np.any(pilot_rho > 0) else 0.0}]
-        norm_cap_val = theta_norm_cap if theta_norm_cap is not None else pilot_norm_cap * 1.25
+        norm_cap_val = None
         for update in range(scoring_steps):
             beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=1.0, norm_cap=norm_cap_val, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn)
             update_diagnostics.append({"step": update, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": int(pilot_counts.sum())})
