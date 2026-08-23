@@ -206,7 +206,13 @@ def tilted_conditional_batch(
     fixed_features = fn(full)[:, fixed] @ beta[fixed]
     envelope = fixed_features + np.sum(np.abs(beta[~fixed]))
     filled = np.zeros(len(rows), dtype=int)
+    rounds = 0
+    max_rounds = 20000
     while np.any(filled < n):
+        rounds += 1
+        if rounds > max_rounds:
+            acceptance = filled / max(rounds * proposal_n, 1)
+            raise RuntimeError(f"conditional exact tilt did not reach requested samples; acceptance={acceptance.tolist()}")
         need = np.maximum(n - filled, 0)
         proposal_n = int(max(64, min(2048, 4 * int(need.max()))))
         observed_rep = np.repeat(rows, proposal_n, axis=0)
