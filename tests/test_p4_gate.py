@@ -5,7 +5,11 @@ from rr_gid_cn.synthetic_oracle import all_pairs, make_frozen_mixture, reference
 def test_paired_gate_rows():
     mix = make_frozen_mixture()
     scale = reference_scale(mix, 200, 1)
-    panels = all_pairs()[:4]
+    # The PDF balanced pilot requires panels that cover the six direct
+    # feature supports (i, i+6).  The former all_pairs()[:4] toy contained
+    # none of those supports and drove the pilot HT moment to a degenerate
+    # zero vector, making exact tilt rejection an invalid test of the gate.
+    panels = tuple((i, i + 6) for i in range(6))
     prepared = prepare_s1_oracle(mix, scale, panels, seed=7, reference_size=500,
                                  information_samples=32, conditional_samples=8,
                                  large_reference_size=2000)
