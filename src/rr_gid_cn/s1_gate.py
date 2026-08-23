@@ -215,7 +215,7 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
 def final_rr_estimator(mixture, beta_start, observations, panels, reference, scale, lu, seed,
                        theta_bound=4.0, h_tilted=128, h_cond=32, step_size=1.0, norm_cap=None,
                        l1_cap=None, mu_samples=10000, mu_direct=False, oracle_information=None,
-                       feature_fn=None, max_step_norm=None):
+                       feature_fn=None, max_step_norm=None, return_diagnostics=False):
     """One Fisher-scoring update following PDF Algorithm 2 step 6.
 
     Re-estimates ``I_S(beta^(j))`` by cross-completion at the current beta, builds
@@ -269,7 +269,14 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
         l1_norm = float(np.abs(updated).sum())
         if l1_norm > float(l1_cap):
             updated = updated * (float(l1_cap) / l1_norm)
-    return updated
+    diagnostics = {
+        "lambda_min_H": float(np.linalg.eigvalsh(H).min()),
+        "lambda_max_H": float(np.linalg.eigvalsh(H).max()),
+        "score_norm": float(np.linalg.norm(U)),
+        "raw_step_norm": float(np.linalg.norm(step)),
+        "applied_step_norm": float(np.linalg.norm(updated - beta_start)),
+    }
+    return (updated, diagnostics) if return_diagnostics else updated
 
 
 def run_replication(mixture, scale, panels, budget, seed, prepared=None,
@@ -360,8 +367,8 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
         # was silently ignored, allowing overlap collapse in exact TiltCond.
         norm_cap_val = theta_norm_cap
         for update in range(scoring_steps):
-            beta_next = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=scoring_step_size, norm_cap=norm_cap_val, l1_cap=theta_l1_cap, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn, max_step_norm=scoring_max_step_norm)
-            update_diagnostics.append({"step": update, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": int(pilot_counts.sum())})
+            beta_next, step_diagnostics = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=scoring_step_size, norm_cap=norm_cap_val, l1_cap=theta_l1_cap, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn, max_step_norm=scoring_max_step_norm, return_diagnostics=True)
+            update_diagnostics.append({"step": update, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": int(pilot_counts.sum()), **step_diagnostics})
             beta_hat = beta_next
         kl = max(0.0, float((beta_true - beta_hat) @ mu_bt - log_partition(beta_true, target_reference, scale, feature_fn=fn) + log_partition(beta_hat, target_reference, scale, feature_fn=fn)))
         rows.append({"policy": name, "budget": budget, "allocated_observations": int(counts.sum() + pilot_counts.sum()), "pilot_budget": int(pilot_counts.sum()), "seed": seed, "beta_true_norm": float(np.linalg.norm(beta_true)), "beta_hat_norm": float(np.linalg.norm(beta_hat)), "kl": kl, "B_kl": budget * kl, "design_ratio": float(kl / max(rr_phi / (2 * budget), 1e-12)), "target_draw_seed": seed + 3, "beta_hat": beta_hat.tolist(), "update_diagnostics": update_diagnostics})

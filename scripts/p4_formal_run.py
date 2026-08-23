@@ -71,6 +71,7 @@ def main() -> None:
                   pilot_norm_cap=p4["pilot_norm_cap"], kl_samples=p4["kl_samples"],
                   scoring_steps=steps,
                   use_oracle_H=bool(p4.get("use_oracle_H", False)),
+                  kl_mu_direct=bool(p4.get("kl_mu_direct", False)),
                   theta_norm_cap=p4.get("theta_norm_cap"),
                   theta_l1_cap=p4.get("theta_l1_cap"),
                   scoring_step_size=p4.get("scoring_step_size", 1.0) if args.scoring_step_size is None else args.scoring_step_size,

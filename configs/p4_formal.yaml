@@ -23,9 +23,9 @@ p4:
   # PDF leaves finite Monte Carlo sizes open.  These values keep exact
   # conditional rejection computationally feasible for 3,000 formal rows;
   # replication-level CI absorbs the finite-MC noise.
-  lu: 32
-  h_tilted: 4
-  h_cond: 1
+  lu: 128
+  h_tilted: 256
+  h_cond: 8
   kl_samples: 2000
   theta_bound: 4.0
   # Compact Theta projection required by PDF Algorithm 2.  The radius is an
@@ -41,9 +41,14 @@ p4:
   # finite trust radius only limits pathological Monte Carlo directions.
   scoring_step_size: 1.0
   scoring_max_step_norm: null
-  # S1 is the PDF exact-oracle allocation gate; use exact oracle I_S for H
-  # while the observed score remains exact conditional rejection.
-  use_oracle_H: true
+  # PDF Algorithm 2 step 6 re-estimates I_S(beta^(j)) at every update.  The
+  # frozen beta* information is used only for the oracle allocation and its
+  # horizontal theory line, never as the update-stage Hessian.
+  use_oracle_H: false
+  # Evaluate KL as one internally consistent reference-pool Bregman
+  # divergence.  Mixing an independently sampled target mean with A_R creates
+  # a first-order Monte Carlo term and invalidates the B*KL convergence gate.
+  kl_mu_direct: false
   ridge: null
   large_reference_size: 200000
   fw_tolerance: 1.0e-6
