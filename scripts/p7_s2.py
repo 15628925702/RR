@@ -18,9 +18,10 @@ def phi(p, fisher, infos):
 
 def main() -> None:
     ckpt = torch.load("experiments/p6_vaeac_synthetic.pt", map_location="cuda", weights_only=False)
-    base_model = VAEAC(dim=16, latent=128, hidden=512, seed=0)
+    base_model = VAEAC(dim=16, latent=16, hidden=256, seed=0)
     base_model.load_state_dict(ckpt["model"])
-    base_model.z_std = ckpt["z_std"]
+    base_model.data_mean = ckpt["data_mean"]
+    base_model.data_std = ckpt["data_std"]
     rows = []
     for alpha in (0.0, 0.5, 1.0, 1.5):
         mix = make_frozen_mixture(seed=2026, alpha=alpha)
