@@ -13,8 +13,12 @@ def test_paired_gate_rows():
     prepared = prepare_s1_oracle(mix, scale, panels, seed=7, reference_size=500,
                                  information_samples=32, conditional_samples=8,
                                  large_reference_size=2000)
-    rows = run_replication(mix, scale, panels, 20, 2, prepared=prepared,
-                           lu=16, h_tilted=16, h_cond=8, kl_samples=500)
+    # This is a structural unit gate, not the PDF's formal budget sweep.  Keep
+    # enough pilot units for a stable bounded tilt and skip scoring updates;
+    # the formal runner separately executes B in {2000,...,32000}, J=2.
+    rows = run_replication(mix, scale, panels, 200, 2, prepared=prepared,
+                           lu=16, h_tilted=16, h_cond=8, kl_samples=500,
+                           scoring_steps=0)
     assert {row["policy"] for row in rows} == {"Uniform SQD", "A-OSQD", "oracle RR-GID"}
     assert all(row["budget"] * 0 <= row["B_kl"] for row in rows)
     assert all(row["allocated_observations"] == row["budget"] for row in rows)
