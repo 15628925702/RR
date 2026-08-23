@@ -1,0 +1,13 @@
+campaign,policy,proj_loss,mean_rmse,std_rmse,c2st_auc,ess
+batch7,Uniform SQD,-0.5270,0.2797,0.2288,1.0000,0.6114
+batch7,A-OSQD,-0.5270,0.2797,0.2288,1.0000,0.3109
+batch7,Discriminative Score OED,-0.5270,0.2797,0.2288,1.0000,0.6076
+batch7,RR-GID,-0.5270,0.2797,0.2288,1.0000,0.8500
+batches89,Uniform SQD,-0.4193,0.6485,0.6346,0.9996,0.9376
+batches89,A-OSQD,-0.4193,0.6485,0.6346,0.9996,0.6744
+batches89,Discriminative Score OED,-0.4193,0.6485,0.6346,0.9996,0.9309
+batches89,RR-GID,-0.4193,0.6485,0.6346,0.9996,0.9618
+batch10,Uniform SQD,-0.5445,0.3277,0.7558,1.0000,0.8289
+batch10,A-OSQD,-0.5445,0.3277,0.7558,1.0000,0.7670
+batch10,Discriminative Score OED,-0.5445,0.3277,0.7558,1.0000,0.8304
+batch10,RR-GID,-0.5445,0.3277,0.7558,1.0000,0.7367
