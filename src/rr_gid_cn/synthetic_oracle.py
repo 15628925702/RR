@@ -26,7 +26,8 @@ def _conditional_parameters(mixture: FrozenMixture, panel: tuple[int, ...]):
         sign, logdet = np.linalg.slogdet(sigma_ss)
         if sign <= 0:
             raise ValueError("mixture covariance is not positive definite")
-        params.append((mean[list(complement)], mean[list(panel)], inv_ss, gain, cond_cov, logdet))
+        chol = np.linalg.cholesky(cond_cov)
+        params.append((mean[list(complement)], mean[list(panel)], inv_ss, gain, cond_cov, chol, logdet))
     _CONDITIONAL_PARAMETER_CACHE[key] = (complement, tuple(params))
     return _CONDITIONAL_PARAMETER_CACHE[key]
 
@@ -146,7 +147,7 @@ def sample_conditional_batch(
     else:
         parameters = _parameters
     for k, (weight, mean, cov) in enumerate(zip(mixture.weights, mixture.means, mixture.covariances)):
-        _mean_c, mean_s, inv_ss, _gain, _cond_cov, logdet = parameters[k]
+        _mean_c, mean_s, inv_ss, _gain, _cond_cov, _chol, logdet = parameters[k]
         delta = z_s - mean[list(panel)]
         log_probs[:, k] = np.log(weight) - 0.5 * (
             len(panel) * np.log(2 * np.pi) + logdet + np.einsum("ni,ij,nj->n", delta, inv_ss, delta)
@@ -157,11 +158,11 @@ def sample_conditional_batch(
     components = (uniforms[:, :, None] > np.cumsum(probs, axis=1)[:, None, :]).sum(axis=2)
     z = np.empty((rows, n, mixture.dimension))
     z[:, :, list(panel)] = z_s[:, None, :]
-    for k, (mean_c, mean_s, _inv_ss, gain, cond_cov, _logdet) in enumerate(parameters):
+    for k, (mean_c, mean_s, _inv_ss, gain, _cond_cov, chol, _logdet) in enumerate(parameters):
         row_idx, sample_idx = np.nonzero(components == k)
         if row_idx.size:
             conditional_mean = mean_c + (z_s[row_idx] - mean_s) @ gain.T
-            draws = rng.multivariate_normal(np.zeros(len(complement)), cond_cov, size=row_idx.size) + conditional_mean
+            draws = rng.standard_normal((row_idx.size, len(complement))) @ chol.T + conditional_mean
             for j, coordinate in enumerate(complement):
                 z[row_idx, sample_idx, coordinate] = draws[:, j]
     return warp(z, mixture.alpha)
