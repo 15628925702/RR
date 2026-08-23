@@ -208,6 +208,10 @@ def tilted_conditional_batch(
     filled = np.zeros(len(rows), dtype=int)
     rounds = 0
     attempted = 0
+    batch_floor = int(max(8, 2 * n))
+    # Bound temporary proposal memory when many rows are active.  The cap is
+    # on the whole call (roughly 32 MiB at float64, dimension 16), not per row.
+    max_batch_total = 262_144
     max_rounds = 20000
     while np.any(filled < n):
         rounds += 1
@@ -228,7 +232,9 @@ def tilted_conditional_batch(
         # parameter/setup overhead.  A modest batch size is sufficient because
         # the envelope acceptance is typically 0.2--0.4; rows are retried until
         # their requested count is filled, so this does not alter the law.
-        proposal_n = int(max(8, min(2048, 2 * int(need.max()))))
+        per_row_cap = max(8, max_batch_total // max(len(active), 1))
+        target_batch = max(batch_floor, 2 * int(need.max()))
+        proposal_n = int(max(8, min(per_row_cap, 65536, target_batch)))
         proposals = sample_conditional_batch(
             mixture, rows[active], panel, proposal_n, int(rng.integers(2**31 - 1))
         )
@@ -236,6 +242,15 @@ def tilted_conditional_batch(
         feats = fn(proposals.reshape(-1, mixture.dimension)).reshape(len(active), proposal_n, -1)
         logits = np.einsum("abr,r->ab", feats, beta)
         keep = rng.random((len(active), proposal_n)) < np.exp(logits - envelope[active, None])
+        accepted_round = int(keep.sum())
+        # Low-overlap rows need fewer Python/NumPy setup passes, while ordinary
+        # rows should retain small allocations.  Only the proposal batch size
+        # changes; every proposal is still drawn from Q0 and accepted with the
+        # exact bounded likelihood ratio.
+        if accepted_round == 0 or accepted_round / max(len(active) * proposal_n, 1) < 0.01:
+            batch_floor = min(65536, batch_floor * 2)
+        elif accepted_round / max(len(active) * proposal_n, 1) > 0.5:
+            batch_floor = max(8, batch_floor // 2)
         for local, row_id in enumerate(active):
             selected = proposals[local][keep[local]]
             take = min(len(selected), n - filled[row_id])
