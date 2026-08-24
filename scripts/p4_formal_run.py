@@ -57,6 +57,15 @@ def main() -> None:
     if prepared_path.exists():
         with prepared_path.open("rb") as stream:
             prepared = pickle.load(stream)
+        # Formal P4 must use the PDF reference train/large pools.  Diagnostic
+        # artifacts intentionally use tiny pools and must never enter JSONL.
+        ref_n = int(len(prepared.get("reference", [])))
+        large_n = int(len(prepared.get("reference_large", [])))
+        if ref_n < 50000 or large_n < int(p4["large_reference_size"]):
+            raise ValueError(
+                f"prepared artifact is diagnostic-sized (reference={ref_n}, "
+                f"reference_large={large_n}); formal P4 requires 50000/{p4['large_reference_size']}"
+            )
         if "reference_large" not in prepared:
             prepared["reference_large"] = sample_full(mixture, p4["large_reference_size"], 2026 + 12345)
             with prepared_path.open("wb") as stream:
