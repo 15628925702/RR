@@ -25,6 +25,17 @@ def _budget_mc_size(base: int, spec, budget: int) -> int:
     return max(int(base), int(math.ceil(scale * float(budget) ** exponent)))
 
 
+def _budget_qmc_order(base: int, spec, budget: int) -> int:
+    """Grow conditional-QMC resolution with LU/B for the exact-score route."""
+    if spec is None:
+        return int(base)
+    if isinstance(spec, (int, float)):
+        return max(int(base), int(spec))
+    anchor = float(spec.get("anchor_budget", 8000.0))
+    slope = float(spec.get("log2_slope", 1.0))
+    return max(int(base), int(math.ceil(float(base) + slope * math.log2(max(float(budget), 1.0) / anchor))))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--budget", type=int, default=None)
@@ -134,9 +145,14 @@ def main() -> None:
                     run_kwargs["h_cond"] = _budget_mc_size(
                         p4["h_cond"], p4.get("h_cond_growth"), budget
                     )
+                if args.qmc_order is None:
+                    run_kwargs["qmc_order"] = _budget_qmc_order(
+                        p4.get("qmc_order", 10), p4.get("qmc_order_growth"), budget
+                    )
                 rows = run_replication(mixture, scale, panels, budget, seed, prepared=prepared, **run_kwargs)
                 for row in rows:
                     row["replication"] = replication
+                    row["qmc_order"] = int(run_kwargs["qmc_order"])
                     if (replication, row["policy"]) not in done[budget]:
                         stream.write(json.dumps(row, sort_keys=True) + "\n")
                         done[budget].add((replication, row["policy"]))

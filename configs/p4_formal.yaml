@@ -26,6 +26,9 @@ p4:
   lu_scale: 1.0
   conditional_method: qmc
   qmc_order: 10
+  # Conditional-score QMC resolution grows with LU/B; diagnostic probes showed
+  # fixed order 10 is insufficient at B=32000.
+  qmc_order_growth: {anchor_budget: 8000, log2_slope: 1.0}
   h_tilted: 256
   h_cond: 8
   h_tilted_growth: {scale: 8.0, exponent: 0.5}
