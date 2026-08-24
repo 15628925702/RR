@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import pickle
 import argparse
+import math
 
 import yaml
 
@@ -20,7 +21,7 @@ def main() -> None:
     ap.add_argument("--max-replications", type=int, default=None, help="limit replications per budget (for smoke runs)")
     ap.add_argument("--scoring-steps", type=int, default=None, help="J Fisher-scoring steps (default from config, 2; J ablation passes 0/1/2 explicitly)")
     ap.add_argument("--rep-range", type=int, nargs=2, default=None, help="[start, end) replication range for sharding a budget across processes")
-    ap.add_argument("--prepared", type=Path, default=Path("experiments/p4_prepared_oracle_fix1.pkl"))
+    ap.add_argument("--prepared", type=Path, default=Path("experiments/p4_prepared_oracle.pkl"))
     ap.add_argument("--out-prefix", default="p4_exact_fix1")
     ap.add_argument("--reference-size", type=int, default=50000)
     ap.add_argument("--large-reference-size", type=int, default=None)
@@ -31,10 +32,15 @@ def main() -> None:
     ap.add_argument("--h-tilted", type=int, default=None, help="override update-stage tilted samples")
     ap.add_argument("--h-cond", type=int, default=None, help="override cross-completion samples")
     ap.add_argument("--kl-samples", type=int, default=None, help="override KL diagnostic samples")
+    ap.add_argument("--diagnostic", action="store_true", help="allow fixed MC overrides; output is not formal")
     args = ap.parse_args()
     with args.config.open(encoding="utf-8") as stream:
         cfg = yaml.safe_load(stream)
     p4 = cfg["p4"]
+    if not args.diagnostic and not bool(p4.get("exact_observed_score", False)):
+        raise ValueError("formal P4 requires exact_observed_score=true")
+    if not args.diagnostic and args.lu is not None:
+        raise ValueError("formal P4 cannot use fixed --lu; use budget-derived L_U(B)")
     budgets = (args.budget,) if args.budget is not None else tuple(p4["budgets"])
     replications = args.max_replications or int(p4["replications"])
     steps = int(p4["scoring_steps"]) if args.scoring_steps is None else args.scoring_steps
@@ -80,7 +86,9 @@ def main() -> None:
         )
         with prepared_path.open("wb") as stream:
             pickle.dump(prepared, stream, protocol=5)
-    kwargs = dict(lu=p4["lu"] if args.lu is None else args.lu,
+    # For the formal S1 route L_U grows with B, as required by the PDF.  A
+    # fixed LU is permitted only for explicitly diagnostic runs.
+    kwargs = dict(lu=(args.lu if args.lu is not None else None),
                   h_tilted=p4["h_tilted"] if args.h_tilted is None else args.h_tilted,
                   h_cond=p4["h_cond"] if args.h_cond is None else args.h_cond,
                   kl_samples=p4["kl_samples"] if args.kl_samples is None else args.kl_samples,
@@ -100,7 +108,10 @@ def main() -> None:
                 if all((replication, pol) in done[budget] for pol in ("Uniform SQD", "A-OSQD", "oracle RR-GID")):
                     continue
                 seed = 202600000 + budget * 1000 + replication
-                rows = run_replication(mixture, scale, panels, budget, seed, prepared=prepared, **kwargs)
+                run_kwargs = dict(kwargs)
+                if run_kwargs["lu"] is None:
+                    run_kwargs["lu"] = int(math.ceil(float(p4.get("lu_scale", 1.0)) * budget))
+                rows = run_replication(mixture, scale, panels, budget, seed, prepared=prepared, **run_kwargs)
                 for row in rows:
                     row["replication"] = replication
                     if (replication, row["policy"]) not in done[budget]:

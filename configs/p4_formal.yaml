@@ -20,10 +20,10 @@ p4:
   # These are internal Monte Carlo sizes (PDF Sec. 9.1 lists them as open), chosen
   # so that the S1 exact-conditional-oracle gate is numerically stable.
   pilot_norm_cap: null
-  # PDF leaves finite Monte Carlo sizes open.  These values keep exact
-  # conditional rejection computationally feasible for 3,000 formal rows;
-  # replication-level CI absorbs the finite-MC noise.
-  lu: 128
+  # PDF S1 requires exact observed scores, or L_U,B -> infinity.  The formal
+  # runner therefore derives L_U(B)=B; fixed --lu is diagnostic-only.
+  exact_observed_score: true
+  lu_scale: 1.0
   h_tilted: 256
   h_cond: 8
   kl_samples: 2000
