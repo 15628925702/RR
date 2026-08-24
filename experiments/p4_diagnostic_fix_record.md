@@ -26,3 +26,15 @@ Conclusion: P4 is not accepted. Do not resume 200-replication budgets until a
 PDF-compliant estimator change is tested on small fixed-seed diagnostics and
 shows stable `B*KL` behavior. Diagnostic outputs remain under `results/` with
 diagnostic names and are excluded from formal summaries.
+
+## Exact-score enforcement update
+
+The formal runner now rejects fixed `--lu` overrides and derives
+`L_U(B)=ceil(lu_scale * B)` from `configs/p4_formal.yaml`. This implements the
+PDF alternative `L_{U,B}->infinity`; fixed-LU runs require `--diagnostic` and
+cannot be treated as S1. The formal default prepared artifact is the
+50,000/200,000 reference-pool artifact, and tiny debug artifacts are rejected.
+
+A B=100 single-policy probe with `L_U` in `{25,50,100}` completed, confirming
+the budget-growing path runs, but it is not a convergence gate. No formal
+replications were started after this change.
