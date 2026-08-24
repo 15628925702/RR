@@ -221,8 +221,21 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
     for panel in panels:
         observed = tilted[:, list(panel)]
         if conditional_method == "qmc":
-            a = tilted_conditional_mean_qmc(mixture, beta, observed, panel, qmc_order, seed=seed + 1, scale=scale, feature_fn=fn) - mu
-            b = tilted_conditional_mean_qmc(mixture, beta, observed, panel, qmc_order, seed=seed + 2, scale=scale, feature_fn=fn) - mu
+            # Chunk rows to keep the (rows x 2**order x d) QMC tensor bounded
+            # at formal budgets.  The chunks use disjoint deterministic seeds
+            # and are concatenated exactly as one cross-completion sample.
+            chunks_a, chunks_b = [], []
+            chunk_rows = 32
+            for start in range(0, len(observed), chunk_rows):
+                stop = min(start + chunk_rows, len(observed))
+                chunks_a.append(tilted_conditional_mean_qmc(
+                    mixture, beta, observed[start:stop], panel, qmc_order,
+                    seed=seed + 1 + start, scale=scale, feature_fn=fn))
+                chunks_b.append(tilted_conditional_mean_qmc(
+                    mixture, beta, observed[start:stop], panel, qmc_order,
+                    seed=seed + 2 + start, scale=scale, feature_fn=fn))
+            a = np.concatenate(chunks_a, axis=0) - mu
+            b = np.concatenate(chunks_b, axis=0) - mu
         else:
             ca = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 1, scale, feature_fn=fn)
             cb = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 2, scale, feature_fn=fn)
