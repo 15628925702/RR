@@ -14,6 +14,17 @@ from rr_gid_cn.s1_gate import prepare_s1_oracle, run_replication
 from rr_gid_cn.synthetic_oracle import all_pairs, make_frozen_mixture, reference_scale, sample_full
 
 
+def _budget_mc_size(base: int, spec, budget: int) -> int:
+    """Return a budget-growing MC size for Algorithm 2 information updates."""
+    if spec is None:
+        return int(base)
+    if isinstance(spec, (int, float)):
+        return max(int(base), int(math.ceil(float(spec))))
+    scale = float(spec.get("scale", 0.0))
+    exponent = float(spec.get("exponent", 0.5))
+    return max(int(base), int(math.ceil(scale * float(budget) ** exponent)))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--budget", type=int, default=None)
@@ -79,7 +90,7 @@ def main() -> None:
     else:
         prepared = prepare_s1_oracle(
             mixture, scale, panels, seed=2026,
-            reference_size=args.reference_size,
+            reference_size=int(p4.get("reference_size", args.reference_size)),
             information_samples=args.info_tilted or p4["information_tilted_samples"],
             conditional_samples=args.info_cond or p4["information_conditional_samples"],
             large_reference_size=args.large_reference_size or p4["large_reference_size"],
@@ -111,6 +122,14 @@ def main() -> None:
                 run_kwargs = dict(kwargs)
                 if run_kwargs["lu"] is None:
                     run_kwargs["lu"] = int(math.ceil(float(p4.get("lu_scale", 1.0)) * budget))
+                if args.h_tilted is None:
+                    run_kwargs["h_tilted"] = _budget_mc_size(
+                        p4["h_tilted"], p4.get("h_tilted_growth"), budget
+                    )
+                if args.h_cond is None:
+                    run_kwargs["h_cond"] = _budget_mc_size(
+                        p4["h_cond"], p4.get("h_cond_growth"), budget
+                    )
                 rows = run_replication(mixture, scale, panels, budget, seed, prepared=prepared, **run_kwargs)
                 for row in rows:
                     row["replication"] = replication
