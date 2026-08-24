@@ -29,10 +29,12 @@ p4:
   # Conditional-score QMC resolution grows with LU/B; diagnostic probes showed
   # fixed order 10 is insufficient at B=32000.
   qmc_order_growth: {anchor_budget: 8000, log2_slope: 1.0}
-  h_tilted: 256
-  h_cond: 8
-  h_tilted_growth: {scale: 8.0, exponent: 0.5}
-  h_cond_growth: {scale: 2.0, exponent: 0.25}
+  # Frozen after B=2000 paired repair: lower H caused a 25% B.KL bias.
+  # These growth rules keep the conditional-information error decreasing.
+  h_tilted: 4096
+  h_cond: 128
+  h_tilted_growth: {scale: 91.5, exponent: 0.5}
+  h_cond_growth: {scale: 26.9, exponent: 0.25}
   kl_samples: 2000
   theta_bound: 4.0
   # Compact Theta projection required by PDF Algorithm 2.  The radius is an
