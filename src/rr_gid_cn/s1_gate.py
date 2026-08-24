@@ -230,10 +230,10 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
                 stop = min(start + chunk_rows, len(observed))
                 chunks_a.append(tilted_conditional_mean_qmc(
                     mixture, beta, observed[start:stop], panel, qmc_order,
-                    seed=seed + 1 + start, scale=scale, feature_fn=fn))
+                    seed=seed + 1 + start, scale=scale, feature_fn=feature_fn))
                 chunks_b.append(tilted_conditional_mean_qmc(
                     mixture, beta, observed[start:stop], panel, qmc_order,
-                    seed=seed + 2 + start, scale=scale, feature_fn=fn))
+                    seed=seed + 2 + start, scale=scale, feature_fn=feature_fn))
             a = np.concatenate(chunks_a, axis=0) - mu
             b = np.concatenate(chunks_b, axis=0) - mu
         else:
@@ -290,7 +290,7 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
     if oracle_information is None:
         active_infos = active_panel_information_cross(
             mixture, beta_start, active_panels, reference, scale,
-            h_tilted, h_cond, seed + 7, feature_fn=fn, conditional_method=conditional_method, qmc_order=qmc_order,
+            h_tilted, h_cond, seed + 7, feature_fn=feature_fn, conditional_method=conditional_method, qmc_order=qmc_order,
         )
     else:
         active_infos = {panel: oracle_information[panels.index(panel)] for panel in active_panels}
@@ -304,7 +304,7 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
         if conditional_method == "qmc":
             projected.append(tilted_conditional_mean_qmc(
                 mixture, beta_start, np.asarray(rows), panel, qmc_order,
-                seed=int(rng.integers(2**31 - 1)), scale=scale, feature_fn=fn,
+                seed=int(rng.integers(2**31 - 1)), scale=scale, feature_fn=feature_fn,
             ))
         else:
             completions = tilted_conditional_batch(mixture, beta_start, np.asarray(rows), panel, lu,
