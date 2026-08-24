@@ -32,7 +32,7 @@ def main() -> None:
     ap.add_argument("--max-replications", type=int, default=None, help="limit replications per budget (for smoke runs)")
     ap.add_argument("--scoring-steps", type=int, default=None, help="J Fisher-scoring steps (default from config, 2; J ablation passes 0/1/2 explicitly)")
     ap.add_argument("--rep-range", type=int, nargs=2, default=None, help="[start, end) replication range for sharding a budget across processes")
-    ap.add_argument("--prepared", type=Path, default=Path("experiments/p4_prepared_oracle.pkl"))
+    ap.add_argument("--prepared", type=Path, default=Path("experiments/p4_prepared_oracle_hp.pkl"))
     ap.add_argument("--out-prefix", default="p4_exact_fix1")
     ap.add_argument("--reference-size", type=int, default=50000)
     ap.add_argument("--large-reference-size", type=int, default=None)
@@ -42,6 +42,8 @@ def main() -> None:
     ap.add_argument("--lu", type=int, default=None, help="override update-stage conditional completions")
     ap.add_argument("--h-tilted", type=int, default=None, help="override update-stage tilted samples")
     ap.add_argument("--h-cond", type=int, default=None, help="override cross-completion samples")
+    ap.add_argument("--conditional-method", choices=("rejection", "qmc"), default=None)
+    ap.add_argument("--qmc-order", type=int, default=None)
     ap.add_argument("--kl-samples", type=int, default=None, help="override KL diagnostic samples")
     ap.add_argument("--diagnostic", action="store_true", help="allow fixed MC overrides; output is not formal")
     args = ap.parse_args()
@@ -110,7 +112,9 @@ def main() -> None:
                   theta_norm_cap=p4.get("theta_norm_cap"),
                   theta_l1_cap=p4.get("theta_l1_cap"),
                   scoring_step_size=p4.get("scoring_step_size", 1.0) if args.scoring_step_size is None else args.scoring_step_size,
-                  scoring_max_step_norm=p4.get("scoring_max_step_norm"))
+                  scoring_max_step_norm=p4.get("scoring_max_step_norm"),
+                  conditional_method=p4.get("conditional_method", "rejection") if args.conditional_method is None else args.conditional_method,
+                  qmc_order=int(p4.get("qmc_order", 10) if args.qmc_order is None else args.qmc_order))
     for budget in budgets:
         fp = out / f"{args.out_prefix}_{budget}{suffix}.jsonl"
         with fp.open("a", encoding="utf-8") as stream:

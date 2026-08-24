@@ -6,7 +6,7 @@ import numpy as np
 
 from .policies import frank_wolfe, uniform_probabilities
 from .discriminative import MaskedScoreMLP, masked_input, masked_pool, score_information
-from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, log_partition, sample_conditional, sample_conditional_batch, sample_full, tilted_conditional_sample, tilted_conditional_batch, tilted_full_sample, tilted_moments, tilted_sample_from_reference
+from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, log_partition, sample_conditional, sample_conditional_batch, sample_full, tilted_conditional_sample, tilted_conditional_batch, tilted_conditional_mean_qmc, tilted_full_sample, tilted_moments, tilted_sample_from_reference
 
 
 def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilted=256, n_conditional=64, seed=0,
@@ -254,7 +254,8 @@ def active_panel_information_cross(mixture, beta, active_panels, reference, scal
 def final_rr_estimator(mixture, beta_start, observations, panels, reference, scale, lu, seed,
                        theta_bound=4.0, h_tilted=128, h_cond=32, step_size=1.0, norm_cap=None,
                        l1_cap=None, mu_samples=10000, mu_direct=False, oracle_information=None,
-                       feature_fn=None, max_step_norm=None, return_diagnostics=False):
+                       feature_fn=None, max_step_norm=None, return_diagnostics=False,
+                       conditional_method="rejection", qmc_order=10):
     """One Fisher-scoring update following PDF Algorithm 2 step 6.
 
     Re-estimates ``I_S(beta^(j))`` by cross-completion at the current beta, builds
@@ -283,9 +284,15 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
         # S1 uses the exact conditional oracle for the observed score. The
         # finite-LU importance proposal is reserved for learned-generator
         # experiments, not the oracle gate.
-        completions = tilted_conditional_batch(mixture, beta_start, np.asarray(rows), panel, lu,
-                                                int(rng.integers(2**31 - 1)), scale, feature_fn=fn)
-        projected.append(fn(completions).mean(axis=1))
+        if conditional_method == "qmc":
+            projected.append(tilted_conditional_mean_qmc(
+                mixture, beta_start, np.asarray(rows), panel, qmc_order,
+                seed=int(rng.integers(2**31 - 1)), scale=scale, feature_fn=fn,
+            ))
+        else:
+            completions = tilted_conditional_batch(mixture, beta_start, np.asarray(rows), panel, lu,
+                                                    int(rng.integers(2**31 - 1)), scale, feature_fn=fn)
+            projected.append(fn(completions).mean(axis=1))
     projected = np.concatenate(projected, axis=0)
     if mu_direct:
         mu_beta = fn(tilted_full_sample(mixture, beta_start, mu_samples, seed + 99, scale, feature_fn=fn)).mean(0)
@@ -332,7 +339,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
                     mlp_hidden=64, mlp_steps=200, generator=None,
                     gen_info_tilted=256, gen_info_cond=32, disc_reference_size=None,
                     feature_fn=None, scoring_step_size=1.0, theta_l1_cap=None,
-                    scoring_max_step_norm=None):
+                    scoring_max_step_norm=None, conditional_method="rejection", qmc_order=10):
     prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed, feature_fn=feature_fn)
     reference = prepared["reference"]
     ref_large = prepared["reference_large"]
@@ -422,7 +429,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
         # was silently ignored, allowing overlap collapse in exact TiltCond.
         norm_cap_val = theta_norm_cap
         for update in range(scoring_steps):
-            beta_next, step_diagnostics = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=scoring_step_size, norm_cap=norm_cap_val, l1_cap=theta_l1_cap, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn, max_step_norm=scoring_max_step_norm, return_diagnostics=True)
+            beta_next, step_diagnostics = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=scoring_step_size, norm_cap=norm_cap_val, l1_cap=theta_l1_cap, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn, max_step_norm=scoring_max_step_norm, return_diagnostics=True, conditional_method=conditional_method, qmc_order=qmc_order)
             update_diagnostics.append({"step": update, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": int(pilot_counts.sum()), **step_diagnostics})
             beta_hat = beta_next
         # Keep the untruncated plug-in Bregman value for the numerical gate.

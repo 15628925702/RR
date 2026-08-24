@@ -7,7 +7,7 @@ name = "rr-gid-cn"
 version = "0.1.0"
 description = "Reference-Relative Generative Information Design"
 requires-python = ">=3.12,<3.13"
-dependencies = ["PyYAML>=6.0"]
+dependencies = ["PyYAML>=6.0", "scipy>=1.14"]
 
 [project.scripts]
 rr-gid-cn = "rr_gid_cn.cli:main"

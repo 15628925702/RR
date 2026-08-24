@@ -57,3 +57,13 @@ the raw fields and may not silently treat clipping as a proof.
 
 Until these three checks pass with the required paired CI, P4 formal
 replications and all dependent P5-P12 stages remain blocked.
+
+## Repair probe (not formal acceptance)
+
+The repaired path now supports SciPy Sobol QMC conditional integration, a
+high-precision prepared artifact, and budget-growing H sizes. Single paired
+oracle probes gave raw `B*KL` 30.60 at B=200 and 30.57 at B=400 (theory
+31.8685), with design ratios 0.943 and 0.942. These are diagnostic evidence
+that the correction is directionally effective, not a formal pass: B=800
+multi-seed replication and the required CI/PSD/operator checks remain to be
+completed.

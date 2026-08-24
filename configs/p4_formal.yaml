@@ -24,6 +24,8 @@ p4:
   # runner therefore derives L_U(B)=B; fixed --lu is diagnostic-only.
   exact_observed_score: true
   lu_scale: 1.0
+  conditional_method: qmc
+  qmc_order: 8
   h_tilted: 256
   h_cond: 8
   h_tilted_growth: {scale: 16.0, exponent: 0.5}

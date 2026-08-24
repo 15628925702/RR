@@ -7,6 +7,12 @@ from itertools import combinations
 from pathlib import Path
 
 import numpy as np
+try:
+    from scipy.special import ndtri
+    from scipy.stats import qmc
+except Exception:  # pragma: no cover - fallback is retained for minimal installs
+    ndtri = None
+    qmc = None
 
 _CONDITIONAL_PARAMETER_CACHE = {}
 
@@ -281,6 +287,102 @@ def tilted_conditional_batch(
             if take:
                 out[row_id, filled[row_id]:filled[row_id] + take] = selected[:take]
                 filled[row_id] += take
+    return out
+
+
+_HALTON_PRIMES = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53)
+
+
+def _halton_normals(n: int, dimension: int, skip: int = 0) -> np.ndarray:
+    """Deterministic nested low-discrepancy standard normals (no SciPy)."""
+    if dimension == 0:
+        return np.empty((n, 0))
+    # Box-Muller consumes pairs of radical-inverse coordinates.  The extra
+    # coordinate is harmless for odd complement dimensions and preserves the
+    # same prefix when n doubles, which is required for order diagnostics.
+    need = 2 * ((dimension + 1) // 2)
+    u = np.empty((n, need), dtype=float)
+    idx = np.arange(skip + 1, skip + n + 1, dtype=np.int64)
+    for j in range(need):
+        base = _HALTON_PRIMES[j]
+        value = idx.copy()
+        radical = np.zeros(n, dtype=float)
+        inv = 1.0 / base
+        while np.any(value):
+            value, digit = divmod(value, base)
+            radical += digit * inv
+            inv /= base
+        u[:, j] = np.clip(radical, 1e-12, 1.0 - 1e-12)
+    z = np.empty((n, dimension), dtype=float)
+    for j in range(0, dimension, 2):
+        radius = np.sqrt(-2.0 * np.log(u[:, j]))
+        z[:, j] = radius * np.cos(2.0 * np.pi * u[:, j + 1])
+        if j + 1 < dimension:
+            z[:, j + 1] = radius * np.sin(2.0 * np.pi * u[:, j + 1])
+    return z
+
+
+def _nested_qmc_normals(n: int, dimension: int, seed: int = 0) -> np.ndarray:
+    """Sobol normal net with a deterministic Halton fallback."""
+    if qmc is None or ndtri is None:
+        return _halton_normals(n, dimension, skip=seed)
+    if dimension == 0:
+        return np.empty((n, 0))
+    if n & (n - 1):
+        raise ValueError("nested Sobol sample size must be a power of two")
+    engine = qmc.Sobol(d=dimension, scramble=True, seed=int(seed))
+    uniforms = np.clip(engine.random_base2(int(np.log2(n))), 1e-12, 1.0 - 1e-12)
+    return ndtri(uniforms)
+
+
+def tilted_conditional_mean_qmc(
+    mixture: FrozenMixture,
+    beta: np.ndarray,
+    x_s: np.ndarray,
+    panel: tuple[int, ...],
+    order: int,
+    seed: int = 0,
+    scale: np.ndarray | None = None,
+    feature_fn=None,
+) -> np.ndarray:
+    """Nested QMC approximation to E_{Q_beta}[phi(X)|X_S=x_s].
+
+    The complete tilted integrand is evaluated at every conditional Gaussian
+    point: all unary and pairwise features remain coupled through
+    ``exp(beta @ phi)``.  This is a diagnostic alternative to rejection LU;
+    order ``k`` uses ``2**k`` points and shares its prefix with order ``k+1``.
+    """
+    if order < 4 or order > 18:
+        raise ValueError("QMC order must be in [4, 18]")
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
+    panel = tuple(panel)
+    rows = np.atleast_2d(np.asarray(x_s, dtype=float))
+    complement = tuple(i for i in range(mixture.dimension) if i not in panel)
+    n = 1 << int(order)
+    z_s = inverse_warp(rows, mixture.alpha)
+    posterior = np.asarray([conditional_component_posterior(mixture, row, panel) for row in rows])
+    parameters = _conditional_parameters(mixture, panel)[1]
+    # Vectorize all observed rows for one component.  This changes only the
+    # evaluation order, not the QMC nodes or the mixture-weighted ratio, and
+    # avoids a Python loop over every acquired observation at formal budgets.
+    normals = _nested_qmc_normals(n, len(complement), seed=int(seed))
+    all_phi, all_logw = [], []
+    for mean_c, mean_s, _inv_ss, gain, _cond_cov, chol, _logdet in parameters:
+        z = np.empty((len(rows), n, mixture.dimension), dtype=float)
+        z[:, :, list(panel)] = z_s[:, None, :]
+        cond_mean = mean_c[None, :] + (z_s - mean_s) @ gain.T
+        z[:, :, list(complement)] = cond_mean[:, None, :] + normals[None, :, :] @ chol.T
+        phi = fn(warp(z.reshape(-1, mixture.dimension), mixture.alpha)).reshape(len(rows), n, -1)
+        all_phi.append(phi)
+        all_logw.append(np.einsum("nkr,r->nk", phi, np.asarray(beta)))
+    shift = np.maximum.reduce([np.max(v, axis=1) for v in all_logw])
+    numer = np.zeros((len(rows), beta.shape[0]), dtype=float)
+    denom = np.zeros(len(rows), dtype=float)
+    for phi, logw, prob in zip(all_phi, all_logw, posterior.T):
+        w = prob[:, None] * np.exp(logw - shift[:, None])
+        denom += w.mean(axis=1)
+        numer += np.einsum("nk,nkr->nr", w, phi) / n
+    out = numer / np.maximum(denom[:, None], 1e-300)
     return out
 
 
