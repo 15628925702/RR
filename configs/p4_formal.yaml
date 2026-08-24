@@ -25,10 +25,10 @@ p4:
   exact_observed_score: true
   lu_scale: 1.0
   conditional_method: qmc
-  qmc_order: 10
+  qmc_order: 12
   # Conditional-score QMC resolution grows with LU/B; diagnostic probes showed
   # fixed order 10 is insufficient at B=32000.
-  qmc_order_growth: {anchor_budget: 8000, log2_slope: 1.0}
+  qmc_order_growth: {anchor_budget: 8000, log2_slope: 0.5}
   # Frozen after B=2000 paired repair: lower H caused a 25% B.KL bias.
   # These growth rules keep the conditional-information error decreasing.
   h_tilted: 4096
