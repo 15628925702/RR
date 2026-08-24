@@ -67,3 +67,7 @@ oracle probes gave raw `B*KL` 30.60 at B=200 and 30.57 at B=400 (theory
 that the correction is directionally effective, not a formal pass: B=800
 multi-seed replication and the required CI/PSD/operator checks remain to be
 completed.
+
+The QMC order check at B=2000 for one fixed seed gave raw `B*KL=57.97` at
+order 8 and `37.69` at order 10. The repaired formal candidate therefore
+freezes order 10; order 8 is retained only as a lower-order diagnostic.

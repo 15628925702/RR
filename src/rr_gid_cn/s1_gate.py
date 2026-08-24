@@ -200,7 +200,7 @@ def imp_conditional_mean(mixture, beta, batch, panel, n, seed, scale, feature_fn
     return np.einsum("onr,on->or", phi, w) / w.sum(axis=1, keepdims=True)
 
 
-def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n_cond, seed, feature_fn=None):
+def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n_cond, seed, feature_fn=None, conditional_method="rejection", qmc_order=8):
     """Cross-completion panel information estimator (PDF Eq. 9) with PSD projection.
 
     Uses importance-weighted conditional completions (not accept-reject), so it is
@@ -220,10 +220,14 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
     infos = []
     for panel in panels:
         observed = tilted[:, list(panel)]
-        ca = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 1, scale, feature_fn=fn)
-        cb = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 2, scale, feature_fn=fn)
-        a = fn(ca).mean(axis=1) - mu
-        b = fn(cb).mean(axis=1) - mu
+        if conditional_method == "qmc":
+            a = tilted_conditional_mean_qmc(mixture, beta, observed, panel, qmc_order, seed=seed + 1, scale=scale, feature_fn=fn) - mu
+            b = tilted_conditional_mean_qmc(mixture, beta, observed, panel, qmc_order, seed=seed + 2, scale=scale, feature_fn=fn) - mu
+        else:
+            ca = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 1, scale, feature_fn=fn)
+            cb = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 2, scale, feature_fn=fn)
+            a = fn(ca).mean(axis=1) - mu
+            b = fn(cb).mean(axis=1) - mu
         a = a - a.mean(0)
         b = b - b.mean(0)
         info_hat = (a.T @ b + b.T @ a) / max(2 * (len(a) - 1), 1)
@@ -233,7 +237,7 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
 
 
 def active_panel_information_cross(mixture, beta, active_panels, reference, scale,
-                                   n_tilted, n_cond, seed, feature_fn=None):
+                                   n_tilted, n_cond, seed, feature_fn=None, conditional_method="rejection", qmc_order=8):
     """Estimate current-step information only for panels present in ``D_B``.
 
     Algorithm 2 step 6 requires re-estimation for every *active* panel.  The
@@ -246,7 +250,7 @@ def active_panel_information_cross(mixture, beta, active_panels, reference, scal
         return {}
     estimates = panel_information_cross(
         mixture, beta, tuple(active_panels), reference, scale,
-        n_tilted, n_cond, seed, feature_fn=feature_fn,
+        n_tilted, n_cond, seed, feature_fn=feature_fn, conditional_method=conditional_method, qmc_order=qmc_order,
     )
     return dict(zip(active_panels, estimates))
 
@@ -273,7 +277,7 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
     if oracle_information is None:
         active_infos = active_panel_information_cross(
             mixture, beta_start, active_panels, reference, scale,
-            h_tilted, h_cond, seed + 7, feature_fn=fn,
+            h_tilted, h_cond, seed + 7, feature_fn=fn, conditional_method=conditional_method, qmc_order=qmc_order,
         )
     else:
         active_infos = {panel: oracle_information[panels.index(panel)] for panel in active_panels}
