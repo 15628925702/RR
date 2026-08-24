@@ -16,8 +16,9 @@ def main():
     ap.add_argument('--out',type=Path,default=Path('results/p4_h_growth_diagnostic.json'))
     ap.add_argument('--budgets',type=int,nargs='+',default=[200,400])
     ap.add_argument('--reps',type=int,default=4)
-    ap.add_argument('--h',type=int,nargs=2,action='append',default=[[256,8],[512,16],[1024,32]])
+    ap.add_argument('--h',type=int,nargs=2,action='append',default=None)
     args=ap.parse_args()
+    if args.h is None: args.h=[[256,8],[512,16],[1024,32]]
     with args.prepared.open('rb') as f: prepared=pickle.load(f)
     if len(prepared.get('reference',[]))<50000 or len(prepared.get('reference_large',[]))<200000: raise ValueError('small prepared artifact')
     mix=make_frozen_mixture(seed=2026,alpha=1.0); scale=reference_scale(mix,6000,2026); panels=all_pairs(); rows=[]
