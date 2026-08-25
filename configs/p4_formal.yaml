@@ -24,17 +24,28 @@ p4:
   # runner therefore derives L_U(B)=B; fixed --lu is diagnostic-only.
   exact_observed_score: true
   lu_scale: 1.0
-  conditional_method: qmc
-  qmc_order: 12
+  # Formal P4 uses the PDF TiltCond oracle: exact GMM conditional proposal
+  # followed by bounded exponential-tilt rejection. QMC remains diagnostic.
+  conditional_method: rejection
+  qmc_order: 10
+  qmc_start_order: 8
+  qmc_max_order: 16
+  # Engineering tolerance for the deterministic conditional integral; PDF
+  # leaves this numerical tolerance open.  Every run records the nested-QMC
+  # terminal delta and fails if this certificate is not met.
+  qmc_atol: 1.0e-4
+  qmc_rtol: 1.0e-3
   # Conditional-score QMC resolution grows with LU/B; diagnostic probes showed
   # fixed order 10 is insufficient at B=32000.
-  qmc_order_growth: {anchor_budget: 8000, log2_slope: 0.5}
+  qmc_order_growth: null
   # Frozen after B=2000 paired repair: lower H caused a 25% B.KL bias.
   # These growth rules keep the conditional-information error decreasing.
-  h_tilted: 4096
-  h_cond: 128
-  h_tilted_growth: {scale: 91.5, exponent: 0.5}
-  h_cond_growth: {scale: 26.9, exponent: 0.25}
+  # Explicit finite MC sizes; the PDF fixes the conditional-law interface and
+  # Eq. (9), not a QMC order or a budget-dependent quadrature schedule.
+  h_tilted: 128
+  h_cond: 32
+  h_tilted_growth: null
+  h_cond_growth: null
   kl_samples: 2000
   theta_bound: 4.0
   # Compact Theta projection required by PDF Algorithm 2.  The radius is an
