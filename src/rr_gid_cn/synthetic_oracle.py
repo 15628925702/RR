@@ -521,12 +521,27 @@ def tilted_conditional_mean_qmc_nested(
 
 
 def _tilted_conditional_mean_qmc_torch(mixture, beta, rows, panel, order, seed, scale, posterior, parameters, return_orders=None):
+    """Inference-only wrapper for the CUDA conditional integral."""
+    with torch.inference_mode():
+        return _tilted_conditional_mean_qmc_torch_impl(
+            mixture, beta, rows, panel, order, seed, scale, posterior,
+            parameters, return_orders=return_orders,
+        )
+
+
+def _tilted_conditional_mean_qmc_torch_impl(mixture, beta, rows, panel, order, seed, scale, posterior, parameters, return_orders=None):
     """CUDA implementation of the same complete tilted QMC integrand."""
     device = torch.device("cuda")
     dtype = torch.float64
     n = 1 << int(order)
     complement = tuple(i for i in range(mixture.dimension) if i not in panel)
+    feature_dimension = 12
+    target_missing = tuple(i for i in range(feature_dimension) if i not in panel)
+    target_missing_idx = tuple(complement.index(i) for i in target_missing)
     z_s = torch.as_tensor(inverse_warp(rows, mixture.alpha), dtype=dtype, device=device)
+    # Keep the original full-complement Sobol dimensionality so fixed seeds
+    # remain paired with the pre-optimization implementation.  Only the
+    # dimensions needed by the feature map are gathered for the reduced draw.
     normal_key = (str(device), int(n), len(complement), int(seed))
     normals = _TORCH_QMC_NORMAL_CACHE.get(normal_key)
     if normals is None:
@@ -547,10 +562,13 @@ def _tilted_conditional_mean_qmc_torch(mixture, beta, rows, panel, order, seed, 
     if static is None:
         static = tuple(
             (
-                torch.as_tensor(mean_c, dtype=dtype, device=device),
+                torch.as_tensor(mean_c[list(target_missing_idx)], dtype=dtype, device=device),
                 torch.as_tensor(mean_s, dtype=dtype, device=device),
-                torch.as_tensor(gain, dtype=dtype, device=device),
-                torch.as_tensor(chol, dtype=dtype, device=device),
+                torch.as_tensor(gain[list(target_missing_idx), :], dtype=dtype, device=device),
+                torch.as_tensor(
+                    np.linalg.cholesky(_cond_cov[np.ix_(target_missing_idx, target_missing_idx)]),
+                    dtype=dtype, device=device,
+                ),
             )
             for mean_c, mean_s, _inv_ss, gain, _cond_cov, chol, _logdet in parameters
         )
@@ -566,12 +584,15 @@ def _tilted_conditional_mean_qmc_torch(mixture, beta, rows, panel, order, seed, 
     numer = {size: torch.zeros((len(rows), beta_t.numel()), dtype=dtype, device=device) for size in sizes}
     denom = {size: torch.zeros(len(rows), dtype=dtype, device=device) for size in sizes}
     for k, (mean_c_t, mean_s_t, gain_t, chol_t) in enumerate(static):
-        z = torch.empty((len(rows), n, mixture.dimension), dtype=dtype, device=device)
-        z[:, :, list(panel)] = z_s[:, None, :]
+        z = torch.empty((len(rows), n, feature_dimension), dtype=dtype, device=device)
+        observed_feature = [j for j, coordinate in enumerate(panel) if coordinate < feature_dimension]
+        if observed_feature:
+            z[:, :, [panel[j] for j in observed_feature]] = z_s[:, None, observed_feature]
         cond_mean = mean_c_t[None, :] + (z_s - mean_s_t) @ gain_t.T
-        z[:, :, list(complement)] = cond_mean[:, None, :] + normals[None, :, :] @ chol_t.T
+        target_normals = normals[:, list(target_missing_idx)]
+        z[:, :, list(target_missing)] = cond_mean[:, None, :] + target_normals[None, :, :] @ chol_t.T
         x = torch.sinh(float(mixture.alpha) * z) / float(mixture.alpha) if mixture.alpha > 0 else z
-        xt = x / scale_t
+        xt = x / scale_t[:feature_dimension]
         phi = torch.cat((torch.tanh(xt[..., :6]), torch.tanh(xt[..., :6] * xt[..., 6:12])), dim=-1)
         logw = torch.einsum("nkr,r->nk", phi, beta_t)
         w = posterior_t[:, k, None] * torch.exp(logw - shift[:, None])
