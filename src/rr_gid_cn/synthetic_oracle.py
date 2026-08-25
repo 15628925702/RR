@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from itertools import combinations
 from pathlib import Path
+from collections import OrderedDict
 
 import numpy as np
 try:
@@ -13,8 +14,20 @@ try:
 except Exception:  # pragma: no cover - fallback is retained for minimal installs
     ndtri = None
     qmc = None
+try:
+    import torch
+except Exception:  # pragma: no cover
+    torch = None
 
 _CONDITIONAL_PARAMETER_CACHE = {}
+# Per-process CUDA cache for panel-specific conditional-Gaussian tensors.  The
+# frozen mixture has only 120 two-coordinate panels, so this cache is bounded
+# by the panel library and avoids repeated host-to-device conversion during
+# active-panel Fisher updates.  It deliberately excludes beta, observations,
+# and QMC nodes, which remain call-specific and seed-controlled.
+_TORCH_PANEL_TENSOR_CACHE = {}
+_TORCH_QMC_NORMAL_CACHE = OrderedDict()
+_TORCH_QMC_NORMAL_CACHE_LIMIT = 16
 
 
 def _conditional_parameters(mixture: FrozenMixture, panel: tuple[int, ...]):
@@ -362,6 +375,10 @@ def tilted_conditional_mean_qmc(
     z_s = inverse_warp(rows, mixture.alpha)
     posterior = np.asarray([conditional_component_posterior(mixture, row, panel) for row in rows])
     parameters = _conditional_parameters(mixture, panel)[1]
+    if torch is not None and torch.cuda.is_available() and feature_fn is None:
+        return _tilted_conditional_mean_qmc_torch(
+            mixture, beta, rows, panel, order, seed, scale, posterior, parameters,
+        )
     # Vectorize all observed rows for one component.  This changes only the
     # evaluation order, not the QMC nodes or the mixture-weighted ratio, and
     # avoids a Python loop over every acquired observation at formal budgets.
@@ -384,6 +401,189 @@ def tilted_conditional_mean_qmc(
         numer += np.einsum("nk,nkr->nr", w, phi) / n
     out = numer / np.maximum(denom[:, None], 1e-300)
     return out
+
+
+def tilted_conditional_mean_exact(
+    mixture: FrozenMixture,
+    beta: np.ndarray,
+    x_s: np.ndarray,
+    panel: tuple[int, ...],
+    seed: int = 0,
+    scale: np.ndarray | None = None,
+    feature_fn=None,
+    start_order: int = 8,
+    max_order: int = 16,
+    atol: float = 2e-6,
+    rtol: float = 2e-5,
+    return_diagnostics: bool = False,
+):
+    """Deterministic nested conditional-score oracle with an error certificate.
+
+    The Gaussian-mixture conditional law is exact; only its bounded nonlinear
+    expectation needs numerical integration.  Nested Sobol prefixes are
+    doubled until two successive estimates agree componentwise.  Calls that
+    do not meet the certificate are explicit failures rather than silently
+    being treated as exact scores.
+    """
+    if start_order < 4 or max_order < start_order:
+        raise ValueError("invalid adaptive conditional integration orders")
+    rows = np.atleast_2d(np.asarray(x_s, dtype=float))
+    # Keep the largest temporary CUDA tensor below roughly 0.5 GiB.  The
+    # bound is a memory safeguard only: each row uses the same deterministic
+    # nested Sobol prefix, so concatenating chunks is algebraically identical
+    # to one unchunked integral.
+    if torch is not None and torch.cuda.is_available() and feature_fn is None:
+        max_rows = max(1, 16_000_000 // (1 << int(max_order)))
+        if len(rows) > max_rows:
+            parts = []
+            diagnostics_parts = []
+            for start in range(0, len(rows), max_rows):
+                stop = min(start + max_rows, len(rows))
+                result = tilted_conditional_mean_exact(
+                    mixture, beta, rows[start:stop], panel,
+                    seed=seed, scale=scale, feature_fn=feature_fn,
+                    start_order=start_order, max_order=max_order,
+                    atol=atol, rtol=rtol, return_diagnostics=return_diagnostics,
+                )
+                if return_diagnostics:
+                    value, diag = result
+                    parts.append(value); diagnostics_parts.append(diag)
+                else:
+                    parts.append(result)
+            value = np.concatenate(parts, axis=0)
+            if return_diagnostics:
+                return value, {
+                    "method": "exact_adaptive",
+                    "orders": sorted({o for d in diagnostics_parts for o in d.get("orders", [])}),
+                    "converged": all(d.get("converged", False) for d in diagnostics_parts),
+                    "chunks": len(diagnostics_parts),
+                    "max_abs_delta": max(float(d.get("max_abs_delta") or 0.0) for d in diagnostics_parts),
+                    "max_rel_delta": max(float(d.get("max_rel_delta") or 0.0) for d in diagnostics_parts),
+                    "final_order": max(int(d.get("final_order", max_order)) for d in diagnostics_parts),
+                }
+            return value
+    previous = None
+    diagnostics = {"method": "exact_adaptive", "orders": [], "converged": False,
+                   "max_abs_delta": None, "max_rel_delta": None}
+    estimate = None
+    # Evaluating every intermediate order repeats the same expensive
+    # conditional Gaussian transform many times.  The nested-prefix
+    # certificate only needs a low reference order and the final two orders;
+    # all three are deterministic prefixes under the same Sobol seed.
+    orders = tuple(dict.fromkeys((int(max_order) - 1, int(max_order))))
+    if torch is not None and torch.cuda.is_available() and feature_fn is None:
+        estimates = tilted_conditional_mean_qmc_nested(
+            mixture, beta, x_s, panel, orders[-1], seed=seed, scale=scale,
+            feature_fn=feature_fn, return_orders=orders,
+        )
+    else:
+        estimates = {order: tilted_conditional_mean_qmc(
+            mixture, beta, x_s, panel, order, seed=seed, scale=scale,
+            feature_fn=feature_fn) for order in orders}
+    for order in orders:
+        estimate = estimates[order]
+        diagnostics["orders"].append(order)
+        if previous is not None:
+            delta = np.abs(estimate - previous)
+            max_abs = float(np.max(delta))
+            scale_norm = max(float(np.max(np.abs(estimate))), float(np.max(np.abs(previous))), 1.0)
+            max_rel = float(max_abs / scale_norm)
+            diagnostics["max_abs_delta"] = max_abs
+            diagnostics["max_rel_delta"] = max_rel
+            if max_abs <= float(atol) + float(rtol) * scale_norm:
+                diagnostics["converged"] = True
+                diagnostics["final_order"] = order
+                return (estimate, diagnostics) if return_diagnostics else estimate
+        previous = estimate
+    diagnostics["final_order"] = int(max_order)
+    if return_diagnostics:
+        return estimate, diagnostics
+    raise RuntimeError(
+        "adaptive exact conditional integral did not meet tolerance: "
+        f"abs={diagnostics['max_abs_delta']}, rel={diagnostics['max_rel_delta']}"
+    )
+
+
+def tilted_conditional_mean_qmc_nested(
+    mixture, beta, x_s, panel, order, seed=0, scale=None, feature_fn=None,
+    return_orders=(None,),
+):
+    """Evaluate one highest-order CUDA QMC grid and reuse nested prefixes."""
+    rows = np.atleast_2d(np.asarray(x_s, dtype=float))
+    complement = tuple(i for i in range(mixture.dimension) if i not in tuple(panel))
+    z_s = inverse_warp(rows, mixture.alpha)
+    posterior = np.asarray([conditional_component_posterior(mixture, row, tuple(panel)) for row in rows])
+    parameters = _conditional_parameters(mixture, tuple(panel))[1]
+    return _tilted_conditional_mean_qmc_torch(
+        mixture, beta, rows, tuple(panel), int(order), seed, scale, posterior,
+        parameters, return_orders=tuple(int(x) for x in return_orders if x is not None),
+    )
+
+
+def _tilted_conditional_mean_qmc_torch(mixture, beta, rows, panel, order, seed, scale, posterior, parameters, return_orders=None):
+    """CUDA implementation of the same complete tilted QMC integrand."""
+    device = torch.device("cuda")
+    dtype = torch.float64
+    n = 1 << int(order)
+    complement = tuple(i for i in range(mixture.dimension) if i not in panel)
+    z_s = torch.as_tensor(inverse_warp(rows, mixture.alpha), dtype=dtype, device=device)
+    normal_key = (str(device), int(n), len(complement), int(seed))
+    normals = _TORCH_QMC_NORMAL_CACHE.get(normal_key)
+    if normals is None:
+        normals = torch.as_tensor(
+            _nested_qmc_normals(n, len(complement), seed=int(seed)),
+            dtype=dtype, device=device,
+        )
+        _TORCH_QMC_NORMAL_CACHE[normal_key] = normals
+        _TORCH_QMC_NORMAL_CACHE.move_to_end(normal_key)
+        while len(_TORCH_QMC_NORMAL_CACHE) > _TORCH_QMC_NORMAL_CACHE_LIMIT:
+            _TORCH_QMC_NORMAL_CACHE.popitem(last=False)
+    else:
+        _TORCH_QMC_NORMAL_CACHE.move_to_end(normal_key)
+    scale_t = torch.as_tensor(np.asarray(scale), dtype=dtype, device=device)
+    beta_t = torch.as_tensor(np.asarray(beta), dtype=dtype, device=device)
+    cache_key = (id(mixture), tuple(panel), str(device), str(dtype))
+    static = _TORCH_PANEL_TENSOR_CACHE.get(cache_key)
+    if static is None:
+        static = tuple(
+            (
+                torch.as_tensor(mean_c, dtype=dtype, device=device),
+                torch.as_tensor(mean_s, dtype=dtype, device=device),
+                torch.as_tensor(gain, dtype=dtype, device=device),
+                torch.as_tensor(chol, dtype=dtype, device=device),
+            )
+            for mean_c, mean_s, _inv_ss, gain, _cond_cov, chol, _logdet in parameters
+        )
+        _TORCH_PANEL_TENSOR_CACHE[cache_key] = static
+    # The frozen compact parameter set has ||beta||_1 <= 5 and every feature
+    # coordinate lies in [-1, 1].  A deterministic global envelope is thus a
+    # finite, row-independent log-weight shift.  It avoids a preliminary pass
+    # over every component while preserving the normalized integral exactly.
+    shift = torch.full((len(rows),), float(np.abs(np.asarray(beta)).sum()), dtype=dtype, device=device)
+    posterior_t = torch.as_tensor(posterior, dtype=dtype, device=device)
+    requested = None if return_orders is None else tuple(sorted(set(int(v) for v in return_orders)))
+    sizes = (n,) if not requested else tuple(1 << q for q in requested)
+    numer = {size: torch.zeros((len(rows), beta_t.numel()), dtype=dtype, device=device) for size in sizes}
+    denom = {size: torch.zeros(len(rows), dtype=dtype, device=device) for size in sizes}
+    for k, (mean_c_t, mean_s_t, gain_t, chol_t) in enumerate(static):
+        z = torch.empty((len(rows), n, mixture.dimension), dtype=dtype, device=device)
+        z[:, :, list(panel)] = z_s[:, None, :]
+        cond_mean = mean_c_t[None, :] + (z_s - mean_s_t) @ gain_t.T
+        z[:, :, list(complement)] = cond_mean[:, None, :] + normals[None, :, :] @ chol_t.T
+        x = torch.sinh(float(mixture.alpha) * z) / float(mixture.alpha) if mixture.alpha > 0 else z
+        xt = x / scale_t
+        phi = torch.cat((torch.tanh(xt[..., :6]), torch.tanh(xt[..., :6] * xt[..., 6:12])), dim=-1)
+        logw = torch.einsum("nkr,r->nk", phi, beta_t)
+        w = posterior_t[:, k, None] * torch.exp(logw - shift[:, None])
+        for size in sizes:
+            wp = w[:, :size]
+            numer[size] += torch.einsum("nk,nkr->nr", wp, phi[:, :size]) / size
+            denom[size] += wp.mean(dim=1)
+        del z, x, xt, phi, logw, w
+    estimates = {int(np.log2(size)): (numer[size] / denom[size][:, None].clamp_min(1e-300)).cpu().numpy() for size in sizes}
+    if requested:
+        return estimates
+    return estimates[int(order)]
 
 
 def conditional_moments(mixture: FrozenMixture, x_s: np.ndarray, panel: tuple[int, ...]) -> tuple[np.ndarray, np.ndarray]:
