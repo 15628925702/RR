@@ -178,6 +178,10 @@ def main() -> None:
                     row["lu"] = int(run_kwargs["lu"])
                     row["lu_schedule"] = p4.get("lu_schedule")
                     row["qmc_order"] = int(run_kwargs["qmc_order"])
+                    row["conditional_method"] = str(run_kwargs["conditional_method"])
+                    row["h_tilted"] = int(run_kwargs["h_tilted"])
+                    row["h_cond"] = int(run_kwargs["h_cond"])
+                    row["scoring_steps"] = int(run_kwargs["scoring_steps"])
                     if (replication, row["policy"]) not in done[budget]:
                         stream.write(json.dumps(row, sort_keys=True) + "\n")
                         done[budget].add((replication, row["policy"]))

@@ -1,0 +1,42 @@
+{
+  "elapsed": 134.97136569023132,
+  "budget": 8000,
+  "rep": 5,
+  "h_tilted": 1024,
+  "h_cond": 32,
+  "qmc_order": 10,
+  "B_kl_raw": 38.69350948883499,
+  "design_ratio": 1.192338564181866,
+  "diag": [
+    {
+      "step": "pilot",
+      "pilot_budget": 200,
+      "beta_norm": 1.830839029473366,
+      "rho_min": 0.165,
+      "pilot_mu_residual_norm": 0.13810204698491338,
+      "pilot_beta_error_norm": 1.450150484170931
+    },
+    {
+      "step": 0,
+      "step_norm": 1.7254137724486815,
+      "projected": false,
+      "pilot_budget": 200,
+      "lambda_min_H": 20.494920128953304,
+      "lambda_max_H": 2539.0477865678777,
+      "score_norm": 771.2339275412611,
+      "raw_step_norm": 1.7254137724486815,
+      "applied_step_norm": 1.7254137724486815
+    },
+    {
+      "step": 1,
+      "step_norm": 0.4429103771226401,
+      "projected": false,
+      "pilot_budget": 200,
+      "lambda_min_H": 14.939820972923163,
+      "lambda_max_H": 2054.9874144963323,
+      "score_norm": 97.95051577512916,
+      "raw_step_norm": 0.4429103771226401,
+      "applied_step_norm": 0.4429103771226401
+    }
+  ]
+}

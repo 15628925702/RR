@@ -18,3 +18,34 @@ experiments/runs/*
 !experiments/runs/.gitkeep
 
 data/gas/processed/gas_processed.npz
+
+# 迁移/临时/日志/压缩包
+*.tar.gz
+*.tar.gz.part*
+*.log
+*.nohup.out
+.tmp_remote_deps/
+legacy_upload.py
+old_cmd.py
+old_manifest.txt
+old_server_check.py
+old_transfer.py
+remote_cmd.py
+remote_finalize.py
+remote_migrate_current.py
+remote_transfer.py
+remote_verify.py
+download_probe.py
+p4_watchdog.sh
+p4_8h_*.sh
+migration_*.tar.gz
+experiments_p4_*.log
+upload_*.py
+upload_*.err
+transfer*.err
+resume_*.py
+resume_*.err
+old_*.py
+old_*.txt
+legacy_*.py
+p4_pdf*.txt

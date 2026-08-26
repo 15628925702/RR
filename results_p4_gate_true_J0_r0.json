@@ -1,0 +1,21 @@
+{
+  "elapsed": 2.9863874912261963,
+  "budget": 8000,
+  "rep": 0,
+  "scoring_steps": 0,
+  "h_tilted": 2048,
+  "h_cond": 64,
+  "qmc_order": 10,
+  "B_kl_raw": 572.8328458979516,
+  "design_ratio": 17.651815563311946,
+  "diag": [
+    {
+      "step": "pilot",
+      "pilot_budget": 200,
+      "beta_norm": 1.684063428899251,
+      "rho_min": 0.165,
+      "pilot_mu_residual_norm": 0.1601436738759552,
+      "pilot_beta_error_norm": 1.2978209059685721
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import numpy as np
 
 from .policies import frank_wolfe, uniform_probabilities
 from .discriminative import MaskedScoreMLP, masked_input, masked_pool, score_information
-from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, log_partition, sample_conditional, sample_conditional_batch, sample_full, tilted_conditional_sample, tilted_conditional_batch, tilted_conditional_mean_qmc, tilted_conditional_mean_exact, tilted_full_sample, tilted_moments, tilted_sample_from_reference
+from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, log_partition, sample_conditional, sample_conditional_batch, sample_full, tilted_conditional_sample, tilted_conditional_batch, tilted_conditional_feature_mean_batch, tilted_conditional_mean_qmc, tilted_conditional_mean_exact, tilted_full_sample, tilted_moments, tilted_sample_from_reference
 
 
 def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilted=256, n_conditional=64, seed=0,
@@ -237,10 +237,8 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
             a = np.concatenate(chunks_a, axis=0) - mu
             b = np.concatenate(chunks_b, axis=0) - mu
         else:
-            ca = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 1, scale, feature_fn=feature_fn)
-            cb = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 2, scale, feature_fn=feature_fn)
-            a = fn(ca).mean(axis=1) - mu
-            b = fn(cb).mean(axis=1) - mu
+            a = tilted_conditional_feature_mean_batch(mixture, beta, observed, panel, n_cond, seed + 1, scale, feature_fn=feature_fn) - mu
+            b = tilted_conditional_feature_mean_batch(mixture, beta, observed, panel, n_cond, seed + 2, scale, feature_fn=feature_fn) - mu
         a = a - a.mean(0)
         b = b - b.mean(0)
         info_hat = (a.T @ b + b.T @ a) / max(2 * (len(a) - 1), 1)
@@ -315,9 +313,10 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
                 seed=int(rng.integers(2**31 - 1)), scale=scale, feature_fn=feature_fn,
             ))
         else:
-            completions = tilted_conditional_batch(mixture, beta_start, np.asarray(rows), panel, lu,
-                                                    int(rng.integers(2**31 - 1)), scale, feature_fn=feature_fn)
-            projected.append(fn(completions).mean(axis=1))
+            projected.append(tilted_conditional_feature_mean_batch(
+                mixture, beta_start, np.asarray(rows), panel, lu,
+                int(rng.integers(2**31 - 1)), scale, feature_fn=feature_fn,
+            ))
     projected = np.concatenate(projected, axis=0)
     if mu_direct:
         mu_beta = fn(tilted_full_sample(mixture, beta_start, mu_samples, seed + 99, scale, feature_fn=fn)).mean(0)

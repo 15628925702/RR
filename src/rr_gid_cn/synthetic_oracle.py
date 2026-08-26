@@ -354,13 +354,15 @@ def tilted_conditional_batch(
     return out
 
 
-def _tilted_conditional_batch_torch(mixture, beta, x_s, panel, n, seed, scale):
+def _tilted_conditional_batch_torch(mixture, beta, x_s, panel, n, seed, scale, return_feature_mean=False):
     """Exact rejection TiltCond on CUDA, with the same proposal law as NumPy."""
     device = _cuda_device()
     dtype = torch.float64
     rows = np.atleast_2d(np.asarray(x_s, dtype=float))
     panel = tuple(panel)
     complement = tuple(i for i in range(mixture.dimension) if i not in panel)
+    panel_index = torch.as_tensor(panel, dtype=torch.long, device=device)
+    complement_index = torch.as_tensor(complement, dtype=torch.long, device=device)
     rows_t = torch.as_tensor(rows, dtype=dtype, device=device)
     z_s = torch.as_tensor(inverse_warp(rows, mixture.alpha), dtype=dtype, device=device)
     beta_t = torch.as_tensor(np.asarray(beta), dtype=dtype, device=device)
@@ -384,7 +386,7 @@ def _tilted_conditional_batch_torch(mixture, beta, x_s, panel, n, seed, scale):
     fixed[:6] = [i in panel_set for i in range(6)]
     fixed[6:] = [i in panel_set and i + 6 in panel_set for i in range(6)]
     full = torch.zeros((len(rows), mixture.dimension), dtype=dtype, device=device)
-    full[:, list(panel)] = rows_t
+    full[:, panel_index] = rows_t
     xt_fixed = full / scale_t
     phi_fixed = torch.cat(
         (torch.tanh(xt_fixed[:, :6]), torch.tanh(xt_fixed[:, :6] * xt_fixed[:, 6:12])),
@@ -394,52 +396,77 @@ def _tilted_conditional_batch_torch(mixture, beta, x_s, panel, n, seed, scale):
     envelope = phi_fixed[:, fixed_t] @ beta_t[fixed_t] + torch.as_tensor(
         np.abs(np.asarray(beta))[~fixed], dtype=dtype, device=device,
     ).sum()
+    posterior_all = torch.as_tensor(
+        conditional_component_posterior_batch(mixture, rows, panel),
+        dtype=dtype, device=device,
+    )
+    posterior_cdf = posterior_all.cumsum(dim=1)
     out = torch.empty((len(rows), n, mixture.dimension), dtype=dtype, device=device)
     filled = torch.zeros(len(rows), dtype=torch.int64, device=device)
     generator = torch.Generator(device=device)
     generator.manual_seed(int(seed or 0) % (2**63 - 1))
     max_rounds = 20000
-    batch_floor = max(8, 2 * int(n))
+    # One large proposal wave saturates an A800; tiny per-row copies do not.
+    max_pairs = 8_000_000
+    batch_floor = max(2048, 16 * int(n))
     for _round in range(max_rounds):
         active = torch.nonzero(filled < n, as_tuple=False).flatten()
         if active.numel() == 0:
-            return out.cpu().numpy()
-        need = n - filled[active]
-        proposal_n = int(min(65536, max(batch_floor, 2 * int(need.max().item()))))
+            break
         a = int(active.numel())
-        posterior_t = torch.as_tensor(
-            conditional_component_posterior_batch(mixture, rows[active.cpu().numpy()], panel),
-            dtype=dtype,
-            device=device,
-        )
+        remaining = n - filled[active]
+        proposal_n = min(65536, max(batch_floor, 8 * int(remaining.max().item())))
+        proposal_n = max(8, min(proposal_n, max_pairs // max(a, 1)))
         uniforms = torch.rand((a, proposal_n), dtype=dtype, device=device, generator=generator)
-        components = (uniforms[:, :, None] > posterior_t.cumsum(dim=1)[:, None, :]).sum(dim=2)
+        components = (uniforms[:, :, None] > posterior_cdf[active][:, None, :]).sum(dim=2)
         normals = torch.randn((a, proposal_n, len(complement)), dtype=dtype, device=device, generator=generator)
         z = torch.empty((a, proposal_n, mixture.dimension), dtype=dtype, device=device)
-        z[:, :, list(panel)] = z_s[active, None, :]
+        z[:, :, panel_index] = z_s[active].unsqueeze(1)
+        z_comp = torch.zeros((a, proposal_n, len(complement)), dtype=dtype, device=device)
         for k, (mean_c, mean_s, gain, chol) in enumerate(static):
             cond_mean = mean_c[None, :] + (z_s[active] - mean_s) @ gain.T
             z_k = cond_mean[:, None, :] + normals @ chol.T
             mask = components == k
-            z[:, :, list(complement)] = torch.where(mask[:, :, None], z_k, z[:, :, list(complement)])
+            z_comp = torch.where(mask.unsqueeze(-1), z_k, z_comp)
+        z[:, :, complement_index] = z_comp
         x = torch.sinh(float(mixture.alpha) * z) / float(mixture.alpha) if mixture.alpha > 0 else z
         xt = x / scale_t
         phi = torch.cat((torch.tanh(xt[..., :6]), torch.tanh(xt[..., :6] * xt[..., 6:12])), dim=-1)
         logits = torch.einsum("abr,r->ab", phi, beta_t)
-        keep = torch.rand((a, proposal_n), dtype=dtype, device=device, generator=generator) < torch.exp(logits - envelope[active, None])
-        for local, row_idx in enumerate(active.tolist()):
-            selected = torch.nonzero(keep[local], as_tuple=False).flatten()
-            take = min(int(selected.numel()), n - int(filled[row_idx].item()))
-            if take:
-                start = int(filled[row_idx].item())
-                out[row_idx, start:start + take] = x[local, selected[:take]]
-                filled[row_idx] += take
-        acceptance = float(keep.sum().item()) / max(a * proposal_n, 1)
-        if acceptance < 0.01:
+        keep = torch.rand((a, proposal_n), dtype=dtype, device=device, generator=generator) < torch.exp(logits - envelope[active].unsqueeze(1))
+        rank = keep.cumsum(dim=1)
+        take_mask = keep & (rank <= remaining.unsqueeze(1))
+        dest = filled[active].unsqueeze(1) + rank - 1
+        row_ids = active.unsqueeze(1).expand_as(keep)
+        selected = take_mask
+        out[row_ids[selected], dest[selected]] = x[selected]
+        filled[active] += take_mask.sum(dim=1)
+        accepted = int(keep.sum().item())
+        attempted = max(a * proposal_n, 1)
+        if accepted / attempted < 0.01:
             batch_floor = min(65536, batch_floor * 2)
-        elif acceptance > 0.5:
-            batch_floor = max(8, batch_floor // 2)
-    raise RuntimeError("CUDA exact conditional rejection did not converge")
+        elif accepted / attempted > 0.5:
+            batch_floor = max(2048, batch_floor // 2)
+    if torch.any(filled < n):
+        raise RuntimeError("CUDA exact conditional rejection did not converge")
+    if return_feature_mean:
+        xt = out / scale_t
+        phi = torch.cat((torch.tanh(xt[..., :6]), torch.tanh(xt[..., :6] * xt[..., 6:12])), dim=-1)
+        return phi.mean(dim=1).cpu().numpy()
+    return out.cpu().numpy()
+
+
+def tilted_conditional_feature_mean_batch(
+    mixture, beta, x_s, panel, n, seed, scale, feature_fn=None,
+) -> np.ndarray:
+    """Mean feature map of exact TiltCond completions, kept on device when possible."""
+    if _cuda_device() is not None and feature_fn is None:
+        return _tilted_conditional_batch_torch(
+            mixture, beta, x_s, panel, n, seed, scale, return_feature_mean=True,
+        )
+    samples = tilted_conditional_batch(mixture, beta, x_s, panel, n, seed, scale, feature_fn=feature_fn)
+    fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
+    return fn(samples).mean(axis=1)
 
 
 _HALTON_PRIMES = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53)
