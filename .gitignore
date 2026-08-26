@@ -12,6 +12,8 @@ results/*
 !results/.gitkeep
 !results/*_summary.json
 !results/*summary*.json
+!results/p4/
+!results/p4/**
 figures/*
 !figures/.gitkeep
 experiments/runs/*
