@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>RR-GID 项目进展汇报</title>
+<style>
+/* RR-GID 汇报：简约学术排版 */
+
+@page {
+  size: A4;
+  margin: 16mm 15.5mm 17mm 15.5mm;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+body {
+  margin: 0;
+  color: #1c1917;
+  background: #fff;
+  font-family: "Microsoft YaHei UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 10pt;
+  line-height: 1.7;
+  font-weight: 400;
+  text-rendering: optimizeLegibility;
+  widows: 3;
+  orphans: 3;
+}
+
+/* —— 文首 —— */
+.masthead {
+  margin: 0 0 1.4em;
+  padding: 0 0 0.95em;
+  border-bottom: 0.6pt solid #1c1917;
+}
+
+.kicker {
+  margin: 0 0 0.5em;
+  font-family: "Microsoft YaHei UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 8pt;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #78716c;
+}
+
+.masthead h1 {
+  margin: 0 0 0.22em;
+  font-family: "Microsoft YaHei UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 18.5pt;
+  font-weight: 700;
+  line-height: 1.32;
+  letter-spacing: 0.01em;
+  color: #0c0a09;
+}
+
+.subtitle {
+  margin: 0 0 0.75em;
+  font-family: "Microsoft YaHei UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 11pt;
+  font-weight: 400;
+  color: #44403c;
+  letter-spacing: 0.02em;
+}
+
+.meta {
+  font-family: "Microsoft YaHei UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 8.2pt;
+  color: #78716c;
+}
+
+.meta .sep {
+  margin: 0 0.7em;
+  color: #a8a29e;
+}
+
+/* —— 标题 —— */
+h2, h3, h4 {
+  font-family: "Microsoft YaHei UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  color: #1c1917;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+h2 {
+  margin: 1.45em 0 0.5em;
+  padding: 0 0 0.26em;
+  font-size: 12.2pt;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-bottom: 0.5pt solid #1c1917;
+}
+
+h3 {
+  margin: 1.1em 0 0.38em;
+  font-size: 10.5pt;
+  font-weight: 700;
+}
+
+h3 .dot {
+  display: inline-block;
+  width: 0.52em;
+  height: 0.52em;
+  margin-right: 0.38em;
+  border-radius: 50%;
+  vertical-align: 0.06em;
+}
+
+h3 .dot.ok { background: #4d7c0f; }
+h3 .dot.warn { background: #ca8a04; }
+h3 .dot.bad { background: #be123c; }
+
+p { margin: 0.42em 0 0.65em; }
+
+strong {
+  font-weight: 600;
+  color: #0c0a09;
+}
+
+a {
+  color: #1e3a5f;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+ul, ol {
+  margin: 0.22em 0 0.75em;
+  padding-left: 1.3em;
+}
+
+li {
+  margin: 0.16em 0;
+}
+
+li > ul, li > ol { margin: 0.12em 0 0.2em; }
+
+hr {
+  margin: 1em 0;
+  border: 0;
+  border-top: 0.4pt solid #e7e5e4;
+}
+
+/* —— 表格 —— */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5em 0 0.95em;
+  font-family: "Microsoft YaHei UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 8.6pt;
+  line-height: 1.48;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+thead { display: table-header-group; }
+
+th {
+  font-weight: 700;
+  text-align: left;
+  color: #1c1917;
+  background: #f5f5f4;
+  border-top: 0.8pt solid #1c1917;
+  border-bottom: 0.4pt solid #a8a29e;
+  padding: 0.4em 0.5em;
+}
+
+td {
+  border-bottom: 0.35pt solid #e7e5e4;
+  padding: 0.38em 0.5em;
+  vertical-align: top;
+  overflow-wrap: break-word;
+}
+
+th:nth-child(1),
+td:nth-child(1) {
+  min-width: 4em;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0.8pt solid #1c1917;
+}
+
+th[align="right"], td[align="right"] {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* —— 公式 / 代码 —— */
+pre {
+  margin: 0.45em 0 0.9em;
+  padding: 0.65em 0.8em;
+  background: #fafaf9;
+  border: 0.4pt solid #e7e5e4;
+  border-left: 1.6pt solid #78716c;
+  font-family: Consolas, "Cascadia Code", "Noto Sans SC", monospace;
+  font-size: 8.3pt;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+code {
+  font-family: Consolas, "Cascadia Code", "Noto Sans SC", monospace;
+  font-size: 0.9em;
+  background: #f5f5f4;
+  padding: 0.04em 0.25em;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+.callout {
+  margin: 0.65em 0 0.95em;
+  padding: 0.5em 0.75em 0.5em 0.8em;
+  background: #fafaf9;
+  border-left: 2pt solid #1c1917;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.callout p { margin: 0.28em 0; }
+.callout p:first-child { margin-top: 0; }
+.callout p:last-child { margin-bottom: 0; }
+
+.footer-note {
+  margin-top: 1.25em;
+  padding-top: 0.65em;
+  border-top: 0.5pt solid #d6d3d1;
+  font-size: 9pt;
+  color: #44403c;
+}
+
+</style>
+</head>
+<body>
+<header class="masthead">
+  <p class="kicker">RR-GID · 阶段性内部汇报</p>
+  <h1>RR-GID 项目进展汇报</h1>
+  <p class="subtitle">已完成工作与 P4 理论阻塞分析</p>
+  <p class="meta">2026年8月26日<span class="sep">|</span>面向师兄的进展与阻塞说明</p>
+</header>
+<main>
+<h2>一、PDF 任务分成了哪些步骤</h2>
+<p>PDF 是一个"参考分布驱动的生成式主动设计"方法（RR-GID）。工程上按 <code>docs/PROJECT_PLAN.md</code> 拆成 P0–P12 十二个阶段，逻辑上是四段：</p>
+<table>
+<thead>
+<tr>
+<th>段落</th>
+<th>阶段</th>
+<th>内容</th>
+<th>性质</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>工程地基</strong></td>
+<td>P0–P3</td>
+<td>环境/Git、Synthetic 精确 oracle（16 维 GMM + sinh warp、120 panels、12 维 feature map）、四种 allocation policy、RR-GID 的 pilot–design–update 完整算法</td>
+<td>纯工程</td>
+</tr>
+<tr>
+<td><strong>Synthetic 主实验</strong></td>
+<td>P4–P7</td>
+<td>P4 S1（三策略最优性门禁）、P5 最终四策略、P6 冻结 VAEAC 生成器、P7 S2（非线性 + 生成器复用）</td>
+<td>PDF 核心理论验证</td>
+</tr>
+<tr>
+<td><strong>真实数据</strong></td>
+<td>P8–P10</td>
+<td>P8 Gas 数据预处理、P9 R1 半合成、P10 R2 自然漂移</td>
+<td>真实数据验证</td>
+</tr>
+<tr>
+<td><strong>收尾</strong></td>
+<td>P11–P12</td>
+<td>统一图表、最终复现与冻结</td>
+<td>产出</td>
+</tr>
+</tbody>
+</table>
+<p>其中 <strong>P4 是整个 PDF 的理论门禁</strong>：它要求 Synthetic 上三策略的 <code>B·KL</code> 收敛到理论常数、design ratio 接近 1。P4 不过，P5–P12 都不能进入。</p>
+<hr />
+<h2>二、每个步骤完成了什么</h2>
+<h3><span class="dot ok"></span>已完成并验证（P0–P3 工程 + 算法）</h3>
+<ul>
+<li><strong>Synthetic 精确 oracle</strong>：16 维四成分 GMM + sinh warp（α=1）、120 个坐标对 panels、12 维 bounded feature map、精确 Gaussian-mixture conditional sampler。</li>
+<li><strong>三种 baseline policy</strong>：Uniform SQD、A-OSQD（完整参考协方差 A-optimal）、oracle RR-GID。</li>
+<li><strong>RR-GID 完整算法</strong>：balanced pilot（<code>b_B=ceil(10B^(1/3))</code>）、HT moment、cross-completion 信息估计 + PSD 投影、cost-aware Frank-Wolfe design、J=2 步 Fisher-scoring。</li>
+<li><strong>预算守恒</strong>、配对 target draws、seed 方案、KL/design ratio 计算。</li>
+<li>单元测试在当前环境 <code>32 passed</code>。</li>
+</ul>
+<h3><span class="dot warn"></span>有工程资产但<strong>未通过正式验收</strong>（P5–P10）</h3>
+<ul>
+<li><strong>P5/P7/P9/P10</strong>：旧结果文件数量正确（如 P10 三 campaign × 4 budgets × 50 reps × 4 policies = 2400 行），但旧 acceptance 明确记为 <strong>NOT PASSED</strong>，且 P9 final estimator 曾用 empirical kernel 而非冻结 VAEAC、P10 指标（Bregman projection loss、policy-specific β̂、32 held-out functions）未按 PDF Eq.17 实现。这些<strong>不能作为最终结论</strong>。</li>
+<li><strong>P6</strong>：VAEAC 生成器经 codex 11 次重训，无条件矩仍未达质量门禁（无条件 std 误差 ~10–17、条件 RMSE ~6），generator 质量不足以支撑依赖它的 P5/P7/P9。</li>
+</ul>
+<h3><span class="dot bad"></span>未完成（P11–P12）</h3>
+<ul>
+<li>依赖 P4–P10 通过，尚未进入。</li>
+</ul>
+<hr />
+<h2>三、P4 卡在哪：理论上的问题</h2>
+<h3>3.1 想要的结果（PDF 理论预期）</h3>
+<p>PDF Sec.5 的局部渐近最优性要求，对固定 target <code>β*</code>、oracle design <code>p*</code>：</p>
+<pre><code>E[ KL(Q_{β*} ∥ Q_{β̂_B}) ]  =  (1/2B)·tr( F(β*) M(p*)^{-1} ) + o(1/B)
+即
+B·KL  →  ½·Φ(p*)   （一个与 B 无关的理论常数，如 B=2000 时 ½·Φ≈31.9）
+design ratio = Φ(p̂)/Φ(p*)  →  1
+</code></pre>
+<h3>3.2 实际得到的结果（formal replication）</h3>
+<p>codex 在新开发机（8×A800）上完成的部分正式预算（每档 200 reps × 3 policies，paired draws）：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Budget</th>
+<th style="text-align: right;">oracle RR-GID mean B·KL</th>
+<th style="text-align: right;">Uniform</th>
+<th style="text-align: right;">A-OSQD</th>
+<th style="text-align: right;">理论线 ½·Φ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">44.11 (CI [40.8, 47.4])</td>
+<td style="text-align: right;">82.90</td>
+<td style="text-align: right;">128.33</td>
+<td style="text-align: right;"><strong>31.9</strong></td>
+</tr>
+<tr>
+<td style="text-align: right;">4000</td>
+<td style="text-align: right;">58.35 (CI [53.2, 63.5])</td>
+<td style="text-align: right;">96.49</td>
+<td style="text-align: right;">180.91</td>
+<td style="text-align: right;"><strong>63.8</strong></td>
+</tr>
+</tbody>
+</table>
+<p>（另一组早期未用正式配置的结果，B·KL 随预算线性上升到 1795.7 @ B=32000，design ratio 高达 42.7；codex 已判定该组 estimator 实现不符 PDF Alg.2，不作为正式结论。）</p>
+<div class="callout"><p><strong>核心矛盾</strong>：
+- oracle RR-GID 的 B·KL <strong>没有随预算收敛到理论常数</strong>，而是停留在 ~44–58 的平台附近（B2000 略高于理论线 31.9，B4000 反而低于理论线 63.8）。
+- <strong>KL 没有按 O(1/B) 衰减</strong>（KL 停在 ~0.02–0.03 量级），而是 <code>B·KL ≈ 常数</code>。这是 B·KL 不收敛的直接表现。
+- design ratio 明显 &gt; 1。</p></div>
+<h3>3.3 为什么卡住：理论假设与 PDF 冻结 pilot 公式的张力</h3>
+<p>通过固定 seed 的小规模诊断，codex 已经把问题<strong>收窄到很具体的一环</strong>：</p>
+<ol>
+<li><strong>β 求解器本身是精确的</strong>：用精确的 target moment <code>μ_β*</code> 反解 β，误差 ≈ 6.3e-9。问题不在求解器。</li>
+<li><strong>卡点在 balanced HT pilot</strong>：PDF 强制 pilot 预算 <code>b_B = ceil(10B^(1/3))</code>（B=8000 时只有 ~200 观测），要在 120 个 panels 上估计 12 维 β。在<strong>弱 Fisher 方向</strong>（某些 feature 变化对 KL 影响很小），pilot 观测覆盖不足，HT moment 产生<strong>不随 B 衰减的系统偏差</strong>（单 seed β 误差约 1.4–2.0）。</li>
+<li><strong>这个偏差是 O(1)，不是理论要求的 O(B^{-1/6})</strong>。PDF 理论假设 <code>||β̂_p − β*|| = O_p(B^{-γ/2})</code>（γ=1/3），但实际 pilot 的系统偏差不随 B 缩小。</li>
+<li><strong>偏差被后续 Fisher-scoring 放大</strong>：β̂ 有偏 → 估计的信息矩阵 H 和观测得分 U 都带噪声 → Newton 步在弱方向过冲。</li>
+</ol>
+<h3>3.4 数学依据（为什么这不是数值 bug）</h3>
+<p>设 pilot 的系统偏差为常数 <code>δ = β̂_p − β*</code>（不随 B 衰减）。则最终估计的 KL 可展开为：</p>
+<pre><code>KL(Q_{β*} ∥ Q_{β̂}) ≈ ½ (β̂−β*)ᵀ F(β*) (β̂−β*)   （二阶 Taylor，F 为 Fisher 信息）
+</code></pre>
+<p>若 <code>β̂</code> 的偏差以常数 δ 为主导（不随 B 收敛到 0），则：</p>
+<pre><code>B·KL ≈ B · ½ δᵀ F δ = ½·Φ(p*) + B·(δᵀ F δ)/2  −  ……
+</code></pre>
+<p>即 <strong><code>B·KL</code> 中混入了一个随 B 线性增长的项 <code>B·(δᵀ F δ)/2</code></strong>。只要 <code>δ ≠ 0</code>（常数级偏差），<code>B·KL</code> 就不可能收敛到理论常数。这正是观测到的现象：KL 停在常数量级 → B·KL 随 B 上升。</p>
+<div class="callout"><p><strong>关键推论</strong>：这不是统计波动（加大 replication 不会消失），也不是 MC 尺寸不足（加大 <code>L_U/H_tilted/H_cond</code> 只降低估计方差，不消除 pilot 系统偏差）。它是 <strong>PDF 冻结的 pilot 预算公式与理论相合性假设之间的有限样本张力</strong>。</p></div>
+<hr />
+<h2>四、为解决问题做的所有尝试（按调整思路分组）</h2>
+<p>以下按"想解决什么问题、怎么做、结果如何"组织。全部保留了日志/诊断结果，未覆盖任何正式结果。</p>
+<h3>4.1 尝试修复 pilot 偏差（核心方向）</h3>
+<table>
+<thead>
+<tr>
+<th>尝试</th>
+<th>思路</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pilot moment 用 reference Fisher 稳定初始化</td>
+<td>减少 pilot 弱方向的初始化误差</td>
+<td>单 seed 略改善，不收敛</td>
+</tr>
+<tr>
+<td>pilot β 投影到 compact Theta</td>
+<td>约束 pilot 解不越界</td>
+<td>β̂_norm 从发散到 2.19 稳定，但 KL 仍不衰减</td>
+</tr>
+<tr>
+<td>加大诊断 pilot 预算（非冻结配置）</td>
+<td>验证是否 pilot 预算过小</td>
+<td>部分 seed 改善，但不是 PDF 冻结实验</td>
+</tr>
+<tr>
+<td>恢复历史 <code>use_oracle_H=true</code></td>
+<td>绕开估计 H 的噪声</td>
+<td><strong>反而更差</strong>，未采用</td>
+</tr>
+</tbody>
+</table>
+<h3>4.2 尝试修复 Fisher-scoring 步长稳定性</h3>
+<table>
+<thead>
+<tr>
+<th>尝试</th>
+<th>思路</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>固定步长 0.25/0.5/0.75/1.0</td>
+<td>抑制 Newton 过冲</td>
+<td>无一致胜者，不构成修复</td>
+</tr>
+<tr>
+<td>trust-region</td>
+<td>限制更新范数</td>
+<td>引入持续偏差，反而恶化</td>
+</tr>
+<tr>
+<td>恢复 PDF full step + Theta/L1 投影</td>
+<td>回到 Alg.2 原定义</td>
+<td>弱方向仍过冲</td>
+</tr>
+</tbody>
+</table>
+<h3>4.3 尝试降低信息估计噪声（H 层）</h3>
+<table>
+<thead>
+<tr>
+<th>尝试</th>
+<th>思路</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cross-completion + PSD 投影</td>
+<td>消除自归一化偏差</td>
+<td>保留（正确实现），但不消除 pilot 偏差</td>
+</tr>
+<tr>
+<td>Sobol QMC 条件积分（<code>b75720a</code> 系列 6 个 commit）</td>
+<td>降低条件期望 MC 方差</td>
+<td>方差改善，偏差不消</td>
+</tr>
+<tr>
+<td>information MC budget-growing（<code>L_U/B → ∞</code>）</td>
+<td>满足 PDF Alg.2 的 <code>L_U,B→∞</code></td>
+<td>LU 效果非单调、小于 seed 方差；H 增长有微弱信号但不稳定</td>
+</tr>
+<tr>
+<td>缓存 conditional Gaussian Cholesky + feature-mean batch</td>
+<td>纯性能优化</td>
+<td>快很多，不影响统计</td>
+</tr>
+</tbody>
+</table>
+<h3>4.4 性能优化（消除工程瓶颈，非统计）</h3>
+<ul>
+<li>exact conditional rejection 逐观测调用 → 向量化 + Cholesky 缓存（单 rep 从数分钟降到 ~1.5 分钟）</li>
+<li>并行 shard 重复计算 prepared oracle → 显式复用已审计 pkl</li>
+<li>设备绑定 <code>RR_GID_CN_CUDA_DEVICE</code>（8 卡各自绑定，GPU0/1 同 seed 输出完全一致）</li>
+</ul>
+<h3>4.5 P6 VAEAC 质量（11 次重训，依赖它的阶段被阻塞）</h3>
+<table>
+<thead>
+<tr>
+<th>尝试</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>四成分 GMM prior + KMeans 初始化 + prior 冻结</td>
+<td>无条件 std 误差从 57 → 10</td>
+</tr>
+<tr>
+<td>增强 panel-conditioned mask 训练 + 提高条件权重</td>
+<td>条件 RMSE 仍 ~6</td>
+</tr>
+<tr>
+<td>400/800 epoch 重训、z_std 归一化修正</td>
+<td>无条件均值误差降到 0.95，std 误差 10，条件 RMSE 6</td>
+</tr>
+</tbody>
+</table>
+<p>P6 生成器仍未达质量门禁，是除 P4 外的第二个阻塞项。</p>
+<hr />
+<h2>五、想要的结果和现在的差距</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>理论想要</th>
+<th>现在</th>
+<th>差距</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>B·KL</code> 收敛</td>
+<td>→ ½·Φ(p*)（常数平台）</td>
+<td>停在 ~44–58 平台，不随 B 衰减</td>
+<td><strong>不收敛</strong></td>
+</tr>
+<tr>
+<td>KL 衰减率</td>
+<td>O(1/B)</td>
+<td>停在 ~0.02–0.03</td>
+<td><strong>不衰减</strong></td>
+</tr>
+<tr>
+<td>design ratio</td>
+<td>→ 1</td>
+<td>&gt; 1</td>
+<td><strong>偏高</strong></td>
+</tr>
+<tr>
+<td>oracle RR-GID 相对最优</td>
+<td>稳定优于 Uniform/A-OSQD</td>
+<td>部分预算不显著</td>
+<td><strong>不稳定</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>六、现有实验说明 PDF 理论可能哪里需要审视（数学依据）</h2>
+<p>以下是从实验结果<strong>反推</strong> PDF 理论里可能需要更仔细审视的假设，不是否定 PDF。</p>
+<p><strong>1. pilot 相合性假设可能过强。</strong></p>
+<p>PDF Sec.5.3 假设 <code>||β̂_p − β*|| = O_p(B^{-γ/2})</code>（γ=1/3），从而 <code>Φ(p̂) → min_p Φ(p)</code>。但 PDF 同时冻结 <code>b_B = ceil(10B^(1/3))</code>——在这个 pilot 预算下，HT moment 在 120 个高维弱信息面板上的系统偏差是 <strong>O(1) 而非 O(B^{-1/6})</strong>（实测单 seed β 误差 1.4–2.0，不随 B 衰减）。数学上，若 <code>δ=O(1)</code>，则 <code>B·KL = ½Φ(p*) + B·(δᵀFδ)/2 + o(B)</code>，收敛被线性项破坏。</p>
+<p><strong>可能的修订方向</strong>（供讨论，不擅自改）：
+- 增大 pilot 预算（如 <code>b_B = ceil(B^{1/2})</code> 或与 feature 维度/panel 数挂钩）；
+- 或 pilot 用 reference-Fisher 定向分配（优先覆盖强信息方向），而非均匀 balanced；
+- 或在理论部分补充对 pilot 有限样本偏差的修正项分析。</p>
+<p><strong>2. 有限样本信息矩阵估计的 operator error 条件。</strong></p>
+<p>PDF Alg.2 要求 update 阶段的信息估计 <code>Î_S</code> 的 operator error 消失，但固定 MC 尺寸（<code>h_tilted, h_cond</code>）不满足渐近条件。codex 的 H-growth 诊断（<code>(256,8)→(1024,32)</code>）显示微弱改善但 CI 太宽，<strong>尚未证明误差消失</strong>。</p>
+<p><strong>3. KL 的 O(1/B) 率依赖 pilot 一致性。</strong></p>
+<p>由于偏差项不消失，KL 无法达到 PDF Eq.13 的 <code>E[KL]=O(1/B)</code>。这是<strong>有限样本下的理论预期偏差</strong>，不是实现错误。</p>
+<hr />
+<h2>七、当前状态与下一步</h2>
+<div class="callout"><p><strong>诚实结论</strong>：项目在工程上完成了 P0–P3 和大部分实验代码/结果框架；但 <strong>P4 的理论门禁未通过，P5–P12 不能进入</strong>。P4 卡在"PDF 冻结的 pilot 预算公式与理论相合性假设的有限样本张力"，codex 已穷尽 PDF 框架内的修法（pilot 初始化、oracle-H、阻尼、trust-region、QMC、H-growth）均未收敛。P6 生成器质量是第二个阻塞项。</p></div>
+<p><strong>下一步选项</strong>（可能的决策）：</p>
+<ol>
+<li><strong>讨论是否可修订 PDF 的 pilot 预算</strong>（最直接恢复收敛）；</li>
+<li><strong>把有限样本 pilot 偏差作为现象写进论文</strong>（给出 <code>B·KL = 常数 + B·bias²/2</code> 的精确形式 + 偏差修正），不强求收敛到理论常数；</li>
+<li><strong>调整论文重心</strong>到不依赖 P4 收敛的相对结论（RR-GID 相对 Uniform/A-OSQD 的 compute 优势、reuse frontier）。</li>
+</ol>
+<p>代码、结果、诊断与交接文档已全部推送到 GitHub：<code><a href="https://github.com/15628925702/RR_GID_CN.git">https://github.com/15628925702/RR_GID_CN.git</a></code>（main 分支，HEAD <code>349c677</code>）</p>
+</main>
+</body>
+</html>
