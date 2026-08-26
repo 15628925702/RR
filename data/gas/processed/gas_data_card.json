@@ -23,7 +23,7 @@
     6
   ],
   "reference_rows": 5933,
-  "sha256": "49112b6bd0f605b65d9ebd8ce7177f19ccfe57528296bac1a5145d52adbaa852",
+  "sha256": "1c284f05e8b5c0775a68c604830c347c7e36653c05ed30036808a260ce04b0cf",
   "source": "UCI Gas Sensor Array Drift at Different Concentrations (dataset 270)",
   "split": "80/20 train/val on reference batches 1-6",
   "split_seed": 2026,
@@ -31,5 +31,10 @@
     "batch10": 3600,
     "batch7": 3613,
     "batches89": 764
-  }
+  },
+  "target_raw_records_saved": [
+    "batch7",
+    "batches89",
+    "batch10"
+  ]
 }

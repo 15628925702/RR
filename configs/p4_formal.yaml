@@ -20,10 +20,10 @@ p4:
   # Internal Monte Carlo sizes.  The growth rules below make update-stage
   # information error decrease with budget; fixed sizes are diagnostic-only.
   pilot_norm_cap: null
-  # PDF S1 requires exact observed scores, or L_U,B -> infinity.  The formal
-  # runner therefore derives L_U(B)=B; fixed --lu is diagnostic-only.
+  # PDF S1 requires exact observed scores, or L_U,B -> infinity.  The finite
+  # run uses the explicit schedule below; every result records actual L_U.
   exact_observed_score: true
-  lu_scale: 1.0
+  lu_schedule: {kind: log2, scale: 32.0, offset: 1.0}
   # Formal P4 uses the PDF TiltCond oracle: exact GMM conditional proposal
   # followed by bounded exponential-tilt rejection. QMC remains diagnostic.
   conditional_method: rejection

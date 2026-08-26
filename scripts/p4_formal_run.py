@@ -36,6 +36,25 @@ def _budget_qmc_order(base: int, spec, budget: int) -> int:
     return max(int(base), int(math.ceil(float(base) + slope * math.log2(max(float(budget), 1.0) / anchor))))
 
 
+def _budget_lu(spec, budget: int) -> int:
+    """Finite completion schedule with L_U(B) increasing to infinity.
+
+    The PDF specifies the asymptotic requirement L_U,B -> infinity, but not
+    a finite-run formula.  A logarithmic schedule avoids the quadratic cost of
+    setting L_U=B while remaining explicit and auditable in every result.
+    """
+    if spec is None:
+        return int(budget)
+    if isinstance(spec, (int, float)):
+        return max(1, int(math.ceil(float(spec))))
+    kind = str(spec.get("kind", "log2"))
+    if kind != "log2":
+        raise ValueError(f"unsupported lu_schedule kind: {kind}")
+    scale = float(spec.get("scale", 32.0))
+    offset = float(spec.get("offset", 1.0))
+    return max(1, int(math.ceil(scale * math.log2(float(budget) + offset))))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--budget", type=int, default=None)
@@ -53,7 +72,7 @@ def main() -> None:
     ap.add_argument("--lu", type=int, default=None, help="override update-stage conditional completions")
     ap.add_argument("--h-tilted", type=int, default=None, help="override update-stage tilted samples")
     ap.add_argument("--h-cond", type=int, default=None, help="override cross-completion samples")
-    ap.add_argument("--conditional-method", choices=("rejection", "qmc"), default=None)
+    ap.add_argument("--conditional-method", choices=("rejection", "qmc", "exact_adaptive"), default=None)
     ap.add_argument("--qmc-order", type=int, default=None)
     ap.add_argument("--kl-samples", type=int, default=None, help="override KL diagnostic samples")
     ap.add_argument("--diagnostic", action="store_true", help="allow fixed MC overrides; output is not formal")
@@ -125,7 +144,11 @@ def main() -> None:
                   scoring_step_size=p4.get("scoring_step_size", 1.0) if args.scoring_step_size is None else args.scoring_step_size,
                   scoring_max_step_norm=p4.get("scoring_max_step_norm"),
                   conditional_method=p4.get("conditional_method", "rejection") if args.conditional_method is None else args.conditional_method,
-                  qmc_order=int(p4.get("qmc_order", 10) if args.qmc_order is None else args.qmc_order))
+                  qmc_order=int(p4.get("qmc_order", 10) if args.qmc_order is None else args.qmc_order),
+                  qmc_start_order=int(p4.get("qmc_start_order", 8)),
+                  qmc_max_order=int(p4.get("qmc_max_order", 16)),
+                  qmc_atol=float(p4.get("qmc_atol", 2e-6)),
+                  qmc_rtol=float(p4.get("qmc_rtol", 2e-5)))
     for budget in budgets:
         fp = out / f"{args.out_prefix}_{budget}{suffix}.jsonl"
         with fp.open("a", encoding="utf-8") as stream:
@@ -136,7 +159,7 @@ def main() -> None:
                 seed = 202600000 + budget * 1000 + replication
                 run_kwargs = dict(kwargs)
                 if run_kwargs["lu"] is None:
-                    run_kwargs["lu"] = int(math.ceil(float(p4.get("lu_scale", 1.0)) * budget))
+                    run_kwargs["lu"] = _budget_lu(p4.get("lu_schedule"), budget)
                 if args.h_tilted is None:
                     run_kwargs["h_tilted"] = _budget_mc_size(
                         p4["h_tilted"], p4.get("h_tilted_growth"), budget
@@ -152,6 +175,8 @@ def main() -> None:
                 rows = run_replication(mixture, scale, panels, budget, seed, prepared=prepared, **run_kwargs)
                 for row in rows:
                     row["replication"] = replication
+                    row["lu"] = int(run_kwargs["lu"])
+                    row["lu_schedule"] = p4.get("lu_schedule")
                     row["qmc_order"] = int(run_kwargs["qmc_order"])
                     if (replication, row["policy"]) not in done[budget]:
                         stream.write(json.dumps(row, sort_keys=True) + "\n")

@@ -8,6 +8,7 @@ from pathlib import Path
 from collections import OrderedDict
 
 import numpy as np
+import os
 try:
     from scipy.special import ndtri
     from scipy.stats import qmc
@@ -26,8 +27,24 @@ _CONDITIONAL_PARAMETER_CACHE = {}
 # active-panel Fisher updates.  It deliberately excludes beta, observations,
 # and QMC nodes, which remain call-specific and seed-controlled.
 _TORCH_PANEL_TENSOR_CACHE = {}
+_TORCH_REJECTION_PANEL_CACHE = {}
 _TORCH_QMC_NORMAL_CACHE = OrderedDict()
 _TORCH_QMC_NORMAL_CACHE_LIMIT = 16
+
+
+def _cuda_device():
+    """Return the explicitly assigned CUDA device for reproducible sharding."""
+    if torch is None or not torch.cuda.is_available():
+        return None
+    value = os.environ.get("RR_GID_CN_CUDA_DEVICE", "0").strip()
+    if value.startswith("cuda:"):
+        return torch.device(value)
+    if not value.isdigit():
+        raise ValueError("RR_GID_CN_CUDA_DEVICE must be an integer or cuda:<integer>")
+    index = int(value)
+    if index >= torch.cuda.device_count():
+        raise ValueError(f"CUDA device {index} unavailable (count={torch.cuda.device_count()})")
+    return torch.device(f"cuda:{index}")
 
 
 def _conditional_parameters(mixture: FrozenMixture, panel: tuple[int, ...]):
@@ -115,6 +132,36 @@ def conditional_component_posterior(mixture: FrozenMixture, x_s: np.ndarray, pan
     logs = np.asarray(logs)
     probs = np.exp(logs - logs.max())
     return probs / probs.sum()
+
+
+def conditional_component_posterior_batch(
+    mixture: FrozenMixture, x_s: np.ndarray, panel: tuple[int, ...]
+) -> np.ndarray:
+    """Vectorized component posterior for many observed panel rows.
+
+    This is algebraically identical to ``conditional_component_posterior``;
+    batching only removes the Python loop over rows in the CUDA conditional
+    samplers.  Keeping the calculation in float64 preserves the formal
+    reference implementation's numerical path.
+    """
+    panel = tuple(panel)
+    observed = np.atleast_2d(np.asarray(x_s, dtype=float))
+    if observed.shape[1] != len(panel):
+        raise ValueError("observed batch has incompatible panel width")
+    z_s = inverse_warp(observed, mixture.alpha)
+    _, parameters = _conditional_parameters(mixture, panel)
+    log_probs = np.empty((len(observed), len(mixture.weights)), dtype=float)
+    for k, (mean_c, mean_s, inv_ss, _gain, _cond_cov, _chol, logdet) in enumerate(parameters):
+        delta = z_s - mean_s
+        log_probs[:, k] = np.log(mixture.weights[k]) - 0.5 * (
+            len(panel) * np.log(2.0 * np.pi)
+            + logdet
+            + np.einsum("ni,ij,nj->n", delta, inv_ss, delta)
+        )
+    log_probs -= log_probs.max(axis=1, keepdims=True)
+    probs = np.exp(log_probs)
+    probs /= probs.sum(axis=1, keepdims=True)
+    return probs
 
 
 def sample_conditional(mixture: FrozenMixture, x_s: np.ndarray, panel: tuple[int, ...], n: int, seed: int | None = None) -> np.ndarray:
@@ -233,6 +280,10 @@ def tilted_conditional_batch(
     scale: np.ndarray | None = None,
     feature_fn=None,
 ) -> np.ndarray:
+    if _cuda_device() is not None and feature_fn is None:
+        return _tilted_conditional_batch_torch(
+            mixture, beta, x_s, panel, n, seed, scale,
+        )
     rng = np.random.default_rng(seed)
     fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     rows = np.atleast_2d(np.asarray(x_s))
@@ -301,6 +352,94 @@ def tilted_conditional_batch(
                 out[row_id, filled[row_id]:filled[row_id] + take] = selected[:take]
                 filled[row_id] += take
     return out
+
+
+def _tilted_conditional_batch_torch(mixture, beta, x_s, panel, n, seed, scale):
+    """Exact rejection TiltCond on CUDA, with the same proposal law as NumPy."""
+    device = _cuda_device()
+    dtype = torch.float64
+    rows = np.atleast_2d(np.asarray(x_s, dtype=float))
+    panel = tuple(panel)
+    complement = tuple(i for i in range(mixture.dimension) if i not in panel)
+    rows_t = torch.as_tensor(rows, dtype=dtype, device=device)
+    z_s = torch.as_tensor(inverse_warp(rows, mixture.alpha), dtype=dtype, device=device)
+    beta_t = torch.as_tensor(np.asarray(beta), dtype=dtype, device=device)
+    scale_t = torch.as_tensor(np.asarray(scale), dtype=dtype, device=device)
+    cache_key = (id(mixture), panel, str(device), str(dtype))
+    static = _TORCH_REJECTION_PANEL_CACHE.get(cache_key)
+    if static is None:
+        static = tuple(
+            (
+                torch.as_tensor(mean_c, dtype=dtype, device=device),
+                torch.as_tensor(mean_s, dtype=dtype, device=device),
+                torch.as_tensor(gain, dtype=dtype, device=device),
+                torch.as_tensor(chol, dtype=dtype, device=device),
+            )
+            for mean_c, mean_s, _inv_ss, gain, _cond_cov, chol, _logdet
+            in _conditional_parameters(mixture, panel)[1]
+        )
+        _TORCH_REJECTION_PANEL_CACHE[cache_key] = static
+    panel_set = set(panel)
+    fixed = np.zeros(beta.shape[0], dtype=bool)
+    fixed[:6] = [i in panel_set for i in range(6)]
+    fixed[6:] = [i in panel_set and i + 6 in panel_set for i in range(6)]
+    full = torch.zeros((len(rows), mixture.dimension), dtype=dtype, device=device)
+    full[:, list(panel)] = rows_t
+    xt_fixed = full / scale_t
+    phi_fixed = torch.cat(
+        (torch.tanh(xt_fixed[:, :6]), torch.tanh(xt_fixed[:, :6] * xt_fixed[:, 6:12])),
+        dim=1,
+    )
+    fixed_t = torch.as_tensor(fixed, dtype=torch.bool, device=device)
+    envelope = phi_fixed[:, fixed_t] @ beta_t[fixed_t] + torch.as_tensor(
+        np.abs(np.asarray(beta))[~fixed], dtype=dtype, device=device,
+    ).sum()
+    out = torch.empty((len(rows), n, mixture.dimension), dtype=dtype, device=device)
+    filled = torch.zeros(len(rows), dtype=torch.int64, device=device)
+    generator = torch.Generator(device=device)
+    generator.manual_seed(int(seed or 0) % (2**63 - 1))
+    max_rounds = 20000
+    batch_floor = max(8, 2 * int(n))
+    for _round in range(max_rounds):
+        active = torch.nonzero(filled < n, as_tuple=False).flatten()
+        if active.numel() == 0:
+            return out.cpu().numpy()
+        need = n - filled[active]
+        proposal_n = int(min(65536, max(batch_floor, 2 * int(need.max().item()))))
+        a = int(active.numel())
+        posterior_t = torch.as_tensor(
+            conditional_component_posterior_batch(mixture, rows[active.cpu().numpy()], panel),
+            dtype=dtype,
+            device=device,
+        )
+        uniforms = torch.rand((a, proposal_n), dtype=dtype, device=device, generator=generator)
+        components = (uniforms[:, :, None] > posterior_t.cumsum(dim=1)[:, None, :]).sum(dim=2)
+        normals = torch.randn((a, proposal_n, len(complement)), dtype=dtype, device=device, generator=generator)
+        z = torch.empty((a, proposal_n, mixture.dimension), dtype=dtype, device=device)
+        z[:, :, list(panel)] = z_s[active, None, :]
+        for k, (mean_c, mean_s, gain, chol) in enumerate(static):
+            cond_mean = mean_c[None, :] + (z_s[active] - mean_s) @ gain.T
+            z_k = cond_mean[:, None, :] + normals @ chol.T
+            mask = components == k
+            z[:, :, list(complement)] = torch.where(mask[:, :, None], z_k, z[:, :, list(complement)])
+        x = torch.sinh(float(mixture.alpha) * z) / float(mixture.alpha) if mixture.alpha > 0 else z
+        xt = x / scale_t
+        phi = torch.cat((torch.tanh(xt[..., :6]), torch.tanh(xt[..., :6] * xt[..., 6:12])), dim=-1)
+        logits = torch.einsum("abr,r->ab", phi, beta_t)
+        keep = torch.rand((a, proposal_n), dtype=dtype, device=device, generator=generator) < torch.exp(logits - envelope[active, None])
+        for local, row_idx in enumerate(active.tolist()):
+            selected = torch.nonzero(keep[local], as_tuple=False).flatten()
+            take = min(int(selected.numel()), n - int(filled[row_idx].item()))
+            if take:
+                start = int(filled[row_idx].item())
+                out[row_idx, start:start + take] = x[local, selected[:take]]
+                filled[row_idx] += take
+        acceptance = float(keep.sum().item()) / max(a * proposal_n, 1)
+        if acceptance < 0.01:
+            batch_floor = min(65536, batch_floor * 2)
+        elif acceptance > 0.5:
+            batch_floor = max(8, batch_floor // 2)
+    raise RuntimeError("CUDA exact conditional rejection did not converge")
 
 
 _HALTON_PRIMES = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53)
@@ -373,9 +512,9 @@ def tilted_conditional_mean_qmc(
     complement = tuple(i for i in range(mixture.dimension) if i not in panel)
     n = 1 << int(order)
     z_s = inverse_warp(rows, mixture.alpha)
-    posterior = np.asarray([conditional_component_posterior(mixture, row, panel) for row in rows])
+    posterior = conditional_component_posterior_batch(mixture, rows, panel)
     parameters = _conditional_parameters(mixture, panel)[1]
-    if torch is not None and torch.cuda.is_available() and feature_fn is None:
+    if _cuda_device() is not None and feature_fn is None:
         return _tilted_conditional_mean_qmc_torch(
             mixture, beta, rows, panel, order, seed, scale, posterior, parameters,
         )
@@ -432,7 +571,7 @@ def tilted_conditional_mean_exact(
     # bound is a memory safeguard only: each row uses the same deterministic
     # nested Sobol prefix, so concatenating chunks is algebraically identical
     # to one unchunked integral.
-    if torch is not None and torch.cuda.is_available() and feature_fn is None:
+    if _cuda_device() is not None and feature_fn is None:
         max_rows = max(1, 16_000_000 // (1 << int(max_order)))
         if len(rows) > max_rows:
             parts = []
@@ -512,7 +651,7 @@ def tilted_conditional_mean_qmc_nested(
     rows = np.atleast_2d(np.asarray(x_s, dtype=float))
     complement = tuple(i for i in range(mixture.dimension) if i not in tuple(panel))
     z_s = inverse_warp(rows, mixture.alpha)
-    posterior = np.asarray([conditional_component_posterior(mixture, row, tuple(panel)) for row in rows])
+    posterior = conditional_component_posterior_batch(mixture, rows, tuple(panel))
     parameters = _conditional_parameters(mixture, tuple(panel))[1]
     return _tilted_conditional_mean_qmc_torch(
         mixture, beta, rows, tuple(panel), int(order), seed, scale, posterior,
@@ -531,7 +670,7 @@ def _tilted_conditional_mean_qmc_torch(mixture, beta, rows, panel, order, seed, 
 
 def _tilted_conditional_mean_qmc_torch_impl(mixture, beta, rows, panel, order, seed, scale, posterior, parameters, return_orders=None):
     """CUDA implementation of the same complete tilted QMC integrand."""
-    device = torch.device("cuda")
+    device = _cuda_device()
     dtype = torch.float64
     n = 1 << int(order)
     complement = tuple(i for i in range(mixture.dimension) if i not in panel)

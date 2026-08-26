@@ -6,7 +6,7 @@ import numpy as np
 
 from .policies import frank_wolfe, uniform_probabilities
 from .discriminative import MaskedScoreMLP, masked_input, masked_pool, score_information
-from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, log_partition, sample_conditional, sample_conditional_batch, sample_full, tilted_conditional_sample, tilted_conditional_batch, tilted_conditional_mean_qmc, tilted_full_sample, tilted_moments, tilted_sample_from_reference
+from .synthetic_oracle import beta_direction_and_scale, feature_map, full_target_kl, log_partition, sample_conditional, sample_conditional_batch, sample_full, tilted_conditional_sample, tilted_conditional_batch, tilted_conditional_mean_qmc, tilted_conditional_mean_exact, tilted_full_sample, tilted_moments, tilted_sample_from_reference
 
 
 def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilted=256, n_conditional=64, seed=0,
@@ -20,8 +20,8 @@ def exact_panel_information(mixture, beta, panels, reference_pool, scale, n_tilt
     infos = []
     for panel in panels:
         observed = tilted[:, list(panel)]
-        projected_a = fn(tilted_conditional_batch(mixture, beta, observed, panel, n_conditional, int(rng.integers(2**31 - 1)), scale, feature_fn=fn)).mean(axis=1) - mu
-        projected_b = fn(tilted_conditional_batch(mixture, beta, observed, panel, n_conditional, int(rng.integers(2**31 - 1)), scale, feature_fn=fn)).mean(axis=1) - mu
+        projected_a = fn(tilted_conditional_batch(mixture, beta, observed, panel, n_conditional, int(rng.integers(2**31 - 1)), scale, feature_fn=feature_fn)).mean(axis=1) - mu
+        projected_b = fn(tilted_conditional_batch(mixture, beta, observed, panel, n_conditional, int(rng.integers(2**31 - 1)), scale, feature_fn=feature_fn)).mean(axis=1) - mu
         a = np.asarray(projected_a); b = np.asarray(projected_b)
         a = a - a.mean(0); b = b - b.mean(0)
         info = (a.T @ b + b.T @ a) / max(2 * (len(a) - 1), 1)
@@ -200,7 +200,7 @@ def imp_conditional_mean(mixture, beta, batch, panel, n, seed, scale, feature_fn
     return np.einsum("onr,on->or", phi, w) / w.sum(axis=1, keepdims=True)
 
 
-def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n_cond, seed, feature_fn=None, conditional_method="rejection", qmc_order=8):
+def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n_cond, seed, feature_fn=None, conditional_method="rejection", qmc_order=8, qmc_start_order=8, qmc_max_order=16, qmc_atol=2e-6, qmc_rtol=2e-5, qmc_chunk_rows=128):
     """Cross-completion panel information estimator (PDF Eq. 9) with PSD projection.
 
     Uses importance-weighted conditional completions (not accept-reject), so it is
@@ -220,25 +220,25 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
     infos = []
     for panel in panels:
         observed = tilted[:, list(panel)]
-        if conditional_method == "qmc":
+        if conditional_method in ("qmc", "exact_adaptive"):
             # Chunk rows to keep the (rows x 2**order x d) QMC tensor bounded
             # at formal budgets.  The chunks use disjoint deterministic seeds
             # and are concatenated exactly as one cross-completion sample.
             chunks_a, chunks_b = [], []
-            chunk_rows = 32
+            chunk_rows = int(qmc_chunk_rows)
             for start in range(0, len(observed), chunk_rows):
                 stop = min(start + chunk_rows, len(observed))
-                chunks_a.append(tilted_conditional_mean_qmc(
-                    mixture, beta, observed[start:stop], panel, qmc_order,
-                    seed=seed + 1 + start, scale=scale, feature_fn=feature_fn))
-                chunks_b.append(tilted_conditional_mean_qmc(
-                    mixture, beta, observed[start:stop], panel, qmc_order,
-                    seed=seed + 2 + start, scale=scale, feature_fn=feature_fn))
+                if conditional_method == "exact_adaptive":
+                    chunks_a.append(tilted_conditional_mean_exact(mixture, beta, observed[start:stop], panel, seed=seed + 1 + start, scale=scale, feature_fn=feature_fn, start_order=qmc_start_order, max_order=qmc_max_order, atol=qmc_atol, rtol=qmc_rtol))
+                    chunks_b.append(tilted_conditional_mean_exact(mixture, beta, observed[start:stop], panel, seed=seed + 2 + start, scale=scale, feature_fn=feature_fn, start_order=qmc_start_order, max_order=qmc_max_order, atol=qmc_atol, rtol=qmc_rtol))
+                else:
+                    chunks_a.append(tilted_conditional_mean_qmc(mixture, beta, observed[start:stop], panel, qmc_order, seed=seed + 1 + start, scale=scale, feature_fn=feature_fn))
+                    chunks_b.append(tilted_conditional_mean_qmc(mixture, beta, observed[start:stop], panel, qmc_order, seed=seed + 2 + start, scale=scale, feature_fn=feature_fn))
             a = np.concatenate(chunks_a, axis=0) - mu
             b = np.concatenate(chunks_b, axis=0) - mu
         else:
-            ca = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 1, scale, feature_fn=fn)
-            cb = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 2, scale, feature_fn=fn)
+            ca = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 1, scale, feature_fn=feature_fn)
+            cb = tilted_conditional_batch(mixture, beta, observed, panel, n_cond, seed + 2, scale, feature_fn=feature_fn)
             a = fn(ca).mean(axis=1) - mu
             b = fn(cb).mean(axis=1) - mu
         a = a - a.mean(0)
@@ -250,7 +250,7 @@ def panel_information_cross(mixture, beta, panels, reference, scale, n_tilted, n
 
 
 def active_panel_information_cross(mixture, beta, active_panels, reference, scale,
-                                   n_tilted, n_cond, seed, feature_fn=None, conditional_method="rejection", qmc_order=8):
+                                   n_tilted, n_cond, seed, feature_fn=None, conditional_method="rejection", qmc_order=8, qmc_start_order=8, qmc_max_order=16, qmc_atol=2e-6, qmc_rtol=2e-5, qmc_chunk_rows=128):
     """Estimate current-step information only for panels present in ``D_B``.
 
     Algorithm 2 step 6 requires re-estimation for every *active* panel.  The
@@ -263,7 +263,7 @@ def active_panel_information_cross(mixture, beta, active_panels, reference, scal
         return {}
     estimates = panel_information_cross(
         mixture, beta, tuple(active_panels), reference, scale,
-        n_tilted, n_cond, seed, feature_fn=feature_fn, conditional_method=conditional_method, qmc_order=qmc_order,
+        n_tilted, n_cond, seed, feature_fn=feature_fn, conditional_method=conditional_method, qmc_order=qmc_order, qmc_start_order=qmc_start_order, qmc_max_order=qmc_max_order, qmc_atol=qmc_atol, qmc_rtol=qmc_rtol, qmc_chunk_rows=qmc_chunk_rows,
     )
     return dict(zip(active_panels, estimates))
 
@@ -272,7 +272,8 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
                        theta_bound=4.0, h_tilted=128, h_cond=32, step_size=1.0, norm_cap=None,
                        l1_cap=None, mu_samples=10000, mu_direct=False, oracle_information=None,
                        feature_fn=None, max_step_norm=None, return_diagnostics=False,
-                       conditional_method="rejection", qmc_order=10):
+                       conditional_method="rejection", qmc_order=10, qmc_start_order=8,
+                       qmc_max_order=16, qmc_atol=2e-6, qmc_rtol=2e-5):
     """One Fisher-scoring update following PDF Algorithm 2 step 6.
 
     Re-estimates ``I_S(beta^(j))`` by cross-completion at the current beta, builds
@@ -290,7 +291,7 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
     if oracle_information is None:
         active_infos = active_panel_information_cross(
             mixture, beta_start, active_panels, reference, scale,
-            h_tilted, h_cond, seed + 7, feature_fn=feature_fn, conditional_method=conditional_method, qmc_order=qmc_order,
+            h_tilted, h_cond, seed + 7, feature_fn=feature_fn, conditional_method=conditional_method, qmc_order=qmc_order, qmc_start_order=qmc_start_order, qmc_max_order=qmc_max_order, qmc_atol=qmc_atol, qmc_rtol=qmc_rtol,
         )
     else:
         active_infos = {panel: oracle_information[panels.index(panel)] for panel in active_panels}
@@ -301,14 +302,21 @@ def final_rr_estimator(mixture, beta_start, observations, panels, reference, sca
         # S1 uses the exact conditional oracle for the observed score. The
         # finite-LU importance proposal is reserved for learned-generator
         # experiments, not the oracle gate.
-        if conditional_method == "qmc":
+        if conditional_method == "exact_adaptive":
+            projected.append(tilted_conditional_mean_exact(
+                mixture, beta_start, np.asarray(rows), panel,
+                seed=int(rng.integers(2**31 - 1)), scale=scale, feature_fn=feature_fn,
+                start_order=qmc_start_order, max_order=qmc_max_order,
+                atol=qmc_atol, rtol=qmc_rtol,
+            ))
+        elif conditional_method == "qmc":
             projected.append(tilted_conditional_mean_qmc(
                 mixture, beta_start, np.asarray(rows), panel, qmc_order,
                 seed=int(rng.integers(2**31 - 1)), scale=scale, feature_fn=feature_fn,
             ))
         else:
             completions = tilted_conditional_batch(mixture, beta_start, np.asarray(rows), panel, lu,
-                                                    int(rng.integers(2**31 - 1)), scale, feature_fn=fn)
+                                                    int(rng.integers(2**31 - 1)), scale, feature_fn=feature_fn)
             projected.append(fn(completions).mean(axis=1))
     projected = np.concatenate(projected, axis=0)
     if mu_direct:
@@ -356,7 +364,8 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
                     mlp_hidden=64, mlp_steps=200, generator=None,
                     gen_info_tilted=256, gen_info_cond=32, disc_reference_size=None,
                     feature_fn=None, scoring_step_size=1.0, theta_l1_cap=None,
-                    scoring_max_step_norm=None, conditional_method="rejection", qmc_order=10):
+                    scoring_max_step_norm=None, conditional_method="rejection", qmc_order=10,
+                    qmc_start_order=8, qmc_max_order=16, qmc_atol=2e-6, qmc_rtol=2e-5):
     prepared = prepared or prepare_s1_oracle(mixture, scale, panels, seed, feature_fn=feature_fn)
     reference = prepared["reference"]
     ref_large = prepared["reference_large"]
@@ -446,7 +455,7 @@ def run_replication(mixture, scale, panels, budget, seed, prepared=None,
         # was silently ignored, allowing overlap collapse in exact TiltCond.
         norm_cap_val = theta_norm_cap
         for update in range(scoring_steps):
-            beta_next, step_diagnostics = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=scoring_step_size, norm_cap=norm_cap_val, l1_cap=theta_l1_cap, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn, max_step_norm=scoring_max_step_norm, return_diagnostics=True, conditional_method=conditional_method, qmc_order=qmc_order)
+            beta_next, step_diagnostics = final_rr_estimator(mixture, beta_hat, observations, panels, ref_large, scale, lu, seed + 4 + update, h_tilted=h_tilted, h_cond=h_cond, step_size=scoring_step_size, norm_cap=norm_cap_val, l1_cap=theta_l1_cap, mu_direct=mu_direct, mu_samples=mu_samples, oracle_information=oracle_information if use_oracle_H else None, feature_fn=feature_fn, max_step_norm=scoring_max_step_norm, return_diagnostics=True, conditional_method=conditional_method, qmc_order=qmc_order, qmc_start_order=qmc_start_order, qmc_max_order=qmc_max_order, qmc_atol=qmc_atol, qmc_rtol=qmc_rtol)
             update_diagnostics.append({"step": update, "step_norm": float(np.linalg.norm(beta_next - beta_hat)), "projected": bool(np.any(np.abs(beta_next) >= 4.0)), "pilot_budget": int(pilot_counts.sum()), **step_diagnostics})
             beta_hat = beta_next
         # Keep the untruncated plug-in Bregman value for the numerical gate.
