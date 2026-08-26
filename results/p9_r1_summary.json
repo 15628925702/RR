@@ -1,8 +1,0 @@
-{
-  "empirical_base": 1187,
-  "max_operator_error_learned": 2.1341070467132597,
-  "n_panels": 120,
-  "panel_ranking_spearman": 0.5278699909715951,
-  "r1_smoke": true,
-  "stage": "P9"
-}

@@ -51,3 +51,5 @@ old_*.py
 old_*.txt
 legacy_*.py
 p4_pdf*.txt
+# Historical diagnostics and generated artifacts are retained outside the active tree.
+/legacy_diagnostic_20260826/
