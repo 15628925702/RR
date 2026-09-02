@@ -12,6 +12,7 @@ from rr_gid_cn.conditional_backend import (
 from rr_gid_cn.p4_integrity import compute_pilot_budget
 from rr_gid_cn.synthetic_oracle import (
     feature_map,
+    full_target_kl,
     make_frozen_mixture,
     reference_scale,
     sample_full,
@@ -97,3 +98,9 @@ def test_reference_moment_cache_matches_feature_map():
     w /= w.sum()
     assert np.linalg.norm(mu - w @ features) <= 1e-12
     assert cache.kl(np.zeros(12), np.zeros(12)) == 0.0
+    beta_true = np.linspace(-0.15, 0.2, 12)
+    cache_true = ReferenceMomentCache.build(reference, scale, beta_true=beta_true)
+    beta_hat = beta_true + 0.05
+    kl = cache_true.kl(beta_true, beta_hat)
+    assert kl > 0.0
+    assert abs(kl - full_target_kl(beta_true, beta_hat, reference, scale)) <= 1e-12

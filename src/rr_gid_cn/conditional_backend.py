@@ -114,7 +114,11 @@ class ReferenceMomentCache:
         else:
             mu_true = self.mu_beta_true
             a_true = self.A_beta_true
-        return float(a_true - self.log_partition(beta_hat) - mu_true @ (np.asarray(beta_true) - np.asarray(beta_hat)))
+        # KL(Q_{β*} || Q_{β̂}) = A(β̂) - A(β*) - μ* · (β̂ - β*)
+        return float(
+            self.log_partition(beta_hat) - a_true
+            - mu_true @ (np.asarray(beta_hat) - np.asarray(beta_true))
+        )
 
 
 @dataclass
