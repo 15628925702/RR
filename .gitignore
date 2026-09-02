@@ -18,8 +18,10 @@ results/*
 !results/.gitkeep
 !results/*_summary.json
 !results/*summary*.json
-!results/p4/
-!results/p4/**
+!results/diagnostics_legacy/
+!results/diagnostics_legacy/**
+!results/paper/
+!results/paper/**
 figures/*
 !figures/.gitkeep
 experiments/runs/*

@@ -170,19 +170,22 @@ def discriminative_design(reference_train, validation, beta, panels, scale, seed
     n = len(reference_train)
     dim = reference_train.shape[-1]
     r = fn(reference_train[:1]).shape[-1]
+    chosen = rng.integers(0, len(panels), size=n)
     mask_matrix = np.zeros((n, dim), dtype=float)
-    for i in range(n):
-        mask_matrix[i, list(panels[int(rng.integers(len(panels)))])] = 1.0
+    panel_arr = np.asarray(panels, dtype=int)
+    mask_matrix[np.arange(n)[:, None], panel_arr[chosen]] = 1.0
     phi_train = fn(reference_train)
     mu_beta, _ = tilted_moments(beta, reference_train, scale, feature_fn=fn)
     labels = phi_train - mu_beta
-    logits = phi_train @ beta
-    w = np.exp(logits - logits.max())
+    logits = phi_train @ np.asarray(beta)
+    shift = float(np.max(logits))
+    w = np.exp(logits - shift)
     model = MaskedScoreMLP(2 * dim, r, hidden=hidden, seed=seed)
     model.fit(masked_pool(reference_train, mask_matrix), labels, weights=w,
               steps=steps, lr=lr)
     phi_val = fn(validation)
-    w_val = np.exp(phi_val @ beta)
+    logits_val = phi_val @ np.asarray(beta)
+    w_val = np.exp(logits_val - logits_val.max())
     infos = score_information(model, validation, panels, w_val)
     _, fisher_hat = tilted_moments(beta, validation, scale, feature_fn=fn)
     costs = np.ones(len(panels))
@@ -244,18 +247,28 @@ def _project_theta(beta, theta_bound=4.0, norm_cap=None, l1_cap=None):
     return x
 
 
-def solve_pilot_beta(mu_pil, reference, scale, theta_bound=4.0, steps=20, norm_cap=None, l1_cap=None):
+def solve_pilot_beta(mu_pil, reference, scale, theta_bound=4.0, steps=20, norm_cap=None, l1_cap=None,
+                    features=None):
     beta = np.zeros(12)
-    features = feature_map(reference, scale)
+    features = feature_map(reference, scale) if features is None else np.asarray(features, dtype=float)
     target = np.asarray(mu_pil)
     def objective(x):
         z = features @ x
         return float(np.logaddexp.reduce(z) - np.log(len(z)) - x @ target)
+    def moments(x):
+        logits = features @ np.asarray(x, dtype=float)
+        weights = np.exp(logits - logits.max())
+        weights /= weights.sum()
+        mean = weights @ features
+        centered = features - mean
+        fisher = (centered * weights[:, None]).T @ centered
+        return mean, fisher
     for _ in range(max(steps, 100)):
-        mu, fisher = tilted_moments(beta, reference, scale)
+        mu, fisher = moments(beta)
         direction = np.linalg.pinv(fisher, rcond=1e-10) @ (target - mu)
         current = objective(beta)
         step = 1.0
+        candidate = beta
         while step > 1e-5:
             candidate = _project_theta(beta + step * direction, theta_bound, norm_cap, l1_cap)
             if objective(candidate) <= current + 1e-9:

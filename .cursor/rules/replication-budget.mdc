@@ -1,12 +1,14 @@
 ---
-description: Formal replications are 50, never 200
+description: Paper experiments follow the 2026-09-02 replan, not G-ladder
 alwaysApply: true
 ---
 
-# Replication budget
+# Paper experiment authority
 
-正式实验（P4 formal / P5 / P9 / P10 及同类 sweep）每格 **50** 次 replication，禁止 200。
+唯一执行依据：`核心文档/RR_GID_实验重规划与代码改造执行指南_20260902.md`。
 
+- 不要再跑或扩展 G0–G4、rejection bulk、\(J/L_U/H\) 诊断矩阵。
+- 论文实验：E1 synthetic main、E2 nonlinearity、E3 reuse、E4 最小 oracle calibration、E5 Gas。
+- 正式格子先 **20** 个 paired replications；CI 半宽过大再追加 10，最多 **40**。禁止 200。
+- Bulk 只用 cached QMC；high-precision / rejection 仅 calibration。
 - 不要改政策、预算、指标、算法来「补」样本数。
-- Phase 3 ladder（G0–G4）当前诊断仍是 20；不要把正在跑的 G3 从 20 改成 50。
-- 种子公式保持 `202600000 + budget*1000 + replication`，replication 取 0–49。

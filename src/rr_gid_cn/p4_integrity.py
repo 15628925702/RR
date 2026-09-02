@@ -28,11 +28,22 @@ def canonical_sha256(value: Any) -> str:
 
 def compute_pilot_budget(schedule: dict[str, Any], budget: int) -> int:
     """Compute the pilot once in the runner from an auditable schedule."""
+    kind = str(schedule.get("kind", ""))
+    if kind == "anchored_power":
+        required = {"anchor_budget", "anchor_pilot", "exponent", "max_fraction"}
+        missing = required - set(schedule)
+        if missing:
+            raise ValueError(f"pilot schedule missing fields: {sorted(missing)}")
+        ratio = float(budget) / float(schedule["anchor_budget"])
+        raw = float(schedule["anchor_pilot"]) * (ratio ** float(schedule["exponent"]))
+        count = int(math.ceil(raw))
+        count = min(count, int(math.floor(float(schedule["max_fraction"]) * budget)), int(budget))
+        return max(0, count)
     required = {"kind", "exponent", "multiplier", "max_fraction", "min_per_support", "rounding_rule"}
     missing = required - set(schedule)
     if missing:
         raise ValueError(f"pilot schedule missing fields: {sorted(missing)}")
-    if schedule["kind"] != "power":
+    if kind != "power":
         raise ValueError(f"unsupported pilot schedule kind: {schedule['kind']}")
     raw = float(schedule["multiplier"]) * float(budget) ** float(schedule["exponent"])
     rounding = str(schedule["rounding_rule"])
@@ -49,10 +60,20 @@ def compute_pilot_budget(schedule: dict[str, Any], budget: int) -> int:
     return max(0, count)
 
 
-def validate_experiment_mode(p4: dict[str, Any], *, formal: bool) -> None:
+def validate_experiment_mode(cfg: dict[str, Any], *, formal: bool = True, paper: bool = False) -> None:
     """Reject ambiguous exact-score labels before any expensive work starts."""
+    if paper:
+        mode = str(cfg.get("experiment_mode", cfg.get("score_backend", "cached_qmc")))
+        if mode in {"rejection", "finite_lu_rejection"}:
+            raise ValueError("paper bulk forbids rejection")
+        if int(cfg.get("replications", 0) or 0) > 40:
+            raise ValueError("paper bulk replications must be <= 40")
+        if str(cfg.get("score_backend", "cached_qmc")) != "cached_qmc":
+            raise ValueError("paper bulk requires score_backend=cached_qmc")
+        return
     if not formal:
         return
+    p4 = cfg
     if "use_oracle_H" in p4:
         raise ValueError("formal config forbids ambiguous use_oracle_H; use frozen_beta_star_information")
     mode = str(p4.get("experiment_mode", ""))

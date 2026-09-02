@@ -62,6 +62,12 @@ _WORKLOAD_COUNTERS = {
     "qmc_nodes": 0,
     "qmc_scrambles": 0,
     "feature_scans": 0,
+    "feature_nodes_built": 0,
+    "feature_nodes_reweighted": 0,
+    "component_nodes": 0,
+    "cache_hit": 0,
+    "cache_miss": 0,
+    "bytes_cached": 0,
 }
 _CONDITIONAL_ACCEPT_RATES: list[float] = []
 _QMC_ORDERS: list[int] = []
