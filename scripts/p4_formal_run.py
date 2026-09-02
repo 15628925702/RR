@@ -6,11 +6,20 @@ import json
 from pathlib import Path
 import pickle
 import argparse
+import hashlib
 import math
+import subprocess
 
 import yaml
 
 from rr_gid_cn.s1_gate import prepare_s1_oracle, run_replication
+from rr_gid_cn.p4_integrity import (
+    compute_pilot_budget,
+    load_seed_manifest,
+    sha256_file,
+    validate_artifact_metadata,
+    validate_experiment_mode,
+)
 from rr_gid_cn.synthetic_oracle import all_pairs, make_frozen_mixture, reference_scale, sample_full
 
 
@@ -55,6 +64,22 @@ def _budget_lu(spec, budget: int) -> int:
     return max(1, int(math.ceil(scale * math.log2(float(budget) + offset))))
 
 
+def _source_hashes() -> dict[str, str]:
+    paths = (
+        Path("src/rr_gid_cn/s1_gate.py"),
+        Path("src/rr_gid_cn/p4_integrity.py"),
+        Path("scripts/p4_formal_run.py"),
+        Path("scripts/p4_validate.py"),
+    )
+    return {path.as_posix(): sha256_file(path) for path in paths}
+
+
+def _git_commit() -> str:
+    return subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], text=True, encoding="utf-8"
+    ).strip()
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--budget", type=int, default=None)
@@ -80,12 +105,23 @@ def main() -> None:
     with args.config.open(encoding="utf-8") as stream:
         cfg = yaml.safe_load(stream)
     p4 = cfg["p4"]
-    if not args.diagnostic and not bool(p4.get("exact_observed_score", False)):
-        raise ValueError("formal P4 requires exact_observed_score=true")
+    validate_experiment_mode(p4, formal=not args.diagnostic)
     if not args.diagnostic and args.lu is not None:
         raise ValueError("formal P4 cannot use fixed --lu; use budget-derived L_U(B)")
     budgets = (args.budget,) if args.budget is not None else tuple(p4["budgets"])
     replications = args.max_replications or int(p4["replications"])
+    manifest_path = Path(p4["target_manifest"])
+    manifest, manifest_sha256 = load_seed_manifest(manifest_path)
+    requested_keys = {
+        (int(budget), int(replication))
+        for budget in budgets for replication in range(replications)
+    }
+    missing_manifest = sorted(requested_keys - set(manifest))
+    if missing_manifest:
+        raise ValueError(f"seed manifest is missing requested entries: {missing_manifest[:5]}")
+    config_sha256 = sha256_file(args.config)
+    source_sha256 = _source_hashes()
+    code_commit = _git_commit()
     steps = int(p4["scoring_steps"]) if args.scoring_steps is None else args.scoring_steps
     # Explicit --scoring-steps always writes a J-suffixed file so the J ablation
     # never collides with the default (J=2) main-configuration output.
@@ -115,10 +151,20 @@ def main() -> None:
                 f"prepared artifact is diagnostic-sized (reference={ref_n}, "
                 f"reference_large={large_n}); formal P4 requires 50000/{p4['large_reference_size']}"
             )
-        if "reference_large" not in prepared:
-            prepared["reference_large"] = sample_full(mixture, p4["large_reference_size"], 2026 + 12345)
-            with prepared_path.open("wb") as stream:
-                pickle.dump(prepared, stream, protocol=5)
+        expected_metadata = {
+            "schema_version": "p4-oracle-artifact-v2",
+            "mixture_seed": int(p4.get("mixture_seed", 2026)),
+            "alpha": float(p4.get("alpha", 1.0)),
+            "reference_size": int(p4.get("reference_size", args.reference_size)),
+            "large_reference_size": int(p4["large_reference_size"]),
+            "information_tilted_samples": int(p4["information_tilted_samples"]),
+            "information_conditional_samples": int(p4["information_conditional_samples"]),
+            "information_method": str(p4.get("information_method", "cross_completion_rejection")),
+            "build_config_sha256": config_sha256,
+            "code_commit": code_commit,
+            "source_sha256": source_sha256,
+        }
+        validate_artifact_metadata(prepared.get("artifact_metadata", {}), expected_metadata)
     else:
         prepared = prepare_s1_oracle(
             mixture, scale, panels, seed=2026,
@@ -127,8 +173,14 @@ def main() -> None:
             conditional_samples=args.info_cond or p4["information_conditional_samples"],
             large_reference_size=args.large_reference_size or p4["large_reference_size"],
         )
+        prepared["artifact_metadata"].update({
+            "build_config_sha256": config_sha256,
+            "code_commit": code_commit,
+            "source_sha256": source_sha256,
+        })
         with prepared_path.open("wb") as stream:
             pickle.dump(prepared, stream, protocol=5)
+    artifact_sha256 = sha256_file(prepared_path)
     # For the formal S1 route L_U grows with B, as required by the PDF.  A
     # fixed LU is permitted only for explicitly diagnostic runs.
     kwargs = dict(lu=(args.lu if args.lu is not None else None),
@@ -137,7 +189,7 @@ def main() -> None:
                   kl_samples=p4["kl_samples"] if args.kl_samples is None else args.kl_samples,
                   pilot_norm_cap=p4["pilot_norm_cap"],
                   scoring_steps=steps,
-                  use_oracle_H=bool(p4.get("use_oracle_H", False)),
+                  frozen_beta_star_information=bool(p4.get("frozen_beta_star_information", False)),
                   kl_mu_direct=bool(p4.get("kl_mu_direct", False)),
                   theta_norm_cap=p4.get("theta_norm_cap"),
                   theta_l1_cap=p4.get("theta_l1_cap"),
@@ -156,7 +208,8 @@ def main() -> None:
             for replication in range(start, min(end, replications)):
                 if all((replication, pol) in done[budget] for pol in ("Uniform SQD", "A-OSQD", "oracle RR-GID")):
                     continue
-                seed = 202600000 + budget * 1000 + replication
+                seed_entry = manifest[(int(budget), int(replication))]
+                seed = int(seed_entry["replication_seed"])
                 run_kwargs = dict(kwargs)
                 if run_kwargs["lu"] is None:
                     run_kwargs["lu"] = _budget_lu(p4.get("lu_schedule"), budget)
@@ -172,7 +225,26 @@ def main() -> None:
                     run_kwargs["qmc_order"] = _budget_qmc_order(
                         p4.get("qmc_order", 10), p4.get("qmc_order_growth"), budget
                     )
-                rows = run_replication(mixture, scale, panels, budget, seed, prepared=prepared, **run_kwargs)
+                pilot_schedule = dict(p4["pilot_schedule"])
+                pilot_budget = compute_pilot_budget(pilot_schedule, budget)
+                reproducibility = {
+                    "schema_version": "p4-phase1-row-v2",
+                    "not_formal": bool(args.diagnostic),
+                    "experiment_mode": str(p4["experiment_mode"]),
+                    "code_commit": code_commit,
+                    "source_sha256": source_sha256,
+                    "config_sha256": config_sha256,
+                    "artifact_id": prepared_path.name,
+                    "artifact_sha256": artifact_sha256,
+                    "manifest_id": manifest_path.name,
+                    "manifest_sha256": manifest_sha256,
+                }
+                rows = run_replication(
+                    mixture, scale, panels, budget, seed, prepared=prepared,
+                    pilot_schedule=pilot_schedule, pilot_budget=pilot_budget,
+                    seed_manifest_entry=seed_entry, reproducibility=reproducibility,
+                    **run_kwargs,
+                )
                 for row in rows:
                     row["replication"] = replication
                     row["lu"] = int(run_kwargs["lu"])

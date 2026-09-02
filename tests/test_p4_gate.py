@@ -27,6 +27,12 @@ def test_paired_gate_rows():
     # paired target draws across the three policies
     seeds = {row["target_draw_seed"] for row in rows}
     assert len(seeds) == 1
+    assert all(0.0 < row["runtime"]["attributed_fraction"] <= 1.01 for row in rows)
+    assert all(row["workload"]["full_requested"] >= row["budget"] for row in rows)
+    assert all(row["workload"]["full_proposals"] >= row["workload"]["full_requested"] for row in rows)
+    assert all(row["workload"]["feature_scans"] > 0 for row in rows)
+    assert all(row["runtime"]["active_panels"] >= 1 for row in rows)
+    assert {row["target_draw_sha256"] for row in rows} == {rows[0]["target_draw_sha256"]}
 
 
 def test_update_information_is_limited_to_active_panels():

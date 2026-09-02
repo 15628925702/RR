@@ -1,0 +1,56 @@
+# Frozen after order-14 μ was shown to impose a ~2% risk floor on C-01 Δ.
+# Phase-2 diagnostic only; never formal/paper output.
+p4_phase2:
+  schema_version: p4-phase2-config-v1
+  not_formal: true
+  phase: 2
+  mixture_seed: 2026
+  alpha: 1.0
+  scale_sample_size: 6000
+  scale_seed: 2026
+  beta_seed: 2026
+  beta_target_ess_fraction: 0.5
+  full_law:
+    order: 16
+    scrambles: 8
+    seed: 26082026
+  conditional:
+    start_order: 6
+    max_order: 10
+    scrambles: 4
+    atol: 0.002
+    rtol: 0.002
+    scramble_se_atol: 0.0025
+    scramble_se_rtol: 0.0025
+    seed: 26083026
+  information:
+    outer_order: 6
+    outer_scrambles: 3
+    seed: 26084026
+    psd_floor: 0.0
+  independent_replicate:
+    full_order_increment: 1
+    information_outer_order_increment: 1
+    seed_offset: 100000000
+  frank_wolfe:
+    tolerance: 0.0001
+    max_iter: 500
+  convergence_gate:
+    constant_relative_tolerance: 0.02
+    top_panel_count: 10
+    top_panel_overlap_min: 0.8
+  score_centering:
+    Bmax: 32000
+    selected_panels: 5
+    risk_fraction_of_half_phi_max: 0.01
+    sampling_draws: 512
+    sampling_seed: 26085026
+  current_beta_information:
+    beta_multiplier: 0.9
+    selected_panels: 3
+    estimated_tilted_samples: 1024
+    estimated_conditional_samples: 128
+    seed: 26086026
+  raw_kl:
+    perturbation_norms: [0.01, 0.05, 0.1]
+    directions_seed: 26087026

@@ -1,0 +1,139 @@
+"""Phase-1 reproducibility and validation helpers for the P4 gate."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import math
+from collections import Counter
+from pathlib import Path
+from typing import Any, Iterable
+
+
+FORMAL_POLICIES = ("Uniform SQD", "A-OSQD", "oracle RR-GID")
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(8 * 1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def canonical_sha256(value: Any) -> str:
+    payload = json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def compute_pilot_budget(schedule: dict[str, Any], budget: int) -> int:
+    """Compute the pilot once in the runner from an auditable schedule."""
+    required = {"kind", "exponent", "multiplier", "max_fraction", "min_per_support", "rounding_rule"}
+    missing = required - set(schedule)
+    if missing:
+        raise ValueError(f"pilot schedule missing fields: {sorted(missing)}")
+    if schedule["kind"] != "power":
+        raise ValueError(f"unsupported pilot schedule kind: {schedule['kind']}")
+    raw = float(schedule["multiplier"]) * float(budget) ** float(schedule["exponent"])
+    rounding = str(schedule["rounding_rule"])
+    if rounding == "ceil":
+        count = int(math.ceil(raw))
+    elif rounding == "floor":
+        count = int(math.floor(raw))
+    elif rounding == "nearest":
+        count = int(round(raw))
+    else:
+        raise ValueError(f"unsupported pilot rounding rule: {rounding}")
+    count = max(count, 6 * int(schedule["min_per_support"]))
+    count = min(count, int(math.floor(float(schedule["max_fraction"]) * budget)), int(budget))
+    return max(0, count)
+
+
+def validate_experiment_mode(p4: dict[str, Any], *, formal: bool) -> None:
+    """Reject ambiguous exact-score labels before any expensive work starts."""
+    if not formal:
+        return
+    if "use_oracle_H" in p4:
+        raise ValueError("formal config forbids ambiguous use_oracle_H; use frozen_beta_star_information")
+    mode = str(p4.get("experiment_mode", ""))
+    method = str(p4.get("conditional_method", ""))
+    if mode in {"oracle_gold_qmc", "validated_fixed_qmc"}:
+        if method not in {"qmc", "exact_adaptive"}:
+            raise ValueError(f"{mode} requires a certified QMC conditional method")
+        if not p4.get("qmc_error_diagnostics", False):
+            raise ValueError(f"{mode} requires qmc_error_diagnostics=true")
+    elif mode == "finite_lu_rejection":
+        if method != "rejection":
+            raise ValueError("finite_lu_rejection requires conditional_method=rejection")
+        if not p4.get("sandwich_benchmark", False):
+            raise ValueError("finite_lu_rejection requires a sandwich benchmark")
+    else:
+        raise ValueError(f"unsupported formal experiment_mode: {mode}")
+    if bool(p4.get("exact_observed_score", False)) and mode == "finite_lu_rejection":
+        raise ValueError("finite-LU rejection mean cannot be labelled exact_observed_score")
+
+
+def load_seed_manifest(path: Path) -> tuple[dict[tuple[int, int], dict[str, int]], str]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    rows = payload.get("rows", [])
+    keys = [(int(row["budget"]), int(row["replication"])) for row in rows]
+    duplicates = sorted(key for key, count in Counter(keys).items() if count > 1)
+    if duplicates:
+        raise ValueError(f"duplicate seed manifest entries: {duplicates[:5]}")
+    manifest = {}
+    required = {
+        "replication_seed", "target_draw_seed", "pilot_or_design_seed",
+        "score_seed_root", "information_seed_root",
+    }
+    for key, row in zip(keys, rows):
+        missing = required - set(row)
+        if missing:
+            raise ValueError(f"manifest entry {key} missing seed fields: {sorted(missing)}")
+        manifest[key] = {name: int(row[name]) for name in required}
+    return manifest, sha256_file(path)
+
+
+def require_manifest_grid(
+    manifest: dict[tuple[int, int], dict[str, int]], budgets: Iterable[int], replications: Iterable[int]
+) -> None:
+    expected = {(int(b), int(r)) for b in budgets for r in replications}
+    observed = set(manifest)
+    missing = sorted(expected - observed)
+    extra = sorted(observed - expected)
+    if missing or extra:
+        raise ValueError(f"seed manifest grid mismatch: missing={missing[:5]}, extra={extra[:5]}")
+
+
+def validate_artifact_metadata(actual: dict[str, Any], expected: dict[str, Any]) -> None:
+    mismatches = {
+        key: (actual.get(key), value)
+        for key, value in expected.items()
+        if actual.get(key) != value
+    }
+    if mismatches:
+        raise ValueError(f"prepared artifact metadata mismatch: {mismatches}")
+
+
+def validate_expected_grid(
+    rows: list[dict[str, Any]],
+    budgets: Iterable[int],
+    replications: Iterable[int],
+    policies: Iterable[str] = FORMAL_POLICIES,
+) -> None:
+    expected = {
+        (int(budget), int(replication), str(policy))
+        for budget in budgets for replication in replications for policy in policies
+    }
+    keys = [
+        (int(row["budget"]), int(row["replication"]), str(row["policy"]))
+        for row in rows
+    ]
+    duplicates = sorted(key for key, count in Counter(keys).items() if count > 1)
+    observed = set(keys)
+    missing = sorted(expected - observed)
+    extra = sorted(observed - expected)
+    if duplicates or missing or extra:
+        raise ValueError(
+            f"result grid mismatch: missing={missing[:5]}, extra={extra[:5]}, "
+            f"duplicates={duplicates[:5]}"
+        )

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>P4 墙时瓶颈</title>
+<style>
+@page { size: A4; margin: 13mm 13mm 14mm 13mm; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  margin: 0;
+  color: #1a2332;
+  background: #fff;
+  font-family: "Microsoft YaHei UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 9.45pt;
+  line-height: 1.62;
+}
+:root {
+  --ink: #1a2332;
+  --muted: #5b6573;
+  --line: #d8dee8;
+  --navy: #1e3a5f;
+  --navy-2: #2b5a8a;
+  --ok: #2f6b3a;
+  --ok-bg: #e8f3ea;
+  --wait: #8a5a12;
+  --wait-bg: #f8efd8;
+  --now: #1e4d7b;
+  --now-bg: #e7f0f8;
+  --paper: #f6f8fb;
+  --slow: #8b2e2e;
+  --slow-bg: #f8ecec;
+}
+.mast {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.2em;
+  padding: 0 0 0.85em;
+  border-bottom: 2.2pt solid var(--navy);
+  margin-bottom: 1.05em;
+}
+.brand { font-size: 8pt; font-weight: 700; color: var(--navy); }
+.brand span { font-weight: 500; color: var(--muted); }
+.mast h1 {
+  margin: 0.18em 0 0;
+  font-size: 18pt;
+  font-weight: 700;
+  line-height: 1.28;
+  color: var(--navy);
+}
+.sub { margin: 0.18em 0 0; font-size: 10.2pt; color: var(--muted); }
+.meta { text-align: right; font-size: 8pt; color: var(--muted); line-height: 1.55; white-space: nowrap; }
+.hero {
+  background: linear-gradient(180deg, #f3f6fb 0%, #eef3f9 100%);
+  border: 0.6pt solid #c5d3e4;
+  border-left: 3.2pt solid var(--navy);
+  padding: 0.72em 0.95em;
+  margin: 0 0 0.95em;
+  page-break-inside: avoid;
+}
+.hero .label { font-size: 7.6pt; font-weight: 700; color: var(--navy); letter-spacing: 0.08em; margin: 0 0 0.28em; }
+.hero p { margin: 0; font-size: 10pt; line-height: 1.62; color: #1a2332; }
+.facts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.45em;
+  margin: 0 0 0.95em;
+}
+.fact {
+  background: var(--paper);
+  border: 0.45pt solid var(--line);
+  padding: 0.5em 0.62em 0.48em;
+  page-break-inside: avoid;
+}
+.fact .k { font-size: 7.4pt; color: var(--muted); margin: 0 0 0.12em; }
+.fact .v { font-size: 10.4pt; font-weight: 700; color: var(--navy); line-height: 1.3; }
+h2 {
+  margin: 1.05em 0 0.38em;
+  padding: 0.08em 0 0.28em 0;
+  font-size: 12pt;
+  font-weight: 700;
+  color: var(--navy);
+  border-bottom: 0.7pt solid var(--navy);
+  page-break-after: avoid;
+}
+h2 .n {
+  display: inline-block;
+  min-width: 1.35em;
+  margin-right: 0.28em;
+  color: #8aa0b8;
+  font-variant-numeric: tabular-nums;
+}
+h3 {
+  margin: 0.72em 0 0.26em;
+  font-size: 10.2pt;
+  font-weight: 700;
+  color: var(--ink);
+  page-break-after: avoid;
+}
+p { margin: 0.28em 0 0.48em; }
+strong { font-weight: 650; color: #111827; }
+ul { margin: 0.15em 0 0.7em; padding-left: 1.25em; }
+li { margin: 0.12em 0; }
+code {
+  font-family: Consolas, "Cascadia Code", "Microsoft YaHei UI", monospace;
+  font-size: 0.88em;
+  background: #eef2f6;
+  padding: 0.02em 0.22em;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.4em 0 0.85em;
+  font-size: 8.3pt;
+  line-height: 1.45;
+  page-break-inside: avoid;
+}
+th {
+  font-weight: 700;
+  text-align: left;
+  background: #1e3a5f;
+  color: #fff;
+  padding: 0.38em 0.48em;
+}
+td {
+  border-bottom: 0.35pt solid #e4e9f0;
+  padding: 0.34em 0.48em;
+  vertical-align: top;
+}
+tr:nth-child(even) td { background: #f7f9fc; }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+tr.slow td { background: #f8ecec; }
+tr.ok td { background: #e8f3ea; }
+.tiny { font-size: 8pt; color: var(--muted); }
+.note {
+  margin: 0.35em 0 0.8em;
+  padding: 0.5em 0.75em;
+  background: var(--paper);
+  border-left: 2.2pt solid var(--navy-2);
+  font-size: 9.3pt;
+  page-break-inside: avoid;
+}
+.note p { margin: 0; }
+.warnbox {
+  background: var(--wait-bg);
+  border: 0.6pt solid #e4d3a4;
+  padding: 0.65em 0.85em;
+  margin: 0.45em 0 0.8em;
+  page-break-inside: avoid;
+}
+.warnbox .t { font-size: 8pt; font-weight: 700; color: var(--wait); letter-spacing: 0.06em; margin: 0 0 0.22em; }
+.warnbox p { margin: 0; font-size: 10pt; }
+.end {
+  margin-top: 0.7em;
+  padding: 0.7em 0.9em;
+  background: var(--navy);
+  color: #fff;
+  page-break-inside: avoid;
+}
+.end p { margin: 0; font-size: 10.3pt; line-height: 1.65; color: #fff; }
+.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55em;
+  margin: 0.35em 0 0.8em;
+}
+.box {
+  border: 0.45pt solid var(--line);
+  padding: 0.55em 0.7em 0.5em;
+  page-break-inside: avoid;
+}
+.box.s { background: var(--slow-bg); border-color: #e3c4c4; }
+.box.f { background: var(--ok-bg); border-color: #b7d4bc; }
+.box .t { font-size: 8pt; font-weight: 700; margin: 0 0 0.22em; }
+.box.s .t { color: var(--slow); }
+.box.f .t { color: var(--ok); }
+.box p, .box ul { margin: 0; font-size: 9pt; }
+.box ul { padding-left: 1.1em; }
+.barwrap { margin: 0.2em 0 0.15em; }
+.bar {
+  display: flex;
+  height: 18px;
+  border-radius: 2px;
+  overflow: hidden;
+  font-size: 7.4pt;
+  font-weight: 700;
+  color: #fff;
+  line-height: 18px;
+}
+.bar span { display: block; text-align: center; white-space: nowrap; overflow: hidden; }
+.bH { background: #8b2e2e; width: 55.7%; }
+.bS { background: #c45c26; width: 32.3%; }
+.bK { background: #2b5a8a; width: 7.3%; }
+.bO { background: #8aa0b8; width: 4.7%; }
+.legend { font-size: 7.8pt; color: var(--muted); margin: 0.2em 0 0.6em; }
+.legend i { display: inline-block; width: 0.72em; height: 0.72em; margin: 0 0.22em 0 0.7em; vertical-align: -0.08em; }
+.legend i:first-child { margin-left: 0; }
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div>
+    <div class="brand">RR-GID <span>· 算力说明</span></div>
+    <h1>正式 P4 慢在哪、大概要多久</h1>
+    <p class="sub">依据 Phase 0 行级 profiler 与 G3 实测墙时，单卡外推</p>
+  </div>
+  <div class="meta">
+    2026年9月2日<br>
+    非正式 · 诊断证书
+  </div>
+</header>
+
+<div class="hero">
+  <div class="label">一句话</div>
+  <p>慢的不是 Frank–Wolfe，也不是解线性方程。每一次更新 β 都要重算 <strong>观测信息 H</strong> 和 <strong>conditional score</strong>，两者都卡在 GMM 缺失坐标的条件抽样上。拒绝抽样在远离 β<sup>⋆</sup> 时接受率会掉到 10<sup>−3</sup> 乃至 10<sup>−6</sup>，时间几乎全在进 Newton 盆之前的前两步。</p>
+</div>
+
+<div class="facts">
+  <div class="fact"><div class="k">G3 rejection 同格</div><div class="v">37.8 GPU 小时</div></div>
+  <div class="fact"><div class="k">G3 QMC 同格</div><div class="v">1.2 小时 · 快 30 倍</div></div>
+  <div class="fact"><div class="k">正式格子</div><div class="v">3 × 5 × 50 = 750</div></div>
+  <div class="fact"><div class="k">外推机器</div><div class="v">RTX 4080 SUPER</div></div>
+</div>
+
+<h2><span class="n">01</span>哪一环节慢</h2>
+
+<div class="two">
+  <div class="box s">
+    <div class="t">吃掉几乎全部墙时</div>
+    <ul>
+      <li><strong>估 H</strong>：当前 β 上的 Fisher / 观测信息</li>
+      <li><strong>算 conditional score</strong>：更新方程里的条件得分</li>
+      <li>两者都要对缺失坐标做 GMM 条件抽样</li>
+    </ul>
+  </div>
+  <div class="box f">
+    <div class="t">几乎可以忽略</div>
+    <ul>
+      <li>Frank–Wolfe（正式 P4 用 oracle p<sup>⋆</sup>，设计步甚至是 0）</li>
+      <li>解 H<sup>−1</sup>s、建 pilot、反解 β̃</li>
+      <li>抽完整 target、算 KL</li>
+    </ul>
+  </div>
+</div>
+
+<p>Phase 0 在 A800 上拍过一格：oracle 分配、B = 8000、J = 2、1 次 replication。墙时归因 <strong>99.79%</strong>，合计 12.4 秒。时间切分如下。</p>
+
+<div class="barwrap">
+  <div class="bar">
+    <span class="bH">H 56%</span>
+    <span class="bS">score 32%</span>
+    <span class="bK">KL 7%</span>
+    <span class="bO">其余</span>
+  </div>
+</div>
+<p class="legend">
+  <i style="background:#8b2e2e"></i>估 H
+  <i style="background:#c45c26"></i>conditional score
+  <i style="background:#2b5a8a"></i>KL
+  <i style="background:#8aa0b8"></i>抽 target / μ / pilot
+</p>
+
+<table>
+  <tr><th>环节</th><th class="r">秒</th><th class="r">占比</th><th>说明</th></tr>
+  <tr class="slow"><td>估 H</td><td class="r">6.91</td><td class="r">55.7%</td><td>当前 β 上重估观测信息，内层是条件抽样</td></tr>
+  <tr class="slow"><td>conditional score</td><td class="r">4.01</td><td class="r">32.3%</td><td>更新方程，同样是条件抽样</td></tr>
+  <tr><td>KL</td><td class="r">0.91</td><td class="r">7.3%</td><td>评估用，不进更新循环</td></tr>
+  <tr><td>抽完整 target</td><td class="r">0.34</td><td class="r">2.7%</td><td>倾斜定律抽 B 条完整向量</td></tr>
+  <tr><td>μ / pilot 反解</td><td class="r">0.20</td><td class="r">1.6%</td><td>一次</td></tr>
+  <tr class="ok"><td>Frank–Wolfe / 线性代数</td><td class="r">≈ 0</td><td class="r">&lt; 0.1%</td><td>不是瓶颈</td></tr>
+</table>
+<p class="tiny">该格还记下：条件提案约 14.8 亿次，接受约 580 万次，中位接受率 0.30%，最低 0.10%。720 次拒绝调用。Phase 0 说明「时间花在哪」；G3 才说明「远 pilot 上会有多肥的尾」。</p>
+
+<h2><span class="n">02</span>为什么拒绝抽样特别贵</h2>
+
+<p>条件抽样次数大致正比于 <strong>B · L<sub>U</sub> · J / 接受率</strong>。L<sub>U</sub> = ⌈32 log<sub>2</sub>(B+1)⌉，B = 8000 时 L<sub>U</sub> = 415。接受率在远离 β<sup>⋆</sup> 时是肥尾：普通格 10<sup>−3</sup> 量级，G3 最差 replication 可到 10<sup>−6</sup>，写死的轮次上限曾经填不满 L<sub>U</sub>（后来按观测接受率加轮次，硬顶 200000；拒绝律本身没改）。</p>
+
+<p>G3 rejection：B = 8000、20 次、J = 0…4，合计 <strong>37.8 GPU 小时</strong>（约 1.6 天）。中位 replication 约 1 小时，最慢一条 <strong>13.7 小时</strong>。时间几乎全在进盆前：</p>
+
+<table>
+  <tr><th>做到哪一步</th><th class="r">累计均值（秒）</th><th>含义</th></tr>
+  <tr class="slow"><td>J = 2</td><td class="r">6746</td><td>约 1.9 小时已经花完；这就是进盆前的前两步</td></tr>
+  <tr class="ok"><td>J = 4</td><td class="r">6795</td><td>后两步进盆之后只要约 50 秒</td></tr>
+</table>
+
+<div class="warnbox">
+  <div class="t">正式配置写成 J = 2 也省不了多少</div>
+  <p>贵的就是前两步。进盆之后 β 靠近 β<sup>⋆</sup>，接受率回升，后面的 Fisher scoring 很快。QMC 同格只要 1.2 小时，比拒绝抽样快约 30 倍，是因为绕开了「远 β 上提案几乎全被拒」这条尾巴，不是因为少算了 H 或 score。</p>
+</div>
+
+<h2><span class="n">03</span>正式 P4 外推多久</h2>
+
+<p>正式格子：Uniform / A-OSQD / oracle RR-GID，预算 {2000, 4000, 8000, 16000, 32000}，每格 50 次，共 750 格。五档预算相对只跑 B = 8000 约 <strong>8.4 倍体积</strong>（B · L<sub>U</sub>），50/20 = 2.5 倍重复，三个政策各算一遍 H/score 再 ×3。大预算上拒绝抽样还会更肥，所以不能只乘体积比。锚定：G3 rejection 同格 37.8 小时，G3 QMC 同格 1.22 小时。</p>
+
+<table>
+  <tr><th>路径</th><th>算法</th><th>单卡连续跑</th></tr>
+  <tr class="slow"><td>A. 现在这套拒绝抽样</td><td>有限 L<sub>U</sub> 拒绝</td><td><strong>约 2–3 个月</strong>（约 60–100 天）</td></tr>
+  <tr class="ok"><td>B. 先做性能重构，正式走 QMC</td><td>与 G3 QMC 同阶</td><td><strong>约 3–8 天 GPU</strong>（约 77 小时再加排队）</td></tr>
+  <tr><td>C. 小预算拒绝 + 大预算 QMC</td><td>审查指南允许的分层</td><td>约 2–4 周</td></tr>
+</table>
+
+<p class="tiny">路径 B 的 GPU 粗算：1.22 h × 2.5 × 8.4 × 3 ≈ 77 h。从今天起，若先花几天做 QMC 大规模路径再开格子，最快大约两周出齐正式全表。G4 若审核要求先过，会再加一段 plugin 扫 120 个 panel 的 I<sub>S</sub>，主耗时仍是正式 750 格。</p>
+
+<div class="end">
+  <p>墙时瓶颈已经定位：远 pilot 上的 H 与 conditional score 条件抽样，不是设计步。正式 P4 走拒绝抽样按月计，走 QMC 按天计。现在停在 G3，是为了先审核选哪条路径，避免一开就锁在几十天的拒绝抽样上。</p>
+</div>
+
+</body>
+</html>

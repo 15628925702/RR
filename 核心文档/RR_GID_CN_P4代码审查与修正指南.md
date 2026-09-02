@@ -56,7 +56,9 @@
 4. **代码的大部分时间花在重复 conditional expectation 和重复 reference-pool 扫描上，而不是 Frank–Wolfe。**  
    当前还存在 shared pilot 重算、百万 reference feature 重算、GPU rejection 过量 proposals、两进程争一张 GPU 等明显浪费。
 
-**建议立即动作：保留现有输出作为 diagnostic，但暂停新增“formal acceptance”批次。先完成本文的 Phase 0–2，再恢复 200-replication sweep。**
+**建议立即动作：保留现有输出作为 diagnostic，但暂停新增“formal acceptance”批次。先完成本文的 Phase 0–2，再恢复 50-replication sweep。**
+
+**操作上限（2026-08-31）：正式 replication 一律 50，禁止再按 200 排期或启动。政策、预算、指标不变。**
 
 ---
 
@@ -437,7 +439,7 @@ PDF 已明确区分：
 
 - 固定 order；
 - 先与 Mode A 做 query-level 和 end-to-end 一致性验证；
-- 用于大规模 200-replication sweep。
+- 用于大规模 50-replication sweep。
 
 #### Mode C：`finite_lu_rejection`
 
@@ -1173,7 +1175,7 @@ pickle 会让每进程独立反序列化大数组。建议把大 reference/featu
 
 ## Phase 3：按 ladder 隔离理论与近似
 
-不要直接恢复三 policy×五预算×200 reps。按下面的梯子逐层加入复杂性。
+不要直接恢复三 policy×五预算×50 reps。按下面的梯子逐层加入复杂性。
 
 ### G0：oracle-start sanity check
 
@@ -1533,7 +1535,7 @@ design consistency 所需的 \(o_p(1)\) 与固定-\(J\) exact rate 所需的定�
 
 12. pilot exponent/multiplier sweep；
 13. FW 微优化；
-14. full five-budget × 200-replication formal sweep。
+14. full five-budget × 50-replication formal sweep。
 
 ---
 

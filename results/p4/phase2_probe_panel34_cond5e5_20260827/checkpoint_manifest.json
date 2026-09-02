@@ -1,0 +1,17 @@
+{
+  "completed_panels": {},
+  "identity": {
+    "base_artifact_sha256": {
+      "config": "1c751b12dc03c63ee982711ee58a23545007ac49637e4a32048f57eb66afdc56",
+      "metadata": "9ec0ebfade2bb3ab5a7b0eaa7e72855c25c2ef14b2c99d71b1a2c449195f7815",
+      "npz": "458e064444fc45f79d569f433e31dd281d6520a87f12a657ec2ee97d3387f878"
+    },
+    "config_canonical_sha256": "ba0e13a739b2a512be0af2b0e9c5e19090ab4a435a371f5d935f2d354f3fea6a",
+    "precision_id": "doc_full16_cond5e5",
+    "source_numerical_kernel_sha256": {
+      "src/rr_gid_cn/oracle_measure.py": "9aa339b5459032fbbdf3b1b27f77f1ed2d3c60a352e1807f061027192805a80f",
+      "src/rr_gid_cn/synthetic_oracle.py": "408ec46a378a0b3fe7ce5fff5fbb7ed605440cb1ed642864dfe768b17bf797ae"
+    }
+  },
+  "schema_version": "p4-phase2-score-centering-checkpoint-v1"
+}

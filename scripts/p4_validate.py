@@ -5,59 +5,144 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import pickle
 from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
+import yaml
+
+from rr_gid_cn.p4_integrity import (
+    FORMAL_POLICIES,
+    load_seed_manifest,
+    sha256_file,
+    validate_expected_grid,
+    validate_experiment_mode,
+)
 
 
-def _pilot_budget(budget: int) -> int:
-    return min(int(math.ceil(10.0 * float(budget) ** (1.0 / 3.0))), int(budget))
+def validate_rows(
+    rows,
+    *,
+    budgets,
+    replications,
+    policies=FORMAL_POLICIES,
+    conditional_method,
+    experiment_mode,
+    integration_tolerance,
+    design_ratio_tolerance,
+    fw_tolerance,
+    artifact_sha256,
+    config_sha256,
+    source_sha256,
+    manifest=None,
+):
+    failures = []
+    try:
+        validate_expected_grid(rows, budgets, replications, policies)
+    except ValueError as exc:
+        failures.append(str(exc))
+    for row in rows:
+        key = (int(row["budget"]), int(row["replication"]))
+        label = f"{key[0]}/{key[1]}/{row['policy']}"
+        if int(row.get("allocated_observations", -1)) != key[0]:
+            failures.append(f"{label}: budget mismatch")
+        raw = float(row.get("kl_raw", np.nan))
+        if not np.isfinite(raw):
+            failures.append(f"{label}: nonfinite kl_raw")
+        elif raw < -float(integration_tolerance):
+            failures.append(
+                f"{label}: kl_raw {raw} below integration tolerance {-float(integration_tolerance)}"
+            )
+        if row.get("conditional_method") != conditional_method:
+            failures.append(
+                f"{label}: method {row.get('conditional_method')} != {conditional_method}"
+            )
+        if row.get("experiment_mode") != experiment_mode:
+            failures.append(
+                f"{label}: experiment_mode {row.get('experiment_mode')} != {experiment_mode}"
+            )
+        if row.get("artifact_sha256") != artifact_sha256:
+            failures.append(f"{label}: artifact hash mismatch")
+        if row.get("config_sha256") != config_sha256:
+            failures.append(f"{label}: config hash mismatch")
+        if row.get("source_sha256") != source_sha256:
+            failures.append(f"{label}: code hash mismatch")
+        if manifest is not None:
+            entry = manifest.get(key)
+            if entry is None:
+                failures.append(f"{label}: missing manifest entry")
+            elif int(row.get("target_draw_seed", -1)) != int(entry["target_draw_seed"]):
+                failures.append(f"{label}: target seed does not match manifest")
+        if row["policy"] == "oracle RR-GID":
+            ratio = float(row.get("design_ratio_main", np.nan))
+            if not np.isfinite(ratio) or abs(ratio - 1.0) > float(design_ratio_tolerance):
+                failures.append(f"{label}: oracle design_ratio_main {ratio} != 1")
+        gap = float(row.get("fw_gap", np.nan))
+        if not np.isfinite(gap) or gap > float(fw_tolerance):
+            failures.append(f"{label}: FW gap {gap} exceeds {fw_tolerance}")
+        if "design_ratio" in row:
+            failures.append(f"{label}: unlabelled legacy design_ratio field is forbidden")
+        if not isinstance(row.get("pilot_schedule"), dict):
+            failures.append(f"{label}: missing structured pilot_schedule")
+        if sum(row.get("pilot_counts", [])) != int(row.get("pilot_budget", -1)):
+            failures.append(f"{label}: pilot count mismatch")
+    return failures
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("paths", nargs="+", type=Path)
-    parser.add_argument("--required-replications", type=int, default=200)
+    parser.add_argument("--config", type=Path, default=None)
+    parser.add_argument("--artifact", type=Path, default=None)
+    parser.add_argument("--manifest", type=Path, default=None)
+    parser.add_argument("--required-replications", type=int, default=None)
     parser.add_argument("--formal", action="store_true", help="PDF S1 formal gates; not a diagnostic check")
     parser.add_argument("--require-method", default=None)
-    parser.add_argument("--oracle-half-phi", type=float, default=33.52962983788052)
-    parser.add_argument("--oracle-ratio-max-largest", type=float, default=1.25)
     args = parser.parse_args()
     rows = [json.loads(line) for path in args.paths for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
-    grouped: dict[tuple[int, int], list[dict]] = defaultdict(list)
+    if args.config is None or args.artifact is None:
+        raise SystemExit("--config and --artifact are required; oracle constants are never hard-coded")
+    cfg = yaml.safe_load(args.config.read_text(encoding="utf-8"))["p4"]
+    validate_experiment_mode(cfg, formal=args.formal)
+    with args.artifact.open("rb") as stream:
+        artifact = pickle.load(stream)
+    oracle_constant = artifact.get("oracle_constant")
+    if not oracle_constant:
+        raise SystemExit("artifact is missing its oracle constant/FW certificate")
+    config_sha256 = sha256_file(args.config)
+    artifact_sha256 = sha256_file(args.artifact)
+    source_paths = (
+        Path("src/rr_gid_cn/s1_gate.py"),
+        Path("src/rr_gid_cn/p4_integrity.py"),
+        Path("scripts/p4_formal_run.py"),
+        Path("scripts/p4_validate.py"),
+    )
+    source_sha256 = {path.as_posix(): sha256_file(path) for path in source_paths}
+    manifest_path = args.manifest or Path(cfg["target_manifest"])
+    manifest, _ = load_seed_manifest(manifest_path)
+    budgets = tuple(map(int, cfg["budgets"]))
+    required_replications = int(args.required_replications or cfg["replications"])
+    replications = tuple(range(required_replications))
+    method = args.require_method or str(cfg["conditional_method"])
+    failures = validate_rows(
+        rows,
+        budgets=budgets,
+        replications=replications,
+        policies=tuple(cfg.get("policies", FORMAL_POLICIES)),
+        conditional_method=method,
+        experiment_mode=str(cfg["experiment_mode"]),
+        integration_tolerance=float(cfg.get("integration_tolerance", 0.0)),
+        design_ratio_tolerance=float(cfg.get("design_ratio_tolerance", 1e-10)),
+        fw_tolerance=float(cfg.get("fw_tolerance", 1e-6)),
+        artifact_sha256=artifact_sha256,
+        config_sha256=config_sha256,
+        source_sha256=source_sha256,
+        manifest=manifest,
+    )
     by_policy: dict[tuple[int, str], list[float]] = defaultdict(list)
     for row in rows:
-        grouped[(row["budget"], row["replication"])].append(row)
         by_policy[(row["budget"], row["policy"])].append(float(row["B_kl_raw"]))
-    failures = []
-    by_budget = defaultdict(int)
-    for (budget, replication), group in grouped.items():
-        by_budget[budget] += 1
-        if len(group) != 3 or len({r["policy"] for r in group}) != 3:
-            failures.append(f"{budget}/{replication}: incomplete policies")
-        if len({r["target_draw_seed"] for r in group}) != 1:
-            failures.append(f"{budget}/{replication}: unpaired target draw")
-        for row in group:
-            if row.get("allocated_observations") != budget:
-                failures.append(f"{budget}/{replication}/{row['policy']}: budget mismatch")
-            if not np.isfinite(row["kl"]) or row["kl"] < 0:
-                failures.append(f"{budget}/{replication}/{row['policy']}: invalid KL")
-            if not np.isfinite(row.get("kl_raw", row["kl"])):
-                failures.append(f"{budget}/{replication}/{row['policy']}: nonfinite kl_raw")
-            if args.formal or args.require_method:
-                method = args.require_method or "rejection"
-                actual = row.get("conditional_method")
-                if actual != method:
-                    failures.append(f"{budget}/{replication}/{row['policy']}: method {actual} != {method}")
-            if args.formal:
-                expected_pilot = _pilot_budget(budget)
-                if int(row.get("pilot_budget", -1)) != expected_pilot:
-                    failures.append(f"{budget}/{replication}/{row['policy']}: pilot {row.get('pilot_budget')} != {expected_pilot}")
-                for diag in row.get("update_diagnostics") or []:
-                    if "lambda_min_H" in diag and not (np.isfinite(diag["lambda_min_H"]) and float(diag["lambda_min_H"]) > 0):
-                        failures.append(f"{budget}/{replication}/{row['policy']}: nonpositive lambda_min_H")
-    missing = {budget: args.required_replications - count for budget, count in by_budget.items() if count < args.required_replications}
     summary = {}
     for (budget, policy), values in sorted(by_policy.items()):
         arr = np.asarray(values, dtype=float)
@@ -68,33 +153,24 @@ def main() -> None:
             "B_kl_mean": mean,
             "B_kl_se": se,
             "B_kl_ci95": [mean - 1.96 * se, mean + 1.96 * se] if len(arr) > 1 else None,
-            "design_ratio_mean": mean / args.oracle_half_phi if policy == "oracle RR-GID" else None,
+            "risk_ratio_raw_mean": mean / float(oracle_constant["half_phi_oracle"]),
+            "negative_count": int(np.sum(arr < 0)),
+            "minimum_B_kl_raw": float(arr.min()),
+            "integration_tolerance": float(cfg.get("integration_tolerance", 0.0)),
         }
-    if args.formal and by_budget:
-        largest = max(by_budget)
-        oracle = by_policy.get((largest, "oracle RR-GID"), [])
-        if len(oracle) >= args.required_replications:
-            ratio = float(np.mean(oracle)) / args.oracle_half_phi
-            if not (0.5 <= ratio <= args.oracle_ratio_max_largest):
-                failures.append(
-                    f"B={largest} oracle RR-GID mean design ratio {ratio:.3f} outside [0.5, {args.oracle_ratio_max_largest}]"
-                )
-        j_groups = defaultdict(list)
-        for row in rows:
-            if row.get("budget") == 8000 and row.get("policy") == "oracle RR-GID":
-                j_groups[int(row.get("scoring_steps", 2))].append(float(row["B_kl_raw"]))
-        if 0 in j_groups and 2 in j_groups:
-            if float(np.mean(j_groups[2])) > float(np.mean(j_groups[0])) * 1.05:
-                failures.append("B=8000 J=2 oracle B_kl mean exceeds J=0")
+    by_budget = {
+        budget: len({int(row["replication"]) for row in rows if int(row["budget"]) == budget})
+        for budget in budgets
+    }
     report = {
         "rows": len(rows),
-        "replications_by_budget": dict(sorted(by_budget.items())),
-        "missing": missing,
+        "replications_by_budget": by_budget,
+        "oracle_constant": oracle_constant,
         "summary": summary,
         "failures": failures,
     }
     print(json.dumps(report, indent=2, sort_keys=True))
-    if failures or missing:
+    if failures:
         raise SystemExit(1)
 
 

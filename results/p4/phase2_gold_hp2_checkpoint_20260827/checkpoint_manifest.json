@@ -1,0 +1,75 @@
+{
+  "completed_panels": {
+    "3": {
+      "arrays": {
+        "conditional_numerical_se": {
+          "dtype": "float64",
+          "sha256": "af845f2d60ff78653e2448af2330b056620c2007c525e9f97e314258c005930e",
+          "shape": [
+            12
+          ]
+        },
+        "conditional_terminal_delta": {
+          "dtype": "float64",
+          "sha256": "835feed228dff07124d8318ce5776d0818e3a53fa2588b31956ecba7c785b120",
+          "shape": [
+            12
+          ]
+        },
+        "delta": {
+          "dtype": "float64",
+          "sha256": "1528d432fcd9bfbd87041f80fa2523856e9d3508f5f2563b11b365711ab17f9d",
+          "shape": [
+            12
+          ]
+        },
+        "outer_numerical_se": {
+          "dtype": "float64",
+          "sha256": "89565aafb02592fdcf9155a4afe088b3794e5ceb8d8c8c00d4f88f044261b2da",
+          "shape": [
+            12
+          ]
+        },
+        "paired_full_feature_means": {
+          "dtype": "float64",
+          "sha256": "723a091b6662bc27c668c53c84301723fce113b0f22da002e1943208c0846752",
+          "shape": [
+            8,
+            12
+          ]
+        },
+        "sampling_se": {
+          "dtype": "float64",
+          "sha256": "da419a1334fbafeb2b89883fdbace0b3797909752590035575c0695f2ee71943",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "fields": {
+        "conditional_converged": false,
+        "conditional_query_scramble_se_max": 0.0004133787555120136,
+        "conditional_query_terminal_delta_max": 0.0007131514991248478,
+        "estimator": "paired_outer_qmc_control_variate",
+        "paired_full_feature_means_sha256": "723a091b6662bc27c668c53c84301723fce113b0f22da002e1943208c0846752"
+      },
+      "file": "panel_003.npz",
+      "npz_sha256": "c769947e84b0fcb056f98f30fc3fec128790c188f934e8c77aa38af993591892",
+      "panel_index": 3
+    }
+  },
+  "identity": {
+    "base_artifact_sha256": {
+      "config": "4484342382e00a521d072abf68fb5cb23a6d2742133688c6ef6fced6f849df37",
+      "metadata": "46caa610580fbe0d731db9f79cca120acdf5504d61400f3fa7f9cd25ad194a4c",
+      "npz": "168ddce579c59331cb7bb95bf4d4de225ab8db5e06f181b07093c9194a22dee1"
+    },
+    "config_canonical_sha256": "6f725c329ff171a52cdb0116c586365f10b7a43397cc1c65a4e8d26358d15533",
+    "precision_id": "hp2",
+    "source_numerical_kernel_sha256": {
+      "src/rr_gid_cn/oracle_measure.py": "9aa339b5459032fbbdf3b1b27f77f1ed2d3c60a352e1807f061027192805a80f",
+      "src/rr_gid_cn/synthetic_oracle.py": "ed90bb124d16649a1feb546d7c32828e63042ee72f95cee570d55d113c586f7a"
+    }
+  },
+  "schema_version": "p4-phase2-score-centering-checkpoint-v1"
+}

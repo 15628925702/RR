@@ -1,0 +1,44 @@
+# G2: actual pilot + oracle allocation + estimated H + gold score.
+p4_phase3_ladder:
+  schema_version: p4-phase3-ladder-config-v1
+  phase: 3
+  ladder: G2
+  not_formal: true
+  h_mode: estimated
+  score_mode: gold
+  allocation: oracle
+  base_artifact:
+    directory: results/p4/phase2_gold_full16_20260827
+    config: configs/p4_phase2_gold_full16_20260827.yaml
+    config_sha256: 1c751b12dc03c63ee982711ee58a23545007ac49637e4a32048f57eb66afdc56
+    metadata: oracle_primary.json
+    metadata_sha256: 9ec0ebfade2bb3ab5a7b0eaa7e72855c25c2ef14b2c99d71b1a2c449195f7815
+    npz: oracle_primary.npz
+    npz_sha256: 458e064444fc45f79d569f433e31dd281d6520a87f12a657ec2ee97d3387f878
+  source_sha256:
+    src/rr_gid_cn/oracle_measure.py: 9aa339b5459032fbbdf3b1b27f77f1ed2d3c60a352e1807f061027192805a80f
+    src/rr_gid_cn/synthetic_oracle.py: ac10990af023dc2516d9efe5a478f357eabbc64643652ce9170575f940f57fb4
+  gold_source_sha256:
+    src/rr_gid_cn/oracle_measure.py: 9aa339b5459032fbbdf3b1b27f77f1ed2d3c60a352e1807f061027192805a80f
+    src/rr_gid_cn/synthetic_oracle.py: 408ec46a378a0b3fe7ce5fff5fbb7ed605440cb1ed642864dfe768b17bf797ae
+  target_manifest: experiments/p4_phase3_ladder_manifest.json
+  budgets: [8000]
+  replications: 20
+  max_scoring_steps: 4
+  snapshot_js: [0, 2, 4]
+  theta_bound: 4.0
+  scoring_step_size: 1.0
+  scoring_max_step_norm: 2.0
+  design_ratio_tolerance: 1.0e-10
+  risk_ratio_mean_max: 10.0
+  pilot_reference_size: 50000
+  h_tilted: 128
+  h_cond: 32
+  pilot_schedule:
+    kind: power
+    exponent: 0.3333333333333333
+    multiplier: 10.0
+    max_fraction: 1.0
+    min_per_support: 1
+    rounding_rule: ceil
+    legacy_named_ablation: ten_times_B_one_third

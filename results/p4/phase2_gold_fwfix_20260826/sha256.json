@@ -1,0 +1,8 @@
+{
+  "diagnostics.json": "1503d4c44a29dfcf8390d0c9c2de433b8376baa7a9441ff76c3457c14848e5a8",
+  "oracle_primary.json": "46caa610580fbe0d731db9f79cca120acdf5504d61400f3fa7f9cd25ad194a4c",
+  "oracle_primary.npz": "168ddce579c59331cb7bb95bf4d4de225ab8db5e06f181b07093c9194a22dee1",
+  "oracle_replicate.json": "2c64d434f052619563a8c5c67952998c51814d95501027c8b3747884bd0903bf",
+  "oracle_replicate.npz": "82b26055566ceb94a110e4d88acc9c669e471a484d77b0427d873db00905f200",
+  "run.log": "6c3e406eb195349c66d7475bb0423d915ac720bf6afaef6b34dcf8bdbb873eb7"
+}

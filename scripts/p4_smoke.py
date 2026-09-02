@@ -21,7 +21,7 @@ def main() -> None:
         for rep in range(3):
             rows.extend(run_replication(mixture, scale, panels, budget, 202600 + budget + rep,
                                         prepared=prepared, lu=32, h_tilted=32, h_cond=8, kl_samples=1000))
-    summary = {"stage": "P4", "alpha": 1.0, "budgets": [200, 400, 800], "replications_per_budget": 3, "rows": rows, "formal_replications_required": 200}
+    summary = {"stage": "P4", "alpha": 1.0, "budgets": [200, 400, 800], "replications_per_budget": 3, "rows": rows, "formal_replications_required": 50}
     payload = json.dumps(summary, sort_keys=True, indent=2) + "\n"
     Path("results").mkdir(exist_ok=True)
     Path("results/p4_s1_gate_summary.json").write_text(payload, encoding="utf-8")

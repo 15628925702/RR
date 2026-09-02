@@ -1,0 +1,588 @@
+{
+  "completed_panels": {
+    "20": {
+      "arrays": {
+        "conditional_numerical_se": {
+          "dtype": "float64",
+          "sha256": "418fdb462f9ac9e6ae251355ba7520b0781b33550c4f34a7443df12aa204d148",
+          "shape": [
+            12
+          ]
+        },
+        "conditional_terminal_delta": {
+          "dtype": "float64",
+          "sha256": "2083c1b30422ad1563eac4d6614f0685851f7ae3f245a51196a69740cb650156",
+          "shape": [
+            12
+          ]
+        },
+        "delta": {
+          "dtype": "float64",
+          "sha256": "3ba36e5bc0b694353ed836431a5f945a16074d5e3c1fa5f83c225c7cc29883b9",
+          "shape": [
+            12
+          ]
+        },
+        "outer_numerical_se": {
+          "dtype": "float64",
+          "sha256": "334881aca35bc90d761eb6c15df4a76c8731cb98e24b4e5b1a316d44c7307859",
+          "shape": [
+            12
+          ]
+        },
+        "row_final_order": {
+          "dtype": "float64",
+          "sha256": "3a065f7dec1464653ccd6a0cfc450d6f927ee4ae32eb835d7c19e4e3f1966267",
+          "shape": [
+            5
+          ]
+        },
+        "sampling_se": {
+          "dtype": "float64",
+          "sha256": "2f95789a3d45247f7f7ba9804ff4d29264d8816733905b2e85fd5f4619f6e542",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "fields": {
+        "conditional_converged": true,
+        "conditional_query_scramble_se_max": 9.999857861418936e-05,
+        "conditional_query_terminal_delta_max": 9.999983611913565e-05,
+        "estimator": "same_q0_oracle_mu",
+        "max_final_order": 16,
+        "mean_final_order": 13.964598083496094
+      },
+      "file": "panel_020.npz",
+      "npz_sha256": "70d111731e4a4a8b24e7a0e9b4ac6a94816fc6eb7c4a90586d9e3c6c980faa55",
+      "panel_index": 20
+    },
+    "3": {
+      "arrays": {
+        "conditional_numerical_se": {
+          "dtype": "float64",
+          "sha256": "dee5779de4c11b70b372999016a20118b4bd9340ff52c3ca783a15f5250ce185",
+          "shape": [
+            12
+          ]
+        },
+        "conditional_terminal_delta": {
+          "dtype": "float64",
+          "sha256": "31966ceb13f22871d019122a0c1747f0a638eae4cf73eb2ec4edd77c7da0ee99",
+          "shape": [
+            12
+          ]
+        },
+        "delta": {
+          "dtype": "float64",
+          "sha256": "9ec0334e64a888c54584a01322c0bed630632e71262af24bd4bebfe1f8d21bed",
+          "shape": [
+            12
+          ]
+        },
+        "outer_numerical_se": {
+          "dtype": "float64",
+          "sha256": "19b53cf847b0c24a65389ca1e721694a54aff6d63d30474d369a519b5c7e5b44",
+          "shape": [
+            12
+          ]
+        },
+        "row_final_order": {
+          "dtype": "float64",
+          "sha256": "278fabaf57747dfcca25cc886124c1fc6869a110810b75461564383d6dd7fc4c",
+          "shape": [
+            5
+          ]
+        },
+        "sampling_se": {
+          "dtype": "float64",
+          "sha256": "3548e28b446eed27a2af117db0a2f791a3801c469fc3a29c49f6fe26e69e34db",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "fields": {
+        "conditional_converged": false,
+        "conditional_query_scramble_se_max": 0.00010800160715895924,
+        "conditional_query_terminal_delta_max": 0.00012062665924750249,
+        "estimator": "same_q0_oracle_mu",
+        "max_final_order": 16,
+        "mean_final_order": 13.892326354980469
+      },
+      "file": "panel_003.npz",
+      "npz_sha256": "e8a795c00e77ae7b43b2a010f4186bbac18268c36f419ccf37c4248c03fa5c92",
+      "panel_index": 3
+    },
+    "30": {
+      "arrays": {
+        "conditional_numerical_se": {
+          "dtype": "float64",
+          "sha256": "a0253105b514d772210c18a690eabe80355d51ffef2f9624931fdab4bc8421f0",
+          "shape": [
+            12
+          ]
+        },
+        "conditional_terminal_delta": {
+          "dtype": "float64",
+          "sha256": "cdd24b92c9fc9f8bd4eb7466a2384e44261756d3316915a6ab248201c470456d",
+          "shape": [
+            12
+          ]
+        },
+        "delta": {
+          "dtype": "float64",
+          "sha256": "2242f2118124173f7c217754f916b320e20c8fb35fdd2deb51b6d5d6174d5133",
+          "shape": [
+            12
+          ]
+        },
+        "outer_numerical_se": {
+          "dtype": "float64",
+          "sha256": "6e5fd584f569f160b4932cca8d685a6227157decb5ea829d1e5a923788709076",
+          "shape": [
+            12
+          ]
+        },
+        "row_final_order": {
+          "dtype": "float64",
+          "sha256": "dd7bc7625575fdf39c34ce6ec991a0a32580ea3dc386cf1665551cca61079182",
+          "shape": [
+            5
+          ]
+        },
+        "sampling_se": {
+          "dtype": "float64",
+          "sha256": "fe56dfe94c746f62ddd773e06842ff9dace38044324baef737bc6f23cf3295a4",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "fields": {
+        "conditional_converged": false,
+        "conditional_query_scramble_se_max": 0.00025204813771003803,
+        "conditional_query_terminal_delta_max": 0.0003593369026133608,
+        "estimator": "same_q0_oracle_mu",
+        "max_final_order": 16,
+        "mean_final_order": 13.196498107910156
+      },
+      "file": "panel_030.npz",
+      "npz_sha256": "b4bb6f830265f2999076794bd562d0816125e95f493ece08a96f7f6aef30060c",
+      "panel_index": 30
+    },
+    "34": {
+      "arrays": {
+        "conditional_numerical_se": {
+          "dtype": "float64",
+          "sha256": "5249c9bd9a8d235c638daeb2f08eabb3e9e049e9d3e035bdf5fcd01c431b0f7b",
+          "shape": [
+            12
+          ]
+        },
+        "conditional_terminal_delta": {
+          "dtype": "float64",
+          "sha256": "6ce2185b2d8ffd532523ca5ac2d8876fb070b621215d19a6a3b2889edf197d9f",
+          "shape": [
+            12
+          ]
+        },
+        "delta": {
+          "dtype": "float64",
+          "sha256": "f743fe960e30c335e3b05963e4eb1b8a5005b29d85866916a68123e1480250ab",
+          "shape": [
+            12
+          ]
+        },
+        "outer_numerical_se": {
+          "dtype": "float64",
+          "sha256": "a9a1ef4728e0ab4fcb82c4645023db82f87502c917b91424a064955b603e69f1",
+          "shape": [
+            12
+          ]
+        },
+        "row_final_order": {
+          "dtype": "float64",
+          "sha256": "371b624dc0b4b5b86d68a00e8c09e44938cade77667b11169837c0cbdc7bba9b",
+          "shape": [
+            5
+          ]
+        },
+        "sampling_se": {
+          "dtype": "float64",
+          "sha256": "251e5de33e3e78c55445b66d396bcf1601e49367558383661bf6af456bd64c71",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "fields": {
+        "conditional_converged": true,
+        "conditional_query_scramble_se_max": 9.999978078175804e-05,
+        "conditional_query_terminal_delta_max": 9.999999147555089e-05,
+        "estimator": "same_q0_oracle_mu",
+        "max_final_order": 16,
+        "mean_final_order": 13.588478088378906
+      },
+      "file": "panel_034.npz",
+      "npz_sha256": "386134ba2eb905198587b787103511eeb2f01ecc8f6fec821bddace27f1412a4",
+      "panel_index": 34
+    },
+    "42": {
+      "arrays": {
+        "conditional_numerical_se": {
+          "dtype": "float64",
+          "sha256": "d1bf4d7447b5dd929a243c823420ffab4efd64be9410bae5794ec8de392a27f0",
+          "shape": [
+            12
+          ]
+        },
+        "conditional_terminal_delta": {
+          "dtype": "float64",
+          "sha256": "6698a32023d19f890bcd442313fc281e42d7893fe235d92e7d1df9e0cede2588",
+          "shape": [
+            12
+          ]
+        },
+        "delta": {
+          "dtype": "float64",
+          "sha256": "1a3bdb05900c7c6dbb54517b888a5a142a8431019867eba25d3027c0ad612032",
+          "shape": [
+            12
+          ]
+        },
+        "outer_numerical_se": {
+          "dtype": "float64",
+          "sha256": "cf25204808b361ab34137562e8275f7d781993bb18a018c0250e33822fd4e254",
+          "shape": [
+            12
+          ]
+        },
+        "row_final_order": {
+          "dtype": "float64",
+          "sha256": "47ea1f3f421357c2c7c81e3dd1c9f61dde7a3c49455f94bdb0d89a89193442f0",
+          "shape": [
+            5
+          ]
+        },
+        "sampling_se": {
+          "dtype": "float64",
+          "sha256": "27407b5c76701a1d6dbd7a5b3331cf43e124a6e03e7a9beaa7101ce591a52c8b",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "fields": {
+        "conditional_converged": true,
+        "conditional_query_scramble_se_max": 9.999983079636542e-05,
+        "conditional_query_terminal_delta_max": 9.999991887575665e-05,
+        "estimator": "same_q0_oracle_mu",
+        "max_final_order": 16,
+        "mean_final_order": 13.527823638916015
+      },
+      "file": "panel_042.npz",
+      "npz_sha256": "3c680e745a1859c2c8a9a7ab49328db6b2ee2f6d62d46072335a83f72a762b11",
+      "panel_index": 42
+    },
+    "47": {
+      "arrays": {
+        "conditional_numerical_se": {
+          "dtype": "float64",
+          "sha256": "b2f7f66207f1f9f82bc062e354c8da34afe33d9531dac47087b95974d81846cb",
+          "shape": [
+            12
+          ]
+        },
+        "conditional_terminal_delta": {
+          "dtype": "float64",
+          "sha256": "71627ce18b3a32039ee356c47beeeb0886eb70745157b68c33667a9218b37d81",
+          "shape": [
+            12
+          ]
+        },
+        "delta": {
+          "dtype": "float64",
+          "sha256": "049590d8f9fa74ba6b9323d223cb04be7b71932ae028cb6fb1bc9af80c7978e3",
+          "shape": [
+            12
+          ]
+        },
+        "outer_numerical_se": {
+          "dtype": "float64",
+          "sha256": "42c5fbbe037e4c73b60a53b0945188a88c62605a9d19fb0d7e892f846776a576",
+          "shape": [
+            12
+          ]
+        },
+        "row_final_order": {
+          "dtype": "float64",
+          "sha256": "55305e3653d30edc9f84314acd32238976a3d1543b58dd4f6a4f8edca304a28b",
+          "shape": [
+            5
+          ]
+        },
+        "sampling_se": {
+          "dtype": "float64",
+          "sha256": "c1b6137364115a4541954f7d4567fba6e082d0e476f654b7b96ec58793483d02",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "fields": {
+        "conditional_converged": true,
+        "conditional_query_scramble_se_max": 9.999986197383762e-05,
+        "conditional_query_terminal_delta_max": 9.999998067253268e-05,
+        "estimator": "same_q0_oracle_mu",
+        "max_final_order": 16,
+        "mean_final_order": 13.963310241699219
+      },
+      "file": "panel_047.npz",
+      "npz_sha256": "49628d260b0ab98fd30e3ea2493f4a740dff0d82dee6839135879942f2c85422",
+      "panel_index": 47
+    },
+    "5": {
+      "arrays": {
+        "conditional_numerical_se": {
+          "dtype": "float64",
+          "sha256": "f3277b05a7fb7b28e58ecf607c50daea3c215737a0013ebd5b66b8677208ced1",
+          "shape": [
+            12
+          ]
+        },
+        "conditional_terminal_delta": {
+          "dtype": "float64",
+          "sha256": "6ed9d60c5eab047962ae504ec58509c55cd46ee32e0a1f7b34e4269a4d4a384d",
+          "shape": [
+            12
+          ]
+        },
+        "delta": {
+          "dtype": "float64",
+          "sha256": "fee556542f332d197fd2d41f376d0e62f73c393488885a032d420b752a997f80",
+          "shape": [
+            12
+          ]
+        },
+        "outer_numerical_se": {
+          "dtype": "float64",
+          "sha256": "d6b137875b24a0b34d7507265d6edaabf861c90375c50fe457504e83894f92b9",
+          "shape": [
+            12
+          ]
+        },
+        "row_final_order": {
+          "dtype": "float64",
+          "sha256": "664e6eb917b8df7218cbb0965ff4cd7b3640f4e9cd1483c8edc4f03fd62ca202",
+          "shape": [
+            5
+          ]
+        },
+        "sampling_se": {
+          "dtype": "float64",
+          "sha256": "c80c89f834713317efbcc3267b5d19a817d62de7dbcacdc63ff0ae8fd528c929",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "fields": {
+        "conditional_converged": false,
+        "conditional_query_scramble_se_max": 9.999998382025244e-05,
+        "conditional_query_terminal_delta_max": 0.00010206939419437483,
+        "estimator": "same_q0_oracle_mu",
+        "max_final_order": 16,
+        "mean_final_order": 14.774034118652343
+      },
+      "file": "panel_005.npz",
+      "npz_sha256": "674f9368eb3b7830f6a5f7f7255ceab3e41222bf08379e698af2ea784cfc9757",
+      "panel_index": 5
+    },
+    "54": {
+      "arrays": {
+        "conditional_numerical_se": {
+          "dtype": "float64",
+          "sha256": "3f9baea9823b6448c84626d799515447fa383ab71b2f54099e2d2f5829a4e32b",
+          "shape": [
+            12
+          ]
+        },
+        "conditional_terminal_delta": {
+          "dtype": "float64",
+          "sha256": "1b97690a7503d8ea82e45dda53cc2b58469def7a587919a0d88593cb08c8d13d",
+          "shape": [
+            12
+          ]
+        },
+        "delta": {
+          "dtype": "float64",
+          "sha256": "0ee6aa1f1b653684f0355666036cd71081eac34d3ebae43d2534d584f4a9f06b",
+          "shape": [
+            12
+          ]
+        },
+        "outer_numerical_se": {
+          "dtype": "float64",
+          "sha256": "e7077e69e9f553492e114c277faabda6ff492e03774d67b8a83e8e038b925104",
+          "shape": [
+            12
+          ]
+        },
+        "row_final_order": {
+          "dtype": "float64",
+          "sha256": "00bbc914cb3279d2cbfefe481fa864331784839c6b24de99ff2451a76fe54510",
+          "shape": [
+            5
+          ]
+        },
+        "sampling_se": {
+          "dtype": "float64",
+          "sha256": "0c2e083fc2526c691022c25a9c2ca1e85e1b26df6bac1cdd98fc5d4378f38250",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "fields": {
+        "conditional_converged": false,
+        "conditional_query_scramble_se_max": 0.0002473168554305289,
+        "conditional_query_terminal_delta_max": 0.00019186681133298578,
+        "estimator": "same_q0_oracle_mu",
+        "max_final_order": 16,
+        "mean_final_order": 13.777804565429687
+      },
+      "file": "panel_054.npz",
+      "npz_sha256": "01cb19096c0db7fb5a6780d70e1eb039d51c7b91831bb87cbb3e23058de40cf4",
+      "panel_index": 54
+    },
+    "59": {
+      "arrays": {
+        "conditional_numerical_se": {
+          "dtype": "float64",
+          "sha256": "c09e3eabd9716e527ae112ec610f72e1e67d61a5e55ae0d59f1a5ff770e3186a",
+          "shape": [
+            12
+          ]
+        },
+        "conditional_terminal_delta": {
+          "dtype": "float64",
+          "sha256": "6a4e1140da479d96327adc5967ddd60b1b6a809e93e5cccab60ec3c3fc6699fa",
+          "shape": [
+            12
+          ]
+        },
+        "delta": {
+          "dtype": "float64",
+          "sha256": "95f8ebbfdf8651f4ca9bd31066b500b759baa00fb21805137107df9ad416e952",
+          "shape": [
+            12
+          ]
+        },
+        "outer_numerical_se": {
+          "dtype": "float64",
+          "sha256": "d76a8155e251a2b964810b6f68890268a07965a900b06c70790bacef2d02481b",
+          "shape": [
+            12
+          ]
+        },
+        "row_final_order": {
+          "dtype": "float64",
+          "sha256": "1a90718c907df36b0bbaaa3e66719901a864cf103571630a8ce5516de797d24b",
+          "shape": [
+            5
+          ]
+        },
+        "sampling_se": {
+          "dtype": "float64",
+          "sha256": "a3c308a139a4eb493997f81e13a1541878ecb9adfcc22cdc9e9a6f26c14996c9",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "fields": {
+        "conditional_converged": true,
+        "conditional_query_scramble_se_max": 9.999975909777707e-05,
+        "conditional_query_terminal_delta_max": 9.999990780788781e-05,
+        "estimator": "same_q0_oracle_mu",
+        "max_final_order": 16,
+        "mean_final_order": 13.922862243652343
+      },
+      "file": "panel_059.npz",
+      "npz_sha256": "5bd1843524be0b8727f5818cd3ae6cafd8f3526ac68342dafdd474207f0c6f47",
+      "panel_index": 59
+    },
+    "70": {
+      "arrays": {
+        "conditional_numerical_se": {
+          "dtype": "float64",
+          "sha256": "be5ac4e0884799fed51e9ff09539a315544ceefd113f14f8237194fe1f3e53d7",
+          "shape": [
+            12
+          ]
+        },
+        "conditional_terminal_delta": {
+          "dtype": "float64",
+          "sha256": "e12b238caf5a240d37a635c2cb7840253098b31a76c3a6e6235b887537e86647",
+          "shape": [
+            12
+          ]
+        },
+        "delta": {
+          "dtype": "float64",
+          "sha256": "7a397c4f3d7d0b24561469194e294e660771219f4dcfe920a433bdd6773d71a7",
+          "shape": [
+            12
+          ]
+        },
+        "outer_numerical_se": {
+          "dtype": "float64",
+          "sha256": "58c60aa1179daeb48acb02718f8fdcd36d65f4e73b86afd1b6d0233db406e068",
+          "shape": [
+            12
+          ]
+        },
+        "row_final_order": {
+          "dtype": "float64",
+          "sha256": "45122256e3581efdba0091e50d4eb7a08d28c813757ef864aebf1458680ba06a",
+          "shape": [
+            5
+          ]
+        },
+        "sampling_se": {
+          "dtype": "float64",
+          "sha256": "63a91db1d32ad58f7772c71006a10f9e1697f1b9ad0d53e7703dae7d0b34b519",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "fields": {
+        "conditional_converged": true,
+        "conditional_query_scramble_se_max": 9.999960107317064e-05,
+        "conditional_query_terminal_delta_max": 9.999993622558656e-05,
+        "estimator": "same_q0_oracle_mu",
+        "max_final_order": 16,
+        "mean_final_order": 14.490287017822265
+      },
+      "file": "panel_070.npz",
+      "npz_sha256": "92d737c77f0ec81aed62748b200e5b94505baad887fdf111d9330de813d41d41",
+      "panel_index": 70
+    }
+  },
+  "identity": {
+    "base_artifact_sha256": {
+      "config": "1c751b12dc03c63ee982711ee58a23545007ac49637e4a32048f57eb66afdc56",
+      "metadata": "9ec0ebfade2bb3ab5a7b0eaa7e72855c25c2ef14b2c99d71b1a2c449195f7815",
+      "npz": "458e064444fc45f79d569f433e31dd281d6520a87f12a657ec2ee97d3387f878"
+    },
+    "config_canonical_sha256": "47a06551f4522a54c8a49411ba8ad9f9450bfc849f8f41e6b3220fad4b17f7da",
+    "precision_id": "doc_full16_cond1e4",
+    "source_numerical_kernel_sha256": {
+      "src/rr_gid_cn/oracle_measure.py": "9aa339b5459032fbbdf3b1b27f77f1ed2d3c60a352e1807f061027192805a80f",
+      "src/rr_gid_cn/synthetic_oracle.py": "ac10990af023dc2516d9efe5a478f357eabbc64643652ce9170575f940f57fb4"
+    }
+  },
+  "schema_version": "p4-phase2-score-centering-checkpoint-v1"
+}

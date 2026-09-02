@@ -1,0 +1,31 @@
+# G0 oracle-start sanity check. Phase-3 ladder diagnostic; never formal/paper output.
+# beta^(0)=beta*, p=p*, H=H_gold(beta^(0)), gold conditional score.
+p4_phase3_g0:
+  schema_version: p4-phase3-g0-config-v1
+  phase: 3
+  ladder: G0
+  not_formal: true
+  base_artifact:
+    directory: results/p4/phase2_gold_full16_20260827
+    config: configs/p4_phase2_gold_full16_20260827.yaml
+    config_sha256: 1c751b12dc03c63ee982711ee58a23545007ac49637e4a32048f57eb66afdc56
+    metadata: oracle_primary.json
+    metadata_sha256: 9ec0ebfade2bb3ab5a7b0eaa7e72855c25c2ef14b2c99d71b1a2c449195f7815
+    npz: oracle_primary.npz
+    npz_sha256: 458e064444fc45f79d569f433e31dd281d6520a87f12a657ec2ee97d3387f878
+  source_sha256:
+    src/rr_gid_cn/oracle_measure.py: 9aa339b5459032fbbdf3b1b27f77f1ed2d3c60a352e1807f061027192805a80f
+    src/rr_gid_cn/synthetic_oracle.py: ac10990af023dc2516d9efe5a478f357eabbc64643652ce9170575f940f57fb4
+  gold_source_sha256:
+    src/rr_gid_cn/oracle_measure.py: 9aa339b5459032fbbdf3b1b27f77f1ed2d3c60a352e1807f061027192805a80f
+    src/rr_gid_cn/synthetic_oracle.py: 408ec46a378a0b3fe7ce5fff5fbb7ed605440cb1ed642864dfe768b17bf797ae
+  target_manifest: experiments/p4_phase3_g0_manifest.json
+  budget: 2000
+  replications: 20
+  scoring_steps: [0, 2]
+  policy: oracle RR-GID
+  theta_bound: 4.0
+  scoring_step_size: 1.0
+  design_ratio_tolerance: 1.0e-10
+  # Catastrophic G0 fail if mean J=2 risk ratio exceeds this; not a tight efficiency gate.
+  risk_ratio_mean_max: 10.0

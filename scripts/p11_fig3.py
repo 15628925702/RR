@@ -1,6 +1,6 @@
 """P11 Fig.3: Gas R1 + R2 budget curves (PDF Fig.3).
 
-Left: R1 semi-synthetic B*KL vs budget (four policies, 200 reps).  Right: R2
+Left: R1 semi-synthetic B*KL vs budget (four policies, 50 reps).  Right: R2
 natural-drift family-internal loss vs budget, averaged over the three campaigns
 (50 reps each).  Four policies share the same final RR estimator so the gap
 isolates allocation quality.
@@ -67,7 +67,7 @@ def main() -> None:
     ax1.set_ylabel("$B\\cdot\\mathrm{KL}$ (relative to empirical base)")
     ax1.grid(True, which="both", alpha=0.3)
     ax1.legend(fontsize=8)
-    ax1.set_title("R1: well-specified semi-synthetic (200 reps)")
+    ax1.set_title("R1: well-specified semi-synthetic (50 reps)")
 
     # --- Right: R2 family-internal loss vs budget (avg over campaigns) ---
     for pol in POLICIES:

@@ -1,0 +1,39 @@
+# Frozen after C-05 per-query adaptive QMC. Phase-2 diagnostic only; never formal.
+# Document gates: C-01/Phase 2 1% induced-risk, T-04 unconverged fail, T-05 E[m]-μ.
+p4_phase2_score_centering:
+  schema_version: p4-phase2-score-centering-config-v1
+  phase: 2
+  not_formal: true
+  precision_id: doc_adaptive
+  base_artifact:
+    directory: results/p4/phase2_gold_adaptive_20260827
+    config: configs/p4_phase2_gold_20260826.yaml
+    config_sha256: 4484342382e00a521d072abf68fb5cb23a6d2742133688c6ef6fced6f849df37
+    metadata: oracle_primary.json
+    metadata_sha256: b8543a54914887307f5de92b92e08025f3111047c6d48cafb319fa47ce760357
+    npz: oracle_primary.npz
+    npz_sha256: 80fbba5fa3b22080690789f0cde4a2e16cd1f3069e820d106fcf11513112a0b9
+  source_sha256:
+    src/rr_gid_cn/oracle_measure.py: 9aa339b5459032fbbdf3b1b27f77f1ed2d3c60a352e1807f061027192805a80f
+    src/rr_gid_cn/synthetic_oracle.py: 408ec46a378a0b3fe7ce5fff5fbb7ed605440cb1ed642864dfe768b17bf797ae
+  active_panels:
+    numerical_probability_threshold: 1.0e-9
+    required_top_count: 5
+  outer_qmc:
+    order: 14
+    scrambles: 8
+    seed: 27094027
+  conditional_qmc:
+    start_order: 6
+    max_order: 16
+    scrambles: 8
+    terminal_delta_atol: 7.5e-4
+    terminal_delta_rtol: 0.0
+    scramble_se_atol: 7.5e-4
+    scramble_se_rtol: 0.0
+    seed: 27095027
+  sampling:
+    draws: 512
+    seed: 27096027
+  Bmax: 32000
+  risk_fraction_of_half_phi_max: 0.01

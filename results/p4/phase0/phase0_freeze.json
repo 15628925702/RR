@@ -1,0 +1,28 @@
+{
+  "artifact_path": "experiments/p4_phase0_prepared.pkl",
+  "artifact_sha256": "b81c8066f945f3c974c6b550cc49441eace54a334dc2aca1101e1f852fd0833a",
+  "baseline_commit": "d43add31d3844c637236390a65deeafc2f046246",
+  "budgets": [
+    2000,
+    8000,
+    32000
+  ],
+  "conditional_method": "rejection",
+  "config_path": "configs/p4_phase0_local.yaml",
+  "config_sha256": "8b1f5706c70a70be4ff1407c05af6d1c273cddc68ee963afa540623770cd331e",
+  "experiment_mode": "phase0_profile",
+  "file_sha256": {
+    "configs/p4_phase0_local.yaml": "8b1f5706c70a70be4ff1407c05af6d1c273cddc68ee963afa540623770cd331e",
+    "scripts/p4_phase0_profiler.py": "583f267db90ca3939e47778ae6f047e4775159ed830f114f8746664aca7dd339",
+    "src/rr_gid_cn/policies.py": "34b0c51a2000f3a2dedf2d3a944e126cca2cf7b4569d089584242d662bd77dcb",
+    "src/rr_gid_cn/s1_gate.py": "f0cc4a433597cfbd31ddda9685c51f7de43b606559a7d47825983cca2eb38292",
+    "src/rr_gid_cn/synthetic_oracle.py": "30d858d70e7df51f56530194e5f71cef97db2f7ca1ea513b1ad4ad4b1d55e255"
+  },
+  "host_note": "phase0 profiler; output is diagnostic and not a formal acceptance batch",
+  "lu": 128,
+  "not_formal": true,
+  "policies": [
+    "oracle RR-GID"
+  ],
+  "scoring_steps": 2
+}

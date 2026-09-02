@@ -1,0 +1,41 @@
+# Frozen before execution after hp1 showed outer-QMC-dominated uncertainty.
+# Phase-2 diagnostic only; never formal/paper output.
+p4_phase2_score_centering:
+  schema_version: p4-phase2-score-centering-config-v1
+  phase: 2
+  not_formal: true
+  precision_id: hp2
+  base_artifact:
+    directory: results/p4/phase2_gold_fwfix_20260826
+    config: configs/p4_phase2_gold_20260826.yaml
+    config_sha256: 4484342382e00a521d072abf68fb5cb23a6d2742133688c6ef6fced6f849df37
+    metadata: oracle_primary.json
+    metadata_sha256: 46caa610580fbe0d731db9f79cca120acdf5504d61400f3fa7f9cd25ad194a4c
+    npz: oracle_primary.npz
+    npz_sha256: 168ddce579c59331cb7bb95bf4d4de225ab8db5e06f181b07093c9194a22dee1
+  source_sha256:
+    src/rr_gid_cn/oracle_measure.py: 9aa339b5459032fbbdf3b1b27f77f1ed2d3c60a352e1807f061027192805a80f
+    src/rr_gid_cn/synthetic_oracle.py: ed90bb124d16649a1feb546d7c32828e63042ee72f95cee570d55d113c586f7a
+  active_panels:
+    numerical_probability_threshold: 1.0e-9
+    required_top_count: 5
+  outer_qmc:
+    order: 14
+    scrambles: 8
+    seed: 27091027
+  conditional_qmc:
+    start_order: 10
+    max_order: 13
+    scrambles: 8
+    terminal_delta_atol: 4.0e-4
+    terminal_delta_rtol: 0.0
+    scramble_se_atol: 4.0e-4
+    scramble_se_rtol: 0.0
+    row_chunk_size: 256
+    seed: 27092027
+  sampling:
+    draws: 4096
+    seed: 27093027
+  Bmax: 32000
+  risk_fraction_of_half_phi_max: 0.01
+  numerical_se_risk_fraction_max: 0.0025

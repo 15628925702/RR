@@ -2,6 +2,12 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
+.phase0-env/
+.apodex/
+.tmp_remote_deps/
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
 *.egg-info/
 data/*
 !data/.gitkeep

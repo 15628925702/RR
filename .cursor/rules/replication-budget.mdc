@@ -1,0 +1,12 @@
+---
+description: Formal replications are 50, never 200
+alwaysApply: true
+---
+
+# Replication budget
+
+正式实验（P4 formal / P5 / P9 / P10 及同类 sweep）每格 **50** 次 replication，禁止 200。
+
+- 不要改政策、预算、指标、算法来「补」样本数。
+- Phase 3 ladder（G0–G4）当前诊断仍是 20；不要把正在跑的 G3 从 20 改成 50。
+- 种子公式保持 `202600000 + budget*1000 + replication`，replication 取 0–49。

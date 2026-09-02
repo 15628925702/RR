@@ -1,0 +1,62 @@
+{
+  "budgets": [
+    8000
+  ],
+  "gate": {
+    "design_ok": true,
+    "gold_H_cholesky": true,
+    "half_phi": 33.60780059376469,
+    "kl_raw_above_tolerance": true,
+    "mean_j0_risk_ratio_raw": 52.91950508690388,
+    "mean_terminal_design_ratio_main": 1.0,
+    "mean_terminal_risk_ratio_raw": 1.2720950484900524,
+    "passed": true,
+    "risk_ratio_mean_max": 10.0,
+    "terminal_count": 20,
+    "terminal_j": 4
+  },
+  "ladder": "G3",
+  "ladder_passed": true,
+  "not_formal": true,
+  "phase": 3,
+  "provenance": {
+    "base_paths": {
+      "config_path": "configs/p4_phase2_gold_full16_20260827.yaml",
+      "metadata_path": "results/p4/phase2_gold_full16_20260827/oracle_primary.json",
+      "npz_path": "results/p4/phase2_gold_full16_20260827/oracle_primary.npz"
+    },
+    "code_commit": "d43add31d3844c637236390a65deeafc2f046246",
+    "config_canonical_sha256": "2ee56581395ef90d9b56377c92669e4464d7f85f6b0dc435df6189f54320fdc1",
+    "config_sha256": "a778a52092da5636d082ba3bdc456d9dee87cac34925bf60b1d64fecc80cea76",
+    "manifest_sha256": "3e1a4c78e9e5d87aa1f8eee0ca1fb75ee2689ad6bca75634337fee0fb7ff113d",
+    "written_at": "2026-09-01T23:04:28.578668+00:00"
+  },
+  "replications_completed": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "schema_version": "p4-phase3-ladder-diagnostics-v1",
+  "scoring_steps": [
+    0,
+    2,
+    4
+  ]
+}

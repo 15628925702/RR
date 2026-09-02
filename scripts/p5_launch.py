@@ -1,6 +1,6 @@
 """Parallel P5 formal launcher.
 
-Splits each budget's 200 replications into ``--shards`` contiguous ranges and
+Splits each budget's 50 replications into ``--shards`` contiguous ranges and
 runs one worker per (budget, shard) as a background subprocess. All workers
 share the same seed scheme so rows pair across the final four policies.
 
@@ -25,7 +25,7 @@ def main() -> None:
     ap.add_argument("--shards", type=int, default=2, help="replication shards per budget")
     ap.add_argument("--threads", type=int, default=8, help="OPENBLAS_NUM_THREADS per worker")
     ap.add_argument("--gpu-fraction", type=float, default=0.5)
-    ap.add_argument("--replications", type=int, default=200)
+    ap.add_argument("--replications", type=int, default=50)
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 

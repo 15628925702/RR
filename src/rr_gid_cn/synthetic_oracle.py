@@ -6,9 +6,11 @@ from dataclasses import dataclass
 from itertools import combinations
 from pathlib import Path
 from collections import OrderedDict
+import gc
+import math
+import os
 
 import numpy as np
-import os
 try:
     from scipy.special import ndtri
     from scipy.stats import qmc
@@ -30,6 +32,108 @@ _TORCH_PANEL_TENSOR_CACHE = {}
 _TORCH_REJECTION_PANEL_CACHE = {}
 _TORCH_QMC_NORMAL_CACHE = OrderedDict()
 _TORCH_QMC_NORMAL_CACHE_LIMIT = 16
+# Bound rows * 2^order so a (rows, n, 12) float64 tensor stays near 0.4 GiB.
+# Concatenating row chunks is algebraically identical to one unchunked integral.
+_CUDA_QMC_ROW_NODE_BUDGET = 4_000_000
+
+
+def _release_cuda_workspace(*, drop_qmc_cache: bool = False) -> None:
+    gc.collect()
+    if drop_qmc_cache:
+        _TORCH_QMC_NORMAL_CACHE.clear()
+    if torch is not None and torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+
+def _cuda_qmc_max_rows(order: int) -> int:
+    return max(1, _CUDA_QMC_ROW_NODE_BUDGET // (1 << int(order)))
+
+
+_WORKLOAD_COUNTERS = {
+    "full_rejection_calls": 0,
+    "full_proposals": 0,
+    "full_accepted_raw": 0,
+    "full_requested": 0,
+    "conditional_rejection_calls": 0,
+    "conditional_proposals": 0,
+    "conditional_accepted_raw": 0,
+    "conditional_requested": 0,
+    "qmc_calls": 0,
+    "qmc_nodes": 0,
+    "qmc_scrambles": 0,
+    "feature_scans": 0,
+}
+_CONDITIONAL_ACCEPT_RATES: list[float] = []
+_QMC_ORDERS: list[int] = []
+
+
+def reset_workload_counters() -> None:
+    """Reset process-local sampler work counters at a replication boundary."""
+    for key in _WORKLOAD_COUNTERS:
+        _WORKLOAD_COUNTERS[key] = 0
+    _CONDITIONAL_ACCEPT_RATES.clear()
+    _QMC_ORDERS.clear()
+
+
+def workload_counters() -> dict[str, int]:
+    """Return an immutable snapshot of process-local sampler work."""
+    return {key: int(value) for key, value in _WORKLOAD_COUNTERS.items()}
+
+
+def workload_rate_summary() -> dict[str, float | int | None]:
+    """Per-call conditional rejection acceptance rates for a replication."""
+    rates = list(_CONDITIONAL_ACCEPT_RATES)
+    if not rates:
+        return {"min": None, "median": None, "max": None, "n": 0}
+    ordered = sorted(rates)
+    n = len(ordered)
+    mid = n // 2
+    median = ordered[mid] if n % 2 else 0.5 * (ordered[mid - 1] + ordered[mid])
+    return {
+        "min": float(ordered[0]),
+        "median": float(median),
+        "max": float(ordered[-1]),
+        "n": n,
+    }
+
+
+def workload_qmc_orders() -> list[int]:
+    return list(_QMC_ORDERS)
+
+
+def _record_workload(**values: int) -> None:
+    for key, value in values.items():
+        _WORKLOAD_COUNTERS[key] += int(value)
+    proposed = int(values.get("conditional_proposals", 0))
+    accepted = int(values.get("conditional_accepted_raw", 0))
+    if proposed > 0:
+        _CONDITIONAL_ACCEPT_RATES.append(accepted / proposed)
+
+
+def _rejection_round_budget(
+    *,
+    round_index: int,
+    remaining_samples: int,
+    proposals_total: int,
+    accepted_raw_total: int,
+    min_rounds: int = 20000,
+    safety: float = 8.0,
+    hard_cap: int = 200_000,
+) -> int:
+    """Extend the 20000-round floor using observed envelope acceptance.
+
+    Far-pilot ``||beta||`` makes bounded-tilt acceptance ~1e-6.  The rejection
+    law is unchanged: only the implementation stop is allowed to grow with the
+    remaining work.  A hard cap still fails loudly rather than hang for days.
+    """
+    if remaining_samples <= 0:
+        return int(round_index)
+    p = float(accepted_raw_total) / max(int(proposals_total), 1)
+    avg = float(proposals_total) / max(int(round_index), 1)
+    if p <= 0.0 or avg <= 0.0:
+        return int(min_rounds if round_index < min_rounds else round_index)
+    expected = float(remaining_samples) / (p * avg)
+    return int(min(hard_cap, max(min_rounds, round_index + math.ceil(safety * expected))))
 
 
 def _cuda_device():
@@ -298,6 +402,7 @@ def tilted_conditional_batch(
     filled = np.zeros(len(rows), dtype=int)
     rounds = 0
     attempted = 0
+    accepted_raw = 0
     batch_floor = int(max(8, 2 * n))
     # Bound temporary proposal memory when many rows are active.  The cap is
     # on the whole call (roughly 32 MiB at float64, dimension 16), not per row.
@@ -306,15 +411,23 @@ def tilted_conditional_batch(
     # rejection vectorized even when acceptance is near the declared
     # low-overlap boundary, without changing the proposal law.
     max_batch_total = 4_194_304
-    max_rounds = 20000
+    round_budget = 20000
     while np.any(filled < n):
         rounds += 1
-        if rounds > max_rounds:
-            acceptance = filled / max(attempted, 1)
-            raise RuntimeError(
-                "conditional exact tilt did not reach requested samples; "
-                f"panel={panel}, rounds={rounds - 1}, acceptance={acceptance.tolist()}"
+        if rounds > round_budget:
+            remaining_samples = int(np.maximum(n - filled, 0).sum())
+            round_budget = _rejection_round_budget(
+                round_index=rounds - 1,
+                remaining_samples=remaining_samples,
+                proposals_total=attempted,
+                accepted_raw_total=accepted_raw,
             )
+            if rounds > round_budget:
+                acceptance = filled / max(attempted, 1)
+                raise RuntimeError(
+                    "conditional exact tilt did not reach requested samples; "
+                    f"panel={panel}, rounds={rounds - 1}, acceptance={acceptance.tolist()}"
+                )
         need = np.maximum(n - filled, 0)
         active = np.flatnonzero(need)
         # Generate a batch directly for each active observation.  The previous
@@ -337,6 +450,7 @@ def tilted_conditional_batch(
         logits = np.einsum("abr,r->ab", feats, beta)
         keep = rng.random((len(active), proposal_n)) < np.exp(logits - envelope[active, None])
         accepted_round = int(keep.sum())
+        accepted_raw += accepted_round
         # Low-overlap rows need fewer Python/NumPy setup passes, while ordinary
         # rows should retain small allocations.  Only the proposal batch size
         # changes; every proposal is still drawn from Q0 and accepted with the
@@ -351,6 +465,12 @@ def tilted_conditional_batch(
             if take:
                 out[row_id, filled[row_id]:filled[row_id] + take] = selected[:take]
                 filled[row_id] += take
+    _record_workload(
+        conditional_rejection_calls=1,
+        conditional_proposals=attempted,
+        conditional_accepted_raw=accepted_raw,
+        conditional_requested=len(rows) * n,
+    )
     return out
 
 
@@ -401,58 +521,118 @@ def _tilted_conditional_batch_torch(mixture, beta, x_s, panel, n, seed, scale, r
         dtype=dtype, device=device,
     )
     posterior_cdf = posterior_all.cumsum(dim=1)
-    out = torch.empty((len(rows), n, mixture.dimension), dtype=dtype, device=device)
+    accumulate_mean = bool(return_feature_mean)
+    feature_dim = int(beta_t.numel())
+    out = None if accumulate_mean else torch.empty(
+        (len(rows), n, mixture.dimension), dtype=dtype, device=device
+    )
+    feat_sum = (
+        torch.zeros((len(rows), feature_dim), dtype=dtype, device=device)
+        if accumulate_mean else None
+    )
     filled = torch.zeros(len(rows), dtype=torch.int64, device=device)
     generator = torch.Generator(device=device)
     generator.manual_seed(int(seed or 0) % (2**63 - 1))
-    max_rounds = 20000
-    # One large proposal wave saturates an A800; tiny per-row copies do not.
-    max_pairs = 8_000_000
+    # Bound a proposal wave to the actual device class.  The original
+    # 8,000,000-pair A800 setting can exhaust a 6 GiB workstation GPU because
+    # ``z``, component transforms, features, logits and masks coexist.  This
+    # changes only batching, not proposal generation or the rejection law.
+    total_memory = int(torch.cuda.get_device_properties(device).total_memory)
+    if total_memory <= 8 * 1024**3:
+        max_pairs = 250_000
+    elif total_memory <= 16 * 1024**3:
+        max_pairs = 1_000_000
+    else:
+        max_pairs = 8_000_000
     batch_floor = max(2048, 16 * int(n))
-    for _round in range(max_rounds):
+    proposals_total = 0
+    accepted_raw_total = 0
+    round_budget = 20000
+    round_index = 0
+    oom_error = getattr(torch.cuda, "OutOfMemoryError", RuntimeError)
+    while True:
         active = torch.nonzero(filled < n, as_tuple=False).flatten()
         if active.numel() == 0:
             break
+        round_index += 1
+        if round_index > round_budget:
+            remaining_samples = int((n - filled).clamp(min=0).sum().item())
+            round_budget = _rejection_round_budget(
+                round_index=round_index - 1,
+                remaining_samples=remaining_samples,
+                proposals_total=proposals_total,
+                accepted_raw_total=accepted_raw_total,
+            )
+            if round_index > round_budget:
+                n_filled = filled.detach().cpu().numpy()
+                raise RuntimeError(
+                    "CUDA exact conditional rejection did not converge; "
+                    f"panel={panel}, rounds={round_index - 1}, n={int(n)}, rows={len(rows)}, "
+                    f"filled_min={int(n_filled.min())}, filled_max={int(n_filled.max())}, "
+                    f"proposals={proposals_total}, accepted_raw={accepted_raw_total}"
+                )
         a = int(active.numel())
         remaining = n - filled[active]
         proposal_n = min(65536, max(batch_floor, 8 * int(remaining.max().item())))
         proposal_n = max(8, min(proposal_n, max_pairs // max(a, 1)))
-        uniforms = torch.rand((a, proposal_n), dtype=dtype, device=device, generator=generator)
-        components = (uniforms[:, :, None] > posterior_cdf[active][:, None, :]).sum(dim=2)
-        normals = torch.randn((a, proposal_n, len(complement)), dtype=dtype, device=device, generator=generator)
-        z = torch.empty((a, proposal_n, mixture.dimension), dtype=dtype, device=device)
-        z[:, :, panel_index] = z_s[active].unsqueeze(1)
-        z_comp = torch.zeros((a, proposal_n, len(complement)), dtype=dtype, device=device)
-        for k, (mean_c, mean_s, gain, chol) in enumerate(static):
-            cond_mean = mean_c[None, :] + (z_s[active] - mean_s) @ gain.T
-            z_k = cond_mean[:, None, :] + normals @ chol.T
-            mask = components == k
-            z_comp = torch.where(mask.unsqueeze(-1), z_k, z_comp)
-        z[:, :, complement_index] = z_comp
-        x = torch.sinh(float(mixture.alpha) * z) / float(mixture.alpha) if mixture.alpha > 0 else z
-        xt = x / scale_t
-        phi = torch.cat((torch.tanh(xt[..., :6]), torch.tanh(xt[..., :6] * xt[..., 6:12])), dim=-1)
-        logits = torch.einsum("abr,r->ab", phi, beta_t)
-        keep = torch.rand((a, proposal_n), dtype=dtype, device=device, generator=generator) < torch.exp(logits - envelope[active].unsqueeze(1))
-        rank = keep.cumsum(dim=1)
-        take_mask = keep & (rank <= remaining.unsqueeze(1))
-        dest = filled[active].unsqueeze(1) + rank - 1
-        row_ids = active.unsqueeze(1).expand_as(keep)
-        selected = take_mask
-        out[row_ids[selected], dest[selected]] = x[selected]
-        filled[active] += take_mask.sum(dim=1)
-        accepted = int(keep.sum().item())
+        accepted = 0
         attempted = max(a * proposal_n, 1)
+        while proposal_n >= 8:
+            try:
+                uniforms = torch.rand((a, proposal_n), dtype=dtype, device=device, generator=generator)
+                components = (uniforms[:, :, None] > posterior_cdf[active][:, None, :]).sum(dim=2)
+                normals = torch.randn((a, proposal_n, len(complement)), dtype=dtype, device=device, generator=generator)
+                z = torch.empty((a, proposal_n, mixture.dimension), dtype=dtype, device=device)
+                z[:, :, panel_index] = z_s[active].unsqueeze(1)
+                z_comp = torch.zeros((a, proposal_n, len(complement)), dtype=dtype, device=device)
+                for k, (mean_c, mean_s, gain, chol) in enumerate(static):
+                    cond_mean = mean_c[None, :] + (z_s[active] - mean_s) @ gain.T
+                    z_k = cond_mean[:, None, :] + normals @ chol.T
+                    mask = components == k
+                    z_comp = torch.where(mask.unsqueeze(-1), z_k, z_comp)
+                z[:, :, complement_index] = z_comp
+                x = torch.sinh(float(mixture.alpha) * z) / float(mixture.alpha) if mixture.alpha > 0 else z
+                xt = x / scale_t
+                phi = torch.cat((torch.tanh(xt[..., :6]), torch.tanh(xt[..., :6] * xt[..., 6:12])), dim=-1)
+                logits = torch.einsum("abr,r->ab", phi, beta_t)
+                keep = torch.rand((a, proposal_n), dtype=dtype, device=device, generator=generator) < torch.exp(
+                    logits - envelope[active].unsqueeze(1)
+                )
+                rank = keep.cumsum(dim=1)
+                take_mask = keep & (rank <= remaining.unsqueeze(1))
+                if accumulate_mean:
+                    feat_sum[active] += (phi * take_mask.unsqueeze(-1)).sum(dim=1)
+                else:
+                    dest = filled[active].unsqueeze(1) + rank - 1
+                    row_ids = active.unsqueeze(1).expand_as(keep)
+                    out[row_ids[take_mask], dest[take_mask]] = x[take_mask]
+                filled[active] += take_mask.sum(dim=1)
+                accepted = int(keep.sum().item())
+                attempted = max(a * proposal_n, 1)
+                break
+            except Exception as exc:
+                message = str(exc).lower()
+                if not (isinstance(exc, oom_error) or "out of memory" in message):
+                    raise
+                torch.cuda.empty_cache()
+                next_n = max(8, proposal_n // 2)
+                if next_n == proposal_n:
+                    raise
+                proposal_n = next_n
+        proposals_total += attempted
+        accepted_raw_total += accepted
         if accepted / attempted < 0.01:
             batch_floor = min(65536, batch_floor * 2)
         elif accepted / attempted > 0.5:
             batch_floor = max(2048, batch_floor // 2)
-    if torch.any(filled < n):
-        raise RuntimeError("CUDA exact conditional rejection did not converge")
-    if return_feature_mean:
-        xt = out / scale_t
-        phi = torch.cat((torch.tanh(xt[..., :6]), torch.tanh(xt[..., :6] * xt[..., 6:12])), dim=-1)
-        return phi.mean(dim=1).cpu().numpy()
+    _record_workload(
+        conditional_rejection_calls=1,
+        conditional_proposals=proposals_total,
+        conditional_accepted_raw=accepted_raw_total,
+        conditional_requested=len(rows) * n,
+    )
+    if accumulate_mean:
+        return (feat_sum / float(n)).cpu().numpy()
     return out.cpu().numpy()
 
 
@@ -503,6 +683,14 @@ def _halton_normals(n: int, dimension: int, skip: int = 0) -> np.ndarray:
 
 def _nested_qmc_normals(n: int, dimension: int, seed: int = 0) -> np.ndarray:
     """Sobol normal net with a deterministic Halton fallback."""
+    try:
+        return _nested_qmc_normals_impl(n, dimension, seed)
+    except MemoryError:
+        _release_cuda_workspace(drop_qmc_cache=True)
+        return _nested_qmc_normals_impl(n, dimension, seed)
+
+
+def _nested_qmc_normals_impl(n: int, dimension: int, seed: int = 0) -> np.ndarray:
     if qmc is None or ndtri is None:
         return _halton_normals(n, dimension, skip=seed)
     if dimension == 0:
@@ -538,6 +726,8 @@ def tilted_conditional_mean_qmc(
     rows = np.atleast_2d(np.asarray(x_s, dtype=float))
     complement = tuple(i for i in range(mixture.dimension) if i not in panel)
     n = 1 << int(order)
+    _QMC_ORDERS.append(int(order))
+    _record_workload(qmc_calls=1, qmc_nodes=len(rows) * n, qmc_scrambles=1)
     z_s = inverse_warp(rows, mixture.alpha)
     posterior = conditional_component_posterior_batch(mixture, rows, panel)
     parameters = _conditional_parameters(mixture, panel)[1]
@@ -569,6 +759,39 @@ def tilted_conditional_mean_qmc(
     return out
 
 
+def _conditional_qmc_at_order(
+    mixture, beta, rows, panel, order, seed, scale, feature_fn
+):
+    """Evaluate one Sobol order for a row subset, without filling max_order."""
+    rows = np.atleast_2d(np.asarray(rows, dtype=float))
+    beta = np.asarray(beta, dtype=float)
+    if len(rows) == 0:
+        return np.zeros((0, beta.shape[0]))
+    use_cuda = _cuda_device() is not None and feature_fn is None
+    max_rows = _cuda_qmc_max_rows(order) if use_cuda else len(rows)
+    if len(rows) > max_rows:
+        parts = []
+        for start in range(0, len(rows), max_rows):
+            parts.append(
+                _conditional_qmc_at_order(
+                    mixture, beta, rows[start:min(start + max_rows, len(rows))],
+                    panel, order, seed, scale, feature_fn,
+                )
+            )
+            _release_cuda_workspace()
+        return np.concatenate(parts, axis=0)
+    if use_cuda:
+        estimates = tilted_conditional_mean_qmc_nested(
+            mixture, beta, rows, panel, int(order), seed=int(seed),
+            scale=scale, feature_fn=feature_fn, return_orders=(int(order),),
+        )
+        return estimates[int(order)]
+    return tilted_conditional_mean_qmc(
+        mixture, beta, rows, panel, int(order), seed=int(seed),
+        scale=scale, feature_fn=feature_fn,
+    )
+
+
 def tilted_conditional_mean_exact(
     mixture: FrozenMixture,
     beta: np.ndarray,
@@ -581,92 +804,111 @@ def tilted_conditional_mean_exact(
     max_order: int = 16,
     atol: float = 2e-6,
     rtol: float = 2e-5,
+    scrambles: int = 4,
+    scramble_se_atol: float | None = None,
+    scramble_se_rtol: float | None = None,
     return_diagnostics: bool = False,
 ):
     """Deterministic nested conditional-score oracle with an error certificate.
 
     The Gaussian-mixture conditional law is exact; only its bounded nonlinear
-    expectation needs numerical integration.  Nested Sobol prefixes are
-    doubled until two successive estimates agree componentwise.  Calls that
+    expectation needs numerical integration.  Each query row doubles its own
+    nested Sobol prefix from ``start_order`` until successive estimates agree
+    componentwise; converged rows stop and do not pay later orders.  Calls that
     do not meet the certificate are explicit failures rather than silently
     being treated as exact scores.
     """
     if start_order < 4 or max_order < start_order:
         raise ValueError("invalid adaptive conditional integration orders")
+    if int(scrambles) < 2:
+        raise ValueError("adaptive conditional integration requires at least two independent scrambles")
+    scramble_se_atol = float(atol if scramble_se_atol is None else scramble_se_atol)
+    scramble_se_rtol = float(rtol if scramble_se_rtol is None else scramble_se_rtol)
     rows = np.atleast_2d(np.asarray(x_s, dtype=float))
-    # Keep the largest temporary CUDA tensor below roughly 0.5 GiB.  The
-    # bound is a memory safeguard only: each row uses the same deterministic
-    # nested Sobol prefix, so concatenating chunks is algebraically identical
-    # to one unchunked integral.
-    if _cuda_device() is not None and feature_fn is None:
-        max_rows = max(1, 16_000_000 // (1 << int(max_order)))
-        if len(rows) > max_rows:
-            parts = []
-            diagnostics_parts = []
-            for start in range(0, len(rows), max_rows):
-                stop = min(start + max_rows, len(rows))
-                result = tilted_conditional_mean_exact(
-                    mixture, beta, rows[start:stop], panel,
-                    seed=seed, scale=scale, feature_fn=feature_fn,
-                    start_order=start_order, max_order=max_order,
-                    atol=atol, rtol=rtol, return_diagnostics=return_diagnostics,
-                )
-                if return_diagnostics:
-                    value, diag = result
-                    parts.append(value); diagnostics_parts.append(diag)
-                else:
-                    parts.append(result)
-            value = np.concatenate(parts, axis=0)
-            if return_diagnostics:
-                return value, {
-                    "method": "exact_adaptive",
-                    "orders": sorted({o for d in diagnostics_parts for o in d.get("orders", [])}),
-                    "converged": all(d.get("converged", False) for d in diagnostics_parts),
-                    "chunks": len(diagnostics_parts),
-                    "max_abs_delta": max(float(d.get("max_abs_delta") or 0.0) for d in diagnostics_parts),
-                    "max_rel_delta": max(float(d.get("max_rel_delta") or 0.0) for d in diagnostics_parts),
-                    "final_order": max(int(d.get("final_order", max_order)) for d in diagnostics_parts),
-                }
-            return value
+    beta = np.asarray(beta, dtype=float)
+    n_rows = len(rows)
+    estimate = np.zeros((n_rows, beta.shape[0]))
     previous = None
-    diagnostics = {"method": "exact_adaptive", "orders": [], "converged": False,
-                   "max_abs_delta": None, "max_rel_delta": None}
-    estimate = None
-    # Evaluating every intermediate order repeats the same expensive
-    # conditional Gaussian transform many times.  The nested-prefix
-    # certificate only needs a low reference order and the final two orders;
-    # all three are deterministic prefixes under the same Sobol seed.
-    orders = tuple(dict.fromkeys((int(max_order) - 1, int(max_order))))
-    if torch is not None and torch.cuda.is_available() and feature_fn is None:
-        estimates = tilted_conditional_mean_qmc_nested(
-            mixture, beta, x_s, panel, orders[-1], seed=seed, scale=scale,
-            feature_fn=feature_fn, return_orders=orders,
-        )
-    else:
-        estimates = {order: tilted_conditional_mean_qmc(
-            mixture, beta, x_s, panel, order, seed=seed, scale=scale,
-            feature_fn=feature_fn) for order in orders}
-    for order in orders:
-        estimate = estimates[order]
+    active = np.ones(n_rows, dtype=bool)
+    row_final_order = np.full(n_rows, int(max_order), dtype=int)
+    row_abs_delta = np.full(n_rows, np.inf)
+    row_scramble_se = np.full(n_rows, np.inf)
+    n_active_by_order = {}
+    diagnostics = {
+        "method": "multi_scramble_sobol_adaptive",
+        "orders": [],
+        "converged": False,
+        "max_abs_delta": None,
+        "max_rel_delta": None,
+        "scramble_se": None,
+        "scrambles": int(scrambles),
+        "start_order": int(start_order),
+        "max_order": int(max_order),
+        "n_active_by_order": n_active_by_order,
+    }
+    for order in range(int(start_order), int(max_order) + 1):
+        active_index = np.flatnonzero(active)
+        n_active_by_order[str(order)] = int(len(active_index))
+        if len(active_index) == 0:
+            break
+        replicates = []
+        for scramble in range(int(scrambles)):
+            scramble_seed = int(seed) + 1_000_003 * scramble
+            replicates.append(
+                _conditional_qmc_at_order(
+                    mixture, beta, rows[active_index], panel, order,
+                    scramble_seed, scale, feature_fn,
+                )
+            )
+        replicate_values = np.stack(replicates, axis=0)
+        mean_active = replicate_values.mean(axis=0)
+        se_active = replicate_values.std(axis=0, ddof=1) / np.sqrt(int(scrambles))
+        estimate[active_index] = mean_active
+        row_se = np.max(se_active, axis=1)
+        row_scramble_se[active_index] = row_se
         diagnostics["orders"].append(order)
+        diagnostics["scramble_se"] = float(np.max(row_scramble_se[np.isfinite(row_scramble_se)]))
         if previous is not None:
-            delta = np.abs(estimate - previous)
-            max_abs = float(np.max(delta))
-            scale_norm = max(float(np.max(np.abs(estimate))), float(np.max(np.abs(previous))), 1.0)
-            max_rel = float(max_abs / scale_norm)
-            diagnostics["max_abs_delta"] = max_abs
-            diagnostics["max_rel_delta"] = max_rel
-            if max_abs <= float(atol) + float(rtol) * scale_norm:
+            delta = np.abs(mean_active - previous[active_index])
+            row_delta = np.max(delta, axis=1)
+            row_abs_delta[active_index] = row_delta
+            scale_norm = np.maximum(
+                np.max(np.abs(mean_active), axis=1),
+                np.max(np.abs(previous[active_index]), axis=1),
+            )
+            scale_norm = np.maximum(scale_norm, 1.0)
+            newly = (
+                (row_delta <= float(atol) + float(rtol) * scale_norm)
+                & (row_se <= scramble_se_atol + scramble_se_rtol * scale_norm)
+            )
+            stopped = active_index[newly]
+            row_final_order[stopped] = order
+            active[stopped] = False
+            diagnostics["max_abs_delta"] = float(np.max(row_abs_delta[np.isfinite(row_abs_delta)]))
+            max_scale = float(np.max(np.abs(estimate))) if n_rows else 1.0
+            diagnostics["max_rel_delta"] = float(
+                diagnostics["max_abs_delta"] / max(max_scale, 1.0)
+            )
+            if not np.any(active):
                 diagnostics["converged"] = True
-                diagnostics["final_order"] = order
+                diagnostics["final_order"] = int(row_final_order.max())
+                diagnostics["row_final_order"] = row_final_order
+                _release_cuda_workspace()
                 return (estimate, diagnostics) if return_diagnostics else estimate
-        previous = estimate
+        previous = estimate.copy()
+        _release_cuda_workspace()
     diagnostics["final_order"] = int(max_order)
+    diagnostics["row_final_order"] = row_final_order
+    diagnostics["max_abs_delta"] = float(np.max(row_abs_delta[np.isfinite(row_abs_delta)])) if n_rows else 0.0
+    max_scale = float(np.max(np.abs(estimate))) if n_rows else 1.0
+    diagnostics["max_rel_delta"] = float(diagnostics["max_abs_delta"] / max(max_scale, 1.0))
+    diagnostics["scramble_se"] = float(np.max(row_scramble_se[np.isfinite(row_scramble_se)])) if n_rows else 0.0
     if return_diagnostics:
         return estimate, diagnostics
     raise RuntimeError(
         "adaptive exact conditional integral did not meet tolerance: "
-        f"abs={diagnostics['max_abs_delta']}, rel={diagnostics['max_rel_delta']}"
+        f"abs={diagnostics['max_abs_delta']}, rel={diagnostics['max_rel_delta']}, "
+        f"scramble_se={diagnostics['scramble_se']}"
     )
 
 
@@ -676,6 +918,8 @@ def tilted_conditional_mean_qmc_nested(
 ):
     """Evaluate one highest-order CUDA QMC grid and reuse nested prefixes."""
     rows = np.atleast_2d(np.asarray(x_s, dtype=float))
+    _QMC_ORDERS.append(int(order))
+    _record_workload(qmc_calls=1, qmc_nodes=len(rows) * (1 << int(order)), qmc_scrambles=1)
     complement = tuple(i for i in range(mixture.dimension) if i not in tuple(panel))
     z_s = inverse_warp(rows, mixture.alpha)
     posterior = conditional_component_posterior_batch(mixture, rows, tuple(panel))
@@ -802,6 +1046,13 @@ def conditional_moments(mixture: FrozenMixture, x_s: np.ndarray, panel: tuple[in
 
 def feature_map(x: np.ndarray, scale: np.ndarray | None = None) -> np.ndarray:
     x = np.asarray(x)
+    if x.ndim == 0:
+        rows = 0
+    elif x.ndim == 1:
+        rows = 1
+    else:
+        rows = int(x.reshape(-1, x.shape[-1]).shape[0])
+    _record_workload(feature_scans=rows)
     if x.shape[-1] != 16:
         raise ValueError("synthetic feature map expects 16 coordinates")
     scale = np.ones(16) if scale is None else np.asarray(scale)
@@ -914,11 +1165,21 @@ def tilted_full_sample(mixture: FrozenMixture, beta: np.ndarray, n: int, seed: i
     fn = (lambda x: feature_map(x, scale)) if feature_fn is None else feature_fn
     envelope = float(np.sum(np.abs(np.asarray(beta))))
     accepted = []
+    proposals_total = 0
+    accepted_raw = 0
     while len(accepted) < n:
         proposal = sample_full(mixture, max(256, min(4096, 4 * (n - len(accepted)))), int(rng.integers(2**31 - 1)))
         logits = fn(proposal) @ beta
         keep = rng.random(len(proposal)) < np.exp(logits - envelope)
+        proposals_total += len(proposal)
+        accepted_raw += int(keep.sum())
         accepted.extend(proposal[keep])
+    _record_workload(
+        full_rejection_calls=1,
+        full_proposals=proposals_total,
+        full_accepted_raw=accepted_raw,
+        full_requested=n,
+    )
     return np.asarray(accepted[:n])
 
 

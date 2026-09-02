@@ -1,0 +1,75 @@
+{
+  "completed_panels": {
+    "34": {
+      "arrays": {
+        "conditional_numerical_se": {
+          "dtype": "float64",
+          "sha256": "ced2ca1f1d1548a00ae24628754ecdb2961b49aa87981db82291253ff47a4aad",
+          "shape": [
+            12
+          ]
+        },
+        "conditional_terminal_delta": {
+          "dtype": "float64",
+          "sha256": "feea29e62452a384e2bab7a82c981d4c430196f58ee6bad801994a6e945013e4",
+          "shape": [
+            12
+          ]
+        },
+        "delta": {
+          "dtype": "float64",
+          "sha256": "775c362889a989242eae7282c9ce27870469cdbcd6d6343daefd43caaefd772f",
+          "shape": [
+            12
+          ]
+        },
+        "outer_numerical_se": {
+          "dtype": "float64",
+          "sha256": "850afa99810a5aa831ecb2c1ee4c2f5fb58203616220392d0cc34f08e591dcad",
+          "shape": [
+            12
+          ]
+        },
+        "row_final_order": {
+          "dtype": "float64",
+          "sha256": "5edd44390a641a659899316c97f1b8e99f029cada3b990667bbf7402ab0ce3da",
+          "shape": [
+            9
+          ]
+        },
+        "sampling_se": {
+          "dtype": "float64",
+          "sha256": "ed9e4f777a435a3d56cc0653451f692616df7eb7e97e6b3a4c03e320232869d1",
+          "shape": [
+            12
+          ]
+        }
+      },
+      "fields": {
+        "conditional_converged": true,
+        "conditional_query_scramble_se_max": 0.0007499974225352628,
+        "conditional_query_terminal_delta_max": 0.0007499996323959701,
+        "estimator": "same_q0_oracle_mu",
+        "max_final_order": 12,
+        "mean_final_order": 10.559207492404514
+      },
+      "file": "panel_034.npz",
+      "npz_sha256": "7265c2db912504f3e736ce6dd72c98c0e3c426742ed5f443fc470e8d4140e15f",
+      "panel_index": 34
+    }
+  },
+  "identity": {
+    "base_artifact_sha256": {
+      "config": "1c751b12dc03c63ee982711ee58a23545007ac49637e4a32048f57eb66afdc56",
+      "metadata": "9ec0ebfade2bb3ab5a7b0eaa7e72855c25c2ef14b2c99d71b1a2c449195f7815",
+      "npz": "458e064444fc45f79d569f433e31dd281d6520a87f12a657ec2ee97d3387f878"
+    },
+    "config_canonical_sha256": "aff37e19036635eab756aa8ef22e37ccc3f9f3cf7e74bb1c4c50ec6a0fcdfb40",
+    "precision_id": "doc_full16_outer16",
+    "source_numerical_kernel_sha256": {
+      "src/rr_gid_cn/oracle_measure.py": "9aa339b5459032fbbdf3b1b27f77f1ed2d3c60a352e1807f061027192805a80f",
+      "src/rr_gid_cn/synthetic_oracle.py": "408ec46a378a0b3fe7ce5fff5fbb7ed605440cb1ed642864dfe768b17bf797ae"
+    }
+  },
+  "schema_version": "p4-phase2-score-centering-checkpoint-v1"
+}

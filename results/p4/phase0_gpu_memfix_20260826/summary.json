@@ -1,0 +1,26 @@
+{
+  "all_reproducibility_fields_present": true,
+  "budgets": [
+    2000,
+    8000,
+    32000
+  ],
+  "code_commit": "d43add31d3844c637236390a65deeafc2f046246",
+  "code_dirty": true,
+  "config_sha256": "8b1f5706c70a70be4ff1407c05af6d1c273cddc68ee963afa540623770cd331e",
+  "experiment_mode": "phase0_profile",
+  "minimum_attributed_fraction": 0.9986636418299916,
+  "not_formal": true,
+  "numpy": "2.2.6",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "prepared_seconds": 0.027177699997992022,
+  "prepared_sha256": "d09887ce7ebb975d2738c9ec8d505cc8077eb7c7c645a3c060b78f2d152db9bc",
+  "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 16:36:49) [MSC v.1944 64 bit (AMD64)]",
+  "rows_sha256": "8a614da4893f5c6ac35aedd76b4b238a860df107b664b3e6c5ae62b15af9059c",
+  "schema_version": "p4-phase0-profile-v1",
+  "source_sha256": {
+    "scripts/p4_phase0_profile.py": "74134f0a8d40a95eed8a75939297553879ac94391b20e0dfd7a298ce448b433f",
+    "src/rr_gid_cn/s1_gate.py": "f0cc4a433597cfbd31ddda9685c51f7de43b606559a7d47825983cca2eb38292",
+    "src/rr_gid_cn/synthetic_oracle.py": "64e18ad2c70d03e2d7e7eba0aad00c625d56d6436deef4a0aeda845a24eb27ab"
+  }
+}
